@@ -20,7 +20,7 @@
 
     (gci -Recurse "$env:USERPROFILE\Documents\psClick").FullName.replace("$env:USERPROFILE\Documents\psClick\","").replace("\","/")|
     ?{$tree.path -notcontains $_}|%{
-        ri (Join-Path "$env:USERPROFILE\Documents\psClick" $_) -Recurse
+        ri (Join-Path "$env:USERPROFILE\Documents\psClick" $_) -Recurse -ea 0
     }
     $tree|select path, sha|ConvertTo-Json|out-file "$env:USERPROFILE\Documents\psClick\psClick.sha"
 }

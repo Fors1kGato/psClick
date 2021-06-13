@@ -68,12 +68,12 @@ function Click-MouseLeft
         if(!$hWnd){
             Write-Warning "Укажите handle окна";return
         }
-        if ([w32]::SendMessage($hWnd, 0x0201, 0, ($x * 0x10000 + $y))){
-            [Void][w32]::SendMessage($hWnd, 0x0202, 0, ($x * 0x10000 + $y))
+        if ([w32]::SendMessage($hWnd, 0x0201, 0, ($y * 0x10000 + $x))){
+            [Void][w32]::SendMessage($hWnd, 0x0202, 0, ($y * 0x10000 + $x))
         }
         else{
-            [Void][w32]::PostMessage($hWnd, 0x0201, 0, ($x * 0x10000 + $y))
-            [Void][w32]::PostMessage($hWnd, 0x0202, 0, ($x * 0x10000 + $y))
+            [Void][w32]::PostMessage($hWnd, 0x0201, 0, ($y * 0x10000 + $x))
+            [Void][w32]::PostMessage($hWnd, 0x0202, 0, ($y * 0x10000 + $x))
         }
     }
 }

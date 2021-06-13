@@ -48,6 +48,7 @@ function Click-MouseLeft
         [Switch]$Event
     )
     if(!$event){
+        if($hWnd){Write-Warning "При указании handle требуется параметр -Event";return}
         Move-Cursor $x $y
         [w32Mouse]::mouse_event(
             [w32Mouse+MouseEventFlags]::MOUSEEVENTF_LEFTDOWN,

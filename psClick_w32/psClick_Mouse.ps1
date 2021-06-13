@@ -40,24 +40,42 @@ function Click-MouseLeft
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        $x, $y
+        [parameter(Mandatory=$true)]
+        [Int]$X,
+        [parameter(Mandatory=$true)]
+        [Int]$Y,
+        [IntPtr]$HWnd,
+        [Switch]$Event
     )
-    Move-Cursor $x $y
-    [w32Mouse]::mouse_event(
-        [w32Mouse+MouseEventFlags]::MOUSEEVENTF_LEFTDOWN,
-        $x,
-        $y,
-        0,
-        0
-    )
-    [w32Mouse]::mouse_event(
-        [w32Mouse+MouseEventFlags]::MOUSEEVENTF_LEFTUP,
-        $x,
-        $y,
-        0,
-        0
-    )
-
+    if(!$event){
+        Move-Cursor $x $y
+        [w32Mouse]::mouse_event(
+            [w32Mouse+MouseEventFlags]::MOUSEEVENTF_LEFTDOWN,
+            $x,
+            $y,
+            0,
+            0
+        )
+        [w32Mouse]::mouse_event(
+            [w32Mouse+MouseEventFlags]::MOUSEEVENTF_LEFTUP,
+            $x,
+            $y,
+            0,
+            0
+        )
+    }
+    else{
+        if(!$hWnd){
+            Write-Warning "Укажите handle окна";return
+        }
+        if ([w32]::SendMessage($hWnd, 0x0201, 0, ($x * 0x10000 + $y))){
+            [Void][w32]::SendMessage($hWnd, 0x0202, 0, ($x * 0x10000 + $y))
+        }
+        else{
+            [Void][w32]::PostMessage($hWnd, 0x0201, 0, ($x * 0x10000 + $y))
+            [Void][w32]::PostMessage($hWnd, 0x0202, 0, ($x * 0x10000 + $y))
+        }
+    }
 }
 
 function Get-CursorPosition

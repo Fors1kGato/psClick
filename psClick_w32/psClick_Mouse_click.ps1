@@ -57,7 +57,7 @@
         if($Middle){$button = "Middle"}
         if($Handle){
             $pt = [Drawing.Point]::new($x,$y)
-            [w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$pt, 1)
+            [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$pt, 1)
             $x = $pt.X ; $y = $pt.Y
         }
         $w = @{'Shift'=0x10;'Control'=0x11}

@@ -1,4 +1,4 @@
-function Move-Cursor
+﻿function Move-Cursor
 {
     #.COMPONENT
     #1

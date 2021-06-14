@@ -1,4 +1,4 @@
-function Click-Mouse
+﻿function Click-Mouse
 {
     #.COMPONENT
     #1

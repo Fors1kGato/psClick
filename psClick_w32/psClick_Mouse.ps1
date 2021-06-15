@@ -15,6 +15,9 @@
         ,
         [Switch]$Event
     )
+    if($event -and !$handle){
+        Write-Error "-Event: Требуется указать handle окна";return
+    }
     if($handle){
         $pt = [Drawing.Point]::new($x, $y)
         [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$pt, 1)

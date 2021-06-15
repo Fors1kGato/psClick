@@ -1,13 +1,33 @@
 ﻿function Move-Cursor
 {
     #.COMPONENT
-    #1
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        $x, $y
+        [parameter(Mandatory=$true)]
+        [Int]$X
+        ,
+        [parameter(Mandatory=$true)]
+        [Int]$Y
+        ,
+        [IntPtr]$Handle
+        ,
+        [Switch]$Event
     )
-    [Windows.Forms.Cursor]::Position = [Drawing.Point]::new($x, $y)
+    if($handle){
+        $pt = [Drawing.Point]::new($x, $y)
+        [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$pt, 1)
+        $x = $pt.X ; $y = $pt.Y
+    }
+    if($Event){
+        if(![w32]::PostMessage($handle, 0x0200, 0, ($x + 0x10000 * $y))){
+            [w32]::SendMessage($handle, 0x0200, 0, ($x + 0x10000 * $y))|Out-Null 
+        }
+    }
+    else{
+        [Windows.Forms.Cursor]::Position = [Drawing.Point]::new($x, $y)
+    }
 }
 
 function Get-MouseSpeed

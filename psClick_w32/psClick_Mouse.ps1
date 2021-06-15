@@ -6,7 +6,7 @@
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
         [parameter(Mandatory=$true)]
-        [Int]$X
+        [Int]$X 
         ,
         [parameter(Mandatory=$true)]
         [Int]$Y

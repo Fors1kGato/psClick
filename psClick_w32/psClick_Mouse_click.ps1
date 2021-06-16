@@ -63,20 +63,13 @@
         $w = @{'Shift' = 0x10;'Control' = 0x11}
         Move-Cursor $x $y
         $with|%{[w32KeyBoard]::keybd_event($w.$_, 0, 0x0000, 0)}
-        if($Down){
-            [w32Mouse]::mouse_event([w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN",0,0,0,0)
-        }
-        elseif($Up){
-            [w32Mouse]::mouse_event([w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP",  0,0,0,0)
-        }
-        else{
-            1..$count|%{
-                [w32Mouse]::mouse_event(
-                    ([w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN" -bor
-                    [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP"),0,0,0,0
-                )
-            }
-        }
+
+        if($Down){$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN"}
+        elseif($Up){$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP"}
+        else{$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN" -bor [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP"}
+        
+        1..$count|%{[w32Mouse]::mouse_event($dwFlags,0,0,0,0)}
+        write-host 777
         $with|%{[w32KeyBoard]::keybd_event($w.$_, 0, 0x0002, 0)}
     }
     #endregion

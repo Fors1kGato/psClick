@@ -1,7 +1,7 @@
 ﻿function Click-Mouse
 {
     #.COMPONENT
-    #1.1
+    #1.2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -69,7 +69,7 @@
         else{$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN" -bor [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP"}
         
         1..$count|%{[w32Mouse]::mouse_event($dwFlags,0,0,0,0)}
-        write-host 777
+        
         $with|%{[w32KeyBoard]::keybd_event($w.$_, 0, 0x0002, 0)}
     }
     #endregion

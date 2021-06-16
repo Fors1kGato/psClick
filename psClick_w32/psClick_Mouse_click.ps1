@@ -1,7 +1,7 @@
 ﻿function Click-Mouse
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -28,7 +28,7 @@
         [Switch]$Event
         ,
         [ValidateSet('Shift','Control')]
-        [String[]]$with = [string[]]::new(0)
+        [String[]]$With = [string[]]::new(0)
     )
     #region Params Validating 
     if($Down -and $Up){
@@ -60,30 +60,20 @@
             [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$pt, 1)
             $x = $pt.X ; $y = $pt.Y
         }
-        $w = @{'Shift'=0x10;'Control'=0x11}
+        $w = @{'Shift' = 0x10;'Control' = 0x11}
         Move-Cursor $x $y
-        $with|%{[w32KeyBoard]::keybd_event($w.$_, 0, 0, 0)}
+        $with|%{[w32KeyBoard]::keybd_event($w.$_, 0, 0x0000, 0)}
         if($Down){
-            [w32Mouse]::mouse_event(
-                [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN",
-                $x,$y,0,0
-            )
+            [w32Mouse]::mouse_event([w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN",0,0,0,0)
         }
         elseif($Up){
-            [w32Mouse]::mouse_event(
-                [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP",
-                $x,$y,0,0
-            )
+            [w32Mouse]::mouse_event([w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP",  0,0,0,0)
         }
         else{
             1..$count|%{
                 [w32Mouse]::mouse_event(
-                    [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN",
-                    $x,$y,0,0
-                )
-                [w32Mouse]::mouse_event(
-                    [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP",
-                    $x,$y,0,0
+                    ([w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN" -bor
+                    [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP"),0,0,0,0
                 )
             }
         }

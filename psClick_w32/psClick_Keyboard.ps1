@@ -41,15 +41,13 @@
                 [w32]::SendMessage($handle ,0x0101, $key, 0)|Out-Null
             }
         }
-        else{
-            1..$count|%{    
-                if ([w32]::PostMessage($handle ,0x0100, $key, 0)){
-                    [w32]::PostMessage($handle ,0x0101, $key, 0)|Out-Null 
-                }
-                else{
-                    [w32]::SendMessage($handle ,0x0100, $key, 0)|Out-Null
-                    [w32]::SendMessage($handle ,0x0101, $key, 0)|Out-Null
-                }
+        else{  
+            if ([w32]::PostMessage($handle ,0x0100, $key, 0)){
+                [w32]::PostMessage($handle ,0x0101, $key, 0)|Out-Null 
+            }
+            else{
+                [w32]::SendMessage($handle ,0x0100, $key, 0)|Out-Null
+                [w32]::SendMessage($handle ,0x0101, $key, 0)|Out-Null
             }
         }
     }

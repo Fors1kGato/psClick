@@ -69,7 +69,7 @@
         else{$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN" -bor [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP"}
         
         1..$count|%{[w32Mouse]::mouse_event($dwFlags,0,0,0,0)}
-        
+
         $with|%{[w32KeyBoard]::keybd_event($w.$_, 0, 0x0002, 0)}
     }
     #endregion

@@ -1,7 +1,7 @@
 ﻿function Move-Cursor
 {
     #.COMPONENT
-    #2.1
+    #2.2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -83,6 +83,8 @@ function Drag-WithMouse
         [IntPtr]$Handle
         ,
         [Switch]$Event
+        ,
+        [Int]$Delay = 64
     )
     #region Params Validating 
     if($event -and !$handle){
@@ -101,7 +103,8 @@ function Drag-WithMouse
         Move-Cursor $from[0] $from[1]
         [w32Mouse]::mouse_event([w32Mouse+MouseEventFlags]::MOUSEEVENTF_LEFTDOWN,0,0,0,0)
 
-        Move-Cursor $to[0] $to[1] ; sleep -m 16
+        Move-Cursor $to[0] $to[1]
+        sleep -m $Delay
         [w32Mouse]::mouse_event([w32Mouse+MouseEventFlags]::MOUSEEVENTF_LEFTUP,  0,0,0,0)
     }
     #endregion

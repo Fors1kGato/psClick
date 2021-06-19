@@ -1,4 +1,4 @@
-﻿function Start-Psclick{
+﻿function Start-Psclick{ 
     #.COMPONENT
     #1
     #.SYNOPSIS

@@ -5,5 +5,5 @@
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
     )
-    start "$psscriptroot\psCLick.exe" -WorkingDirectory (split-path "$psscriptroot\psCLick.exe")
+    start "$psscriptroot\psCLick.exe" -WorkingDirectory $psscriptroot
 }

@@ -23,4 +23,5 @@
         ri (Join-Path "$env:USERPROFILE\Documents\psClick" $_) -Recurse -ea 0
     }
     $tree|select path, sha|ConvertTo-Json|out-file "$env:USERPROFILE\Documents\psClick\psClick.sha"
+    (Get-Command -Module psClick*).Module|ForEach{Remove-Module $_}
 }

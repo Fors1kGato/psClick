@@ -1,24 +1,23 @@
 ﻿function WinApi{
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     PARAM(
         [Parameter(Position = 0, Mandatory = $True )]
-        [String]
-        $method,
-        [Parameter(Position = 1, Mandatory = $True )]
-        [Object[]]
-        $params,
+        [String]$method
+        ,
+        [Parameter(Position = 1, Mandatory = $False)]
+        [Object[]]$params = [object[]]::new(0)
+        ,
         [Parameter(Position = 2, Mandatory = $False)]
-        [Type]
-        $return  = [Boolean],
+        [Type]$return = [Boolean]
+        ,
         [Parameter(Position = 3, Mandatory = $False)]
-        [String]
-        $dll     = 'User32.dll',
+        [String]$dll = 'User32.dll'
+        ,
         [Parameter(Position = 4, Mandatory = $False)]
-        [Int]
-        $charSet = 4
+        [Int]$charSet = 4
     )
     BEGIN{
         [Type[]]$pTypes = $params|ForEach{
@@ -55,9 +54,11 @@ function Struct{
     #Author: Fors1k ; Link: https://psClick.ru
     PARAM(
         [Parameter(ValueFromPipeline  =  $True)]
-        [String]$Attributes,
+        [String]$Attributes
+        ,
         [Parameter(Position=0,Mandatory=$True )]
-        [String]$typeName,
+        [String]$typeName
+        ,
         [Parameter(Position=1,Mandatory=$True )]
         [Object[]]$data
     )

@@ -8,7 +8,7 @@
         [String]$method
         ,
         [Parameter(Position = 1, Mandatory = $False)]
-        [Object[]]$params = [object[]]::new(0)
+        [Object[]]$params = [Object[]]::new(0)
         ,
         [Parameter(Position = 2, Mandatory = $False)]
         [Type]$return = [Boolean]

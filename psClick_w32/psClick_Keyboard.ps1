@@ -99,3 +99,44 @@ function Send-Text
     }
     #endregion
 }
+
+function Type-Text
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        [parameter(Mandatory=$true )]
+        [String]$Text
+        ,
+        [int]$Delay = 32
+    )
+
+    $chars = $Text.ToCharArray()
+    $rus = [w32KeyBoard]::LoadKeyboardLayout("00000419", 0)
+    $eng = [w32KeyBoard]::LoadKeyboardLayout("00000409", 0)
+    $window = [w32Windos]::GetForegroundWindow()
+    ForEach($c in $chars){
+        if([Text.Encoding]::Default.GetBytes($c) -ge 184){
+            [w32]::PostMessage($window, 0x0050, 0x0001, $rus)
+            $vk = [w32KeyBoard]::VkKeyScanEx($c, $rus)
+        }
+        else{
+            [w32]::PostMessage($window, 0x0050, 0x0001, $eng)
+            $vk = [w32KeyBoard]::VkKeyScanEx($c, $eng)
+        }
+
+        if($vk -band 256){
+            [w32KeyBoard]::keybd_event(0xA0, 0, 0x0000, 0)
+            [w32KeyBoard]::keybd_event($vk , 0, 0x0000, 0)
+            [w32KeyBoard]::keybd_event($vk , 0, 0x0002, 0)
+            [w32KeyBoard]::keybd_event(0xA0, 0, 0x0002, 0)
+        }
+        else{
+            [w32KeyBoard]::keybd_event($vk , 0, 0x0000, 0)
+            [w32KeyBoard]::keybd_event($vk , 0, 0x0002, 0)
+        }
+        Sleep -m $Delay
+    }
+}

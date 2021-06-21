@@ -53,3 +53,49 @@
     }
     #endregion
 }
+
+function Send-Text
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        [parameter(Mandatory=$true)]
+        [String]$Text
+        ,
+        [int]$Delay = 64
+        ,
+        [switch]$Event
+        ,
+        [IntPtr]$Handle
+    )
+    #region Params Validating 
+    if($Event -and !$Handle -or $Handle -and !$Event){
+        Write-Error "-Event , -Handle: Требуются оба параметра";return
+    }
+    #endregion
+    #region keybd_event 
+    if(!$Handle){
+        $tempCb = Get-Clipboard 
+        Set-Clipboard $Text
+        [w32KeyBoard]::keybd_event(0xA2, 0, 0x0000, 0)
+
+        [w32KeyBoard]::keybd_event(0x56, 0, 0x0000, 0)
+        [w32KeyBoard]::keybd_event(0x56, 0, 0x0002, 0)
+
+        Sleep -m $delay
+
+        [w32KeyBoard]::keybd_event(0xA2, 0, 0x0002, 0)
+        Set-Clipboard $tempCb
+    }
+    #endregion
+    #region Message
+    else{   
+        $chars = $Text.ToCharArray()
+        ForEach($c in $chars){
+            [void][w32]::PostMessage($handle ,0x0102, $c, 0)
+        }
+    }
+    #endregion
+}

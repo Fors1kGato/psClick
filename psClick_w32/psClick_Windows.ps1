@@ -35,8 +35,6 @@ function Get-WindowText
     Param(
         [parameter(Mandatory=$true)]
         [IntPtr]$Handle
-        ,
-        [String]$Text
     )
     $Text = [Text.StringBuilder]::new()
     [Void][w32Windos]::GetWindowText($Handle, $Text, [Int16]::MaxValue)

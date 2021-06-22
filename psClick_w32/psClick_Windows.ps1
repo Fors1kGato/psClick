@@ -64,3 +64,46 @@ function Set-ForegroundWindow
     )
     [w32Windos]::SetForegroundWindow($Handle)
 }
+
+function Show-Window
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        [parameter(Mandatory = $true)]
+        [IntPtr]$Handle
+        ,
+        [parameter(Mandatory = $true)]
+        [ValidateSet('SHOWMAXIMIZED', 'HIDE', 'SHOWNOACTIVATE', 'SHOWDEFAULT', 'SHOWMINNOACTIVE', 'SHOWNA', 'SHOW', 'MINIMIZE', 'RESTORE', 'SHOWMINIMIZED', 'SHOWNORMAL', 'MAXIMIZE', 'FORCEMINIMIZE', 'TOPMOST', 'BOTTOM', 'TOP', 'NOTOPMOST')]
+        [String]$Command
+    ) 
+       
+    $ShowWindow = @{
+        HIDE            = 0
+        SHOWNORMAL      = 1
+        SHOWMINIMIZED   = 2
+        MAXIMIZE        = 3
+        SHOWMAXIMIZED   = 3
+        SHOWNOACTIVATE  = 4
+        SHOW            = 5
+        MINIMIZE        = 6
+        SHOWMINNOACTIVE = 7
+        SHOWNA          = 8
+        RESTORE         = 9
+        SHOWDEFAULT     = 10
+        FORCEMINIMIZE   = 11
+    }
+    $SetWindowPos = @{
+        BOTTOM          =  1
+        NOTOPMOST       = -2
+        TOP             =  0
+        TOPMOST         = -1
+    }
+
+    if($cmd -in $ShowWindow.Keys)
+    {[w32Windos]::ShowWindow($Handle, $ShowWindow.$cmd)}
+    else
+    {[w32Windos]::SetWindowPos($Handle, $SetWindowPos.$cmd, 0,0,0,0, (0x0001 -bor 0x0002))}
+}

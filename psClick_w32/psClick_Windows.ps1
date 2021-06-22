@@ -76,7 +76,7 @@ function Show-Window
         [IntPtr]$Handle
         ,
         [parameter(Mandatory = $true)]
-        [ValidateSet('SHOWMAXIMIZED', 'HIDE', 'SHOWNOACTIVATE', 'SHOWDEFAULT', 'SHOWMINNOACTIVE', 'SHOWNA', 'SHOW', 'MINIMIZE', 'RESTORE', 'SHOWMINIMIZED', 'SHOWNORMAL', 'MAXIMIZE', 'FORCEMINIMIZE', 'TOPMOST', 'BOTTOM', 'TOP', 'NOTOPMOST')]
+        [ValidateSet('ShowMaximized', 'Hide', 'ShowNoActivate', 'ShowDefault', 'ShowMinNoActivate', 'ShowNA', 'Show', 'Minimize', 'Restore', 'ShowMinimized', 'ShowNormal', 'Maximize', 'ForceMinimize', 'TopMost', 'Bottom', 'Top', 'NoTopMost')]
         [String]$State
     ) 
        

@@ -77,7 +77,7 @@ function Show-Window
         ,
         [parameter(Mandatory = $true)]
         [ValidateSet('SHOWMAXIMIZED', 'HIDE', 'SHOWNOACTIVATE', 'SHOWDEFAULT', 'SHOWMINNOACTIVE', 'SHOWNA', 'SHOW', 'MINIMIZE', 'RESTORE', 'SHOWMINIMIZED', 'SHOWNORMAL', 'MAXIMIZE', 'FORCEMINIMIZE', 'TOPMOST', 'BOTTOM', 'TOP', 'NOTOPMOST')]
-        [String]$Command
+        [String]$State
     ) 
        
     $ShowWindow = @{
@@ -102,8 +102,8 @@ function Show-Window
         TOPMOST         = -1
     }
 
-    if($cmd -in $ShowWindow.Keys)
-    {[w32Windos]::ShowWindow($Handle, $ShowWindow.$cmd)}
+    if($State -in $ShowWindow.Keys)
+    {[w32Windos]::ShowWindow($Handle, $ShowWindow.$State)}
     else
-    {[w32Windos]::SetWindowPos($Handle, $SetWindowPos.$cmd, 0,0,0,0, (0x0001 -bor 0x0002))}
+    {[w32Windos]::SetWindowPos($Handle, $SetWindowPos.$State, 0,0,0,0, (0x0001 -bor 0x0002))}
 }

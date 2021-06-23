@@ -61,6 +61,8 @@ function Struct{
         ,
         [Parameter(Position=1,Mandatory=$True )]
         [Object[]]$data
+        ,
+        [Switch]$New
     )
     PROCESS{
         for($i=0;$i-lt$data.count){
@@ -103,5 +105,5 @@ function Struct{
             }
         }
     }
-    END{[void]$type.CreateType()}  
+    END{if($New){$type.CreateType()::new()}else{[void]$type.CreateType()}} 
 }

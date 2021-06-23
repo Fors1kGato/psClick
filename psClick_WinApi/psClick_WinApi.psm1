@@ -49,7 +49,7 @@
 }
 function Struct{
     #.COMPONENT
-    #1
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     PARAM(
@@ -63,6 +63,8 @@ function Struct{
         [Object[]]$data
         ,
         [Switch]$New
+        ,
+        [Switch]$AutoSize
     )
     PROCESS{
         for($i=0;$i-lt$data.count){
@@ -105,5 +107,16 @@ function Struct{
             }
         }
     }
-    END{if($New){$type.CreateType()::new()}else{[void]$type.CreateType()}} 
+    END{
+        if($New){
+            $struct = $type.CreateType()::new()
+            if($AutoSize){
+                $struct.($data[1]) = [Runtime.InteropServices.Marshal]::SizeOf([type]$typeName)
+            }
+            $struct
+        }
+        else{
+            [void]$type.CreateType()
+        }
+    }  
 }

@@ -67,6 +67,9 @@ function Struct{
         [Switch]$AutoSize
     )
     PROCESS{
+        if($AutoSize -and !$New){
+            Write-Error "-AutoSize: Expected -New with -AutoSize";return
+        }
         for($i=0;$i-lt$data.count){
             [Type[]]$fieldTypes+=$data[$i++]
             [String[]]$fieldNames+=$data[$i++]

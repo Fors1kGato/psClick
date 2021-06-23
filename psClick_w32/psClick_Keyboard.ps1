@@ -4,7 +4,7 @@
     #1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
-    Param(
+    Param( 
         [parameter(Mandatory=$true)]
         [Int]$Key
         ,

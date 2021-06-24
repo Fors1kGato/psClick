@@ -1,4 +1,4 @@
-﻿function Update-Psclick{
+function Update-Psclick{
     #.COMPONENT
     #1
     #.SYNOPSIS
@@ -24,12 +24,14 @@
     $files|%{
         $check = $tr.sha.Contains($_.sha)
         if(!$check){
-            try{$p = (Ni (Join-path "$env:USERPROFILE\Documents\psClick" $_.path)  -Force)}
+            $Path = (Join-path "$env:USERPROFILE\Documents\psClick" $_.path)
+            try{$p = Ni -ea Stop $Path -Force}
             catch{
                 Write-Warning (
-                    "Не удалось обновить "+$_.path+
+                    "Не удалось обновить "+$Path+
                     "`nЗакройте программу, которая использует файл в данный момент, и повторите попытку"
                 )
+                $er = $true
             }
             Irm -useb "github.com/Fors1kGato/psClick/raw/main/$($_.path)" -OutFile $p|out-null
         }
@@ -40,4 +42,5 @@
         ri (Join-Path "$env:USERPROFILE\Documents\psClick" $_) -Recurse -ea 0
     }
     (Get-Command -Module psClick*).Module|ForEach{Remove-Module $_}
+    if(!$er){Write-Host "Обновление завершено!" -Fore green}
 }

@@ -1,6 +1,6 @@
 ﻿function WinApi{
     #.COMPONENT
-    #1.1
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     PARAM(
@@ -18,34 +18,39 @@
         ,
         [Parameter(Position = 4, Mandatory = $False)]
         [Int]$charSet = 4
+        ,
+        [Switch]$New
     )
-    BEGIN{
-        [Type[]]$pTypes = $params|ForEach{
-            if($_-is[ref]){$_.Value.GetType().MakeByRefType()}
-            elseif($_-is[scriptblock]){
-                [Delegate]::CreateDelegate([func[[type[]],type]],
-                [Linq.Expressions.Expression].Assembly.GetType(
-                'System.Linq.Expressions.Compiler.DelegateHelpers'
-                ).GetMethod('MakeNewCustomDelegate',
-                [Reflection.BindingFlags]'NonPublic, Static') 
-                ).Invoke(($_.ast.ParamBlock.Parameters.StaticType+
-                $_.Attributes.type.type))
-            }else{$_.GetType()}
-        }
+
+    if(!$global:psClickWinApi){@{}|nv psClickWinApi -Option Constant -Scope global}
+    if(!$new-and$global:psClickWinApi.$method){return $global:psClickWinApi.$method.invoke($params)}
+    [Type[]]$pTypes = $params|ForEach{
+        if($_-is[ref]){$_.Value.GetType().MakeByRefType()}
+        elseif($_-is[scriptblock]){
+            [Delegate]::CreateDelegate([func[[type[]],type]],
+            [Linq.Expressions.Expression].Assembly.GetType(
+            'System.Linq.Expressions.Compiler.DelegateHelpers'
+            ).GetMethod('MakeNewCustomDelegate',
+            [Reflection.BindingFlags]'NonPublic, Static') 
+            ).Invoke(($_.ast.ParamBlock.Parameters.StaticType+
+            $_.Attributes.type.type))
+        }else{$_.GetType()}
     }
-    PROCESS{
-        ($w32=[Reflection.Emit.AssemblyBuilder]::
-        DefineDynamicAssembly('w32A','Run').
-        DefineDynamicModule('w32M').DefineType('w32T',
-        "Public,BeforeFieldInit")).DefineMethod(
-        $method,'Public,HideBySig,Static,PinvokeImpl',
-        $return,($pTypes)).SetCustomAttribute(
-        [Reflection.Emit.CustomAttributeBuilder]::new(
-        ($DI=[Runtime.InteropServices.DllImportAttribute]).
-        GetConstructor([string]),$dll,$DI.GetField('CharSet'),
-        @{[char]'W'=-1;;[char]'A'=-2}[$method[-1]]+$CharSet))
-    }
-    END{$w32.CreateType()::$method.Invoke($Params)}
+
+    ($w32=[Reflection.Emit.AssemblyBuilder]::
+    DefineDynamicAssembly('w32A','Run').
+    DefineDynamicModule('w32M').DefineType('w32T',
+    "Public,BeforeFieldInit")).DefineMethod(
+    $method,'Public,HideBySig,Static,PinvokeImpl',
+    $return,($pTypes)).SetCustomAttribute(
+    [Reflection.Emit.CustomAttributeBuilder]::new(
+    ($DI=[Runtime.InteropServices.DllImportAttribute]).
+    GetConstructor([string]),$dll,$DI.GetField('CharSet'),
+    @{[char]'W'=-1;;[char]'A'=-2}[$method[-1]]+$CharSet))
+
+    $global:psClickWinApi.Remove($method)
+    $global:psClickWinApi.Add($method, $w32.CreateType()::$method)
+    $global:psClickWinApi.$method.invoke($params)
 }
 function Struct{
     #.COMPONENT

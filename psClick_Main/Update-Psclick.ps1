@@ -1,4 +1,4 @@
-function Update-Psclick{
+﻿function Update-Psclick{
     #.COMPONENT
     #1
     #.SYNOPSIS
@@ -6,16 +6,17 @@ function Update-Psclick{
     Param(
     )
     $url   = "api.github.com/repos/Fors1kGato/psClick/git/trees/main?recursive=1"
+    $psClickPath = [Environment]::GetFolderPath("MyDocuments") + "\psClick"
     $tree  = (Irm $url -useb).tree
     $files = $tree|?{$_.type -ne "tree"}
-    $tr    = (gci -file -Recurse "$env:USERPROFILE\Documents\psClick").FullName|ForEach{
+    $tr    = (gci -file -Recurse $psClickPath).FullName|ForEach{
         $bytes =  [IO.File]::ReadAllBytes($_)
         $blob  = [Text.Encoding]::UTF8.GetBytes("blob $($bytes.Count)`0") + $bytes
         $sha1  = [Security.Cryptography.SHA1Managed]::Create()
         $hash  = $sha1.ComputeHash($blob)
         $hashString = [BitConverter]::ToString($hash).Replace('-','').ToLower()
         [PSCustomObject]@{
-            Path = $_.replace("$env:USERPROFILE\Documents\psClick\","").replace("\","/")
+            Path = $_.replace("$psClickPath\","").replace("\","/")
             sha = $hashString
         }
         #sleep 50
@@ -24,7 +25,7 @@ function Update-Psclick{
     $files|%{
         $check = $tr.sha.Contains($_.sha)
         if(!$check){
-            $Path = (Join-path "$env:USERPROFILE\Documents\psClick" $_.path)
+            $Path = (Join-path $psClickPath $_.path)
             try{$p = Ni -ea Stop $Path -Force}
             catch{
                 Write-Warning (
@@ -37,9 +38,9 @@ function Update-Psclick{
         }
     }
 
-    (gci -Recurse "$env:USERPROFILE\Documents\psClick").FullName.replace("$env:USERPROFILE\Documents\psClick\","").replace("\","/")|
+    (gci -Recurse $psClickPath).FullName.replace("$psClickPath\","").replace("\","/")|
     ?{$tree.path -notcontains $_}|%{
-        ri (Join-Path "$env:USERPROFILE\Documents\psClick" $_) -Recurse -ea 0
+        ri (Join-Path $psClickPath $_) -Recurse -ea 0
     }
     (Get-Command -Module psClick*).Module|ForEach{Remove-Module $_}
     if(!$er){Write-Host "Обновление завершено!" -Fore green}

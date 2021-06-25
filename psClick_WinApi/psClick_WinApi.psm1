@@ -1,6 +1,6 @@
 ﻿function WinApi{
     #.COMPONENT
-    #2
+    #2.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     PARAM(
@@ -19,11 +19,16 @@
         [Parameter(Position = 4, Mandatory = $False)]
         [Int]$charSet = 4
         ,
-        [Switch]$New
+        [Switch]$Override
+        ,
+        [Parameter(Position = 5, Mandatory = $False)]
+        [Boolean]$SetLastError = $true
     )
 
-    if(!$global:psClickWinApi){@{}|nv psClickWinApi -Option Constant -Scope global}
-    if(!$new-and$global:psClickWinApi.$method){return $global:psClickWinApi.$method.invoke($params)}
+    if(!$global:psClickWinApi){@{}|
+    nv psClickWinApi -Option Constant -Scope global}
+    if(!$new-and$global:psClickWinApi.$method)
+    {return $global:psClickWinApi.$method.invoke($params)}
     [Type[]]$pTypes = $params|ForEach{
         if($_-is[ref]){$_.Value.GetType().MakeByRefType()}
         elseif($_-is[scriptblock]){
@@ -45,11 +50,13 @@
     $return,($pTypes)).SetCustomAttribute(
     [Reflection.Emit.CustomAttributeBuilder]::new(
     ($DI=[Runtime.InteropServices.DllImportAttribute]).
-    GetConstructor([string]),$dll,$DI.GetField('CharSet'),
-    @{[char]'W'=-1;;[char]'A'=-2}[$method[-1]]+$CharSet))
+    GetConstructor([System.string]),$dll,[Object[]] @(),
+    [System.Object[]]@(),@($DI.GetField('SetLastError'),
+    $DI.GetField('CharSet')),[System.Object[]]($SetLastError,
+    (@{[char]'W'=-1;[char]'A'=-2}[$method[-1]]+$CharSet))))
 
     $global:psClickWinApi.Remove($method)
-    $global:psClickWinApi.Add($method, $w32.CreateType()::$method)
+    $global:psClickWinApi.Add($method,$w32.CreateType()::$method)
     $global:psClickWinApi.$method.invoke($params)
 }
 function Struct{

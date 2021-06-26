@@ -27,7 +27,7 @@
 
     if(!$global:psClickWinApi){@{}|
     nv psClickWinApi -Option Constant -Scope global}
-    if(!$new-and$global:psClickWinApi.$method)
+    if(!$Override-and$global:psClickWinApi.$method)
     {return $global:psClickWinApi.$method.invoke($params)}
     [Type[]]$pTypes = $params|ForEach{
         if($_-is[ref]){$_.Value.GetType().MakeByRefType()}

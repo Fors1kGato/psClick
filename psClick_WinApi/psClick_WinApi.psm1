@@ -59,6 +59,7 @@
     $global:psClickWinApi.Add($method,$w32.CreateType()::$method)
     $global:psClickWinApi.$method.invoke($params)
 }
+
 function Struct{
     #.COMPONENT
     #2
@@ -134,4 +135,67 @@ function Struct{
             [void]$type.CreateType()
         }
     }  
+}
+
+function New-WinApi{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    PARAM(
+        [Parameter(Position = 0, Mandatory = $True )]
+        [String]$method
+        ,
+        [Parameter(Position = 1, Mandatory = $False)]
+        [Type[]]$pTypes = [Type[]]::new(0)
+        ,
+        [Parameter(Position = 2, Mandatory = $False)]
+        [Type]$return = [Boolean]
+        ,
+        [Parameter(Position = 3, Mandatory = $False)]
+        [String]$dll = 'User32.dll'
+        ,
+        [Parameter(Position = 4, Mandatory = $False)]
+        [Int]$charSet = 4
+        ,
+        [Parameter(Position = 5, Mandatory = $False)]
+        [Boolean]$SetLastError = $true
+    )
+    ($w32=[Reflection.Emit.AssemblyBuilder]::
+    DefineDynamicAssembly('w32A','Run').
+    DefineDynamicModule('w32M').DefineType('w32T',
+    "Public,BeforeFieldInit")).DefineMethod(
+    $method,'Public,HideBySig,Static,PinvokeImpl',
+    $return,($pTypes)).SetCustomAttribute(
+    [Reflection.Emit.CustomAttributeBuilder]::new(
+    ($DI=[Runtime.InteropServices.DllImportAttribute]).
+    GetConstructor([System.string]),$dll,[Object[]] @(),
+    [System.Object[]]@(),@($DI.GetField('SetLastError'),
+    $DI.GetField('CharSet')),[System.Object[]]($SetLastError,
+    (@{[char]'W'=-1;[char]'A'=-2}[$method[-1]]+$CharSet))))
+    $w32.CreateType()::$method|nv $method -Scope 1 -Force
+}
+
+function New-Delegate{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    param(
+    )
+    [Delegate]::CreateDelegate([func[[type[]],type]],
+    [Linq.Expressions.Expression].Assembly.GetType(
+    'System.Linq.Expressions.Compiler.DelegateHelpers'
+    ).GetMethod('MakeNewCustomDelegate',
+    [Reflection.BindingFlags]'NonPublic, Static') 
+    ).Invoke(($args[0][-1]+$args[0][0]))
+}
+function ref {
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    param(
+    )
+    $args[0].MakeByRefType()
 }

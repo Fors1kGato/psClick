@@ -173,7 +173,7 @@ function New-WinApi{
     [System.Object[]]@(),@($DI.GetField('SetLastError'),
     $DI.GetField('CharSet')),[System.Object[]]($SetLastError,
     (@{[char]'W'=-1;[char]'A'=-2}[$method[-1]]+$CharSet))))
-    $w32.CreateType()::$method|nv $method -Scope 1 -Force
+    $w32.CreateType()::$method|nv $method -Scope 2 -Force
 }
 
 function New-Delegate{

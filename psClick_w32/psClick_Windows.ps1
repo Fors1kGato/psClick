@@ -33,10 +33,12 @@ function Get-WindowText
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [parameter(Mandatory=$true)]
+        [parameter(Mandatory=$true )]
         [IntPtr]$Handle
+        ,
+        [parameter(Mandatory=$false)]
+        [String]$Text = [Text.StringBuilder]::new([int16]::MaxValue)
     )
-    $Text = [Text.StringBuilder]::new([int16]::MaxValue)
     [Void][w32Windos]::GetWindowText($Handle, $Text, [Int16]::MaxValue)
     $Text.ToString()
 }

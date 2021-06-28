@@ -1,5 +1,5 @@
 ﻿function Get-ChildWindows
-{
+{ 
     #.COMPONENT
     #1
     #.SYNOPSIS

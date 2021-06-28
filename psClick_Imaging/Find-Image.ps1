@@ -10,11 +10,6 @@
         $accuracy  = 100
     )
 
-    if(-not ('Drawing.Bitmap'-as [Type]))
-    {[Void][Reflection.Assembly]::LoadWithPartialName("System.Drawing")}
-    if(-not ('ImgSearcher'-as [Type]))
-    {[Void][Reflection.Assembly]::Loadfile("$PSScriptRoot\psClick_SearchImage.dll")}
-
     $small = [Drawing.Bitmap]::new($smallPath)
     $big   = [Drawing.Bitmap]::new($bigPath)
 

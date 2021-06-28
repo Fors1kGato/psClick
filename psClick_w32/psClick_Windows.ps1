@@ -131,7 +131,7 @@ function Find-Window
         ,
         [Parameter(Mandatory=$false,ParameterSetName ='Title')]
         [Parameter(ParameterSetName = 'ProcessName')]
-        [ValidateSet('eq','match','ceq','cmatch')]
+        [ValidateSet('EQ','match','cEQ','cMatch')]
         [String]$Option = "eq"
     )
 

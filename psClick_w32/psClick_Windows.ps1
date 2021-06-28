@@ -1,5 +1,5 @@
 ﻿function Get-ChildWindows
-{ 
+{
     #.COMPONENT
     #1
     #.SYNOPSIS
@@ -127,7 +127,7 @@ function Find-Window
         [String]$ProcessName
         ,
         [Parameter(Mandatory=$true,ParameterSetName =  'wPid')]
-        [String]$wPid
+        [Int]$wPid
         ,
         [Parameter(Mandatory=$false,ParameterSetName ='Title')]
         [Parameter(ParameterSetName = 'ProcessName')]

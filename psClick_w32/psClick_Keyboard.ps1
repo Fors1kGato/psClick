@@ -95,6 +95,7 @@ function Send-Text
         $chars = $Text.ToCharArray()
         ForEach($c in $chars){
             [void][w32]::PostMessage($handle ,0x0102, $c, 0)
+            Sleep -m $delay
         }
     }
     #endregion

@@ -34,11 +34,12 @@
         [Parameter(Mandatory = $false,  ParameterSetName = 'Screen'  )]
         [Parameter(Mandatory = $false,  ParameterSetName = 'EndPoint')]
         [Parameter(Mandatory = $false,  ParameterSetName = 'Size'    )]
+        [Parameter(Mandatory = $false,  ParameterSetName = 'Window'  )]
         [ValidateRange(0.0, 1.0)]
         [Double]$deviation = 0.0
         ,
         [Parameter(ParameterSetName = 'Screen')]
-        [Boolean]$Screen
+        [switch]$Screen
         ,
         [Parameter(ParameterSetName = 'Window')]
         [IntPtr]$Handle

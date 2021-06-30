@@ -85,7 +85,7 @@
     $res.location.X+=$rect.x;$res.location.Y+=$rect.Y
     $scr.Dispose()
     $img.Dispose()
-    $gfx.Dispose()
+    if($gfx){$gfx.Dispose()}
     return $res.location  
 }
 

@@ -5,46 +5,43 @@
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = 'Screen')]Param
     (
-        [Parameter(Mandatory=$true,ParameterSetName = 'Screen')]
-        [Parameter(Mandatory=$true,ParameterSetName = 'EndPoint')]
-        [Parameter(Mandatory=$true,ParameterSetName = 'Size')]
-        [Parameter(Position = 0)]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'Screen'  )]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'EndPoint')]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'Size'    )]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'Window'  )]
         [Object[]]$Color
         ,
-        [Parameter(Mandatory=$true,ParameterSetName = 'EndPoint')]
-        [Parameter(Mandatory=$true,ParameterSetName = 'Size')]
-        [Parameter(Position = 1)]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'EndPoint')]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Size'    )]
         [int]$StartX
         ,
-        [Parameter(Mandatory=$true,ParameterSetName = 'EndPoint')]
-        [Parameter(Mandatory=$true,ParameterSetName = 'Size')]
-        [Parameter(Position = 2)]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'EndPoint')]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Size'    )]
         [int]$StartY
         ,
-        [Parameter(Mandatory=$true,ParameterSetName = 'EndPoint')]
-        [Parameter(Position = 3)]
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'EndPoint')]
         [int]$EndX
         ,
-        [Parameter(Mandatory=$true,ParameterSetName = 'EndPoint')]
-        [Parameter(Position = 4)]
+        [Parameter(Mandatory,Position=4,ParameterSetName = 'EndPoint')]
         [int]$EndY
         ,
-        [Parameter(Mandatory=$true,ParameterSetName = 'Size')]
-        [Parameter(Position = 3)]
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'Size'    )]
         [int]$Width
         ,
-        [Parameter(Mandatory=$true,ParameterSetName = 'Size')]
-        [Parameter(Position = 4)]
+        [Parameter(Mandatory,Position=4,ParameterSetName = 'Size'    )]
         [int]$Height
         ,
-        [Parameter(Mandatory=$false,ParameterSetName = 'Screen')]
-        [Parameter(Mandatory=$false,ParameterSetName = 'EndPoint')]
-        [Parameter(Mandatory=$false,ParameterSetName = 'Size')]
+        [Parameter(Mandatory = $false,  ParameterSetName = 'Screen'  )]
+        [Parameter(Mandatory = $false,  ParameterSetName = 'EndPoint')]
+        [Parameter(Mandatory = $false,  ParameterSetName = 'Size'    )]
         [ValidateRange(0.0, 1.0)]
         [Double]$deviation = 0.0
         ,
         [Parameter(ParameterSetName = 'Screen')]
-        [Boolean]$Screen = $true
+        [Boolean]$Screen
+        ,
+        [Parameter(ParameterSetName = 'Window')]
+        [IntPtr]$Handle
     )
     try{
         if($color.count-eq 1)
@@ -67,26 +64,28 @@
         {
             $rect = [Drawing.Rectangle]::new($StartX, $StartY, $Width, $Height)
         }
+        'Window'
+        {
+            $scr = Get-Image -Handle $Handle
+        }
+
     }
 
     $img = [System.Drawing.Bitmap]::new(1,1)
     $img.SetPixel(0,0,$color)
-
-    write-host $rect
-
-    $scr = [System.Drawing.Bitmap]::new($Rect.Width, $Rect.Height)
-    $gfx = [System.Drawing.Graphics]::FromImage($scr)
-    $gfx.CopyFromScreen(
-        $Rect.Location,
-        [System.Drawing.Point]::Empty,
-        $Rect.Size
-    )
+    
+    if($PSCmdlet.ParameterSetName-ne'Window'){
+        $scr = [System.Drawing.Bitmap]::new($Rect.Width, $Rect.Height)
+        $gfx = [System.Drawing.Graphics]::FromImage($scr)
+        $gfx.CopyFromScreen($Rect.Location,[Drawing.Point]::Empty,$Rect.Size)
+    }
 
     $res = [ImgSearcher]::searchBitmap($img, $scr, $deviation, 100)
     $res.location.X+=$rect.x;$res.location.Y+=$rect.Y
-    return $res.location
+    $scr.Dispose()
     $img.Dispose()
     $gfx.Dispose()
+    return $res.location  
 }
 
 function Get-Color{
@@ -102,14 +101,39 @@ function Get-Color{
     [psClickColor]::GetColor($x, $y, $handle)
 }
 
-function Import-Image{
+function Get-Image{
     #.COMPONENT
     #1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
-    Param(
-        [parameter(Mandatory = $true )]
-        [string]$Path
+    [CmdletBinding(DefaultParameterSetName = 'Screen')]Param
+    (
+        [Parameter(Mandatory,ParameterSetName = 'Window')]
+        [IntPtr]$Handle
+        ,
+        [Parameter(Mandatory = $true,ParameterSetName = 'Screen')]
+        [switch]$Screen
+        ,
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'File')]
+        [String]$Path
     )
-    [System.Drawing.Bitmap]::new($path)
+    Switch ($PSCmdlet.ParameterSetName){
+        'Window'
+        {
+            return [psClickColor]::GetImage($handle)
+        }
+        'Screen'
+        {
+            $rect = [Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $scr = [System.Drawing.Bitmap]::new($Rect.Width, $Rect.Height)
+            $gfx = [System.Drawing.Graphics]::FromImage($scr)
+            $gfx.CopyFromScreen($rect.Location,[Drawing.Point]::Empty,$rect.Size)
+            $gfx.Dispose()
+            return $scr
+        }
+        'File'
+        {
+            return [System.Drawing.Bitmap]::new($path)
+        }
+    }
 }

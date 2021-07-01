@@ -38,7 +38,7 @@
         }
     }
 
-    (gci -Recurse $psClickPath).FullName.replace("$psClickPath\","").replace("\","/")|
+    (gci -Recurse $psClickPath -ex "token" ).FullName.replace("$psClickPath\","").replace("\","/")|
     ?{$tree.path -notcontains $_}|%{
         ri (Join-Path $psClickPath $_) -Recurse -ea 0
     }

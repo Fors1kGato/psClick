@@ -1,14 +1,17 @@
 ﻿function Move-Cursor
 {
     #.COMPONENT
-    #2.2
+    #3
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [parameter(Mandatory=$true)]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'Point')]
+        [Drawing.Point]$Point
+        ,
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'crds')]
         [Int]$X
         ,
-        [parameter(Mandatory=$true)]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'crds')]
         [Int]$Y
         ,
         [IntPtr]$Handle
@@ -18,18 +21,17 @@
     if($event -and !$handle){
         Write-Error "-Event: Требуется указать handle окна";return
     }
+    if(!$point){$point = [Drawing.Point]::new($x, $y)}
     if($Event){
-        if(![w32]::PostMessage($handle, 0x0200, 0, ($x + 0x10000 * $y))){
-            [w32]::SendMessage($handle, 0x0200, 0, ($x + 0x10000 * $y))|Out-Null 
+        if(![w32]::PostMessage($handle, 0x0200, 0, ($point.X + 0x10000 * $point.Y))){
+            [w32]::SendMessage($handle, 0x0200, 0, ($point.X + 0x10000 * $point.Y))|Out-Null 
         }
     }
     else{
         if($handle){
-            $pt = [Drawing.Point]::new($x, $y)
-            [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$pt, 1)
-            $x = $pt.X ; $y = $pt.Y
+            [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$point, 1)
         }
-        [Windows.Forms.Cursor]::Position = [Drawing.Point]::new($x, $y)
+        [Windows.Forms.Cursor]::Position = $point
     }
 }
 

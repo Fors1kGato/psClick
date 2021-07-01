@@ -1,14 +1,17 @@
 ﻿function Click-Mouse
 {
     #.COMPONENT
-    #1.2
+    #1.3
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [parameter(Mandatory=$true)]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'Point')]
+        [Drawing.Point]$Point
+        ,
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'crds')]
         [Int]$X
         ,
-        [parameter(Mandatory=$true)]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'crds')]
         [Int]$Y
         ,
         [switch]$Right
@@ -49,6 +52,7 @@
     $count = 1
     if($Double ){$count = 2}
     if($Tripple){$count = 3}
+    if($point){$X=$Point.X;$Y=$Point.Y}
     #endregion
     #region Kleft 
     if(!$event){

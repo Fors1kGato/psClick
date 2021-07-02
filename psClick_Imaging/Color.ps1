@@ -82,11 +82,11 @@
     }
 
     $res = [ImgSearcher]::searchBitmap($img, $scr, $deviation, 100)
-    $res.location.X+=$rect.x;$res.location.Y+=$rect.Y
+    $res.Location.X+=$rect.x;$res.Location.Y+=$rect.Y
     $scr.Dispose()
     $img.Dispose()
     if($gfx){$gfx.Dispose()}
-    return $res.location  
+    return $res  
 }
 
 function Get-Color{

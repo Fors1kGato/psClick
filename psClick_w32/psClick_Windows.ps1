@@ -132,9 +132,8 @@ function Find-Window
         [Parameter(Mandatory=$false,ParameterSetName ='Title')]
         [Parameter(ParameterSetName = 'ProcessName')]
         [ValidateSet('EQ','match','cEQ','cMatch')]
-        [String]$Option = "eq"
+        [String]$Option = "match"
     )
-
     $res  = [Collections.Generic.List[PSCustomObject]]::new()
     if($Title){
         $hwnd = [w32Windos]::FindWindowEx(0, 0, [NullString]::Value, [NullString]::Value)
@@ -152,7 +151,6 @@ function Find-Window
         }
         return $res
     }
-
     if($Class){
         $hwnd = [w32Windos]::FindWindowEx(0, 0, $Class, [NullString]::Value)
         $text = [Text.StringBuilder]::new([int16]::MaxValue)

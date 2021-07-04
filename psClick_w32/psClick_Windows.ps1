@@ -43,7 +43,7 @@ function Get-WindowText
     $Text.ToString()
 }
 
-function Get-WindowClass
+function Get-WindowClassName
 {
     #.COMPONENT
     #1

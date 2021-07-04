@@ -43,6 +43,23 @@ function Get-WindowText
     $Text.ToString()
 }
 
+function Get-WindowClass
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        [parameter(Mandatory=$true )]
+        [IntPtr]$Handle
+        ,
+        [parameter(Mandatory=$false)]
+        [Text.StringBuilder]$Text = [Text.StringBuilder]::new([int16]::MaxValue)
+    )
+    [Void][w32Windos]::GetClassName($handle, $text, [int16]::MaxValue)
+    $Text.ToString()
+}
+
 function Get-ForegroundWindow
 {
     #.COMPONENT

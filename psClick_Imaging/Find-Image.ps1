@@ -1,7 +1,7 @@
-﻿function Find-Image1
+﻿function Find-Image
 {
     #.COMPONENT
-    #1
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = 'Screen_FullSize')]Param

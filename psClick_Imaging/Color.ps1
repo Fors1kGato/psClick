@@ -52,7 +52,8 @@
     }
     catch{Write-Error "Неверно указан цвет";return}
 
-    Switch ($PSCmdlet.ParameterSetName){
+    Switch ($PSCmdlet.ParameterSetName)
+    {
         'Screen'
         {
             $rect = [Windows.Forms.Screen]::PrimaryScreen.Bounds
@@ -102,39 +103,162 @@ function Get-Color{
     [psClickColor]::GetColor($x, $y, $handle)
 }
 
+function Cut-Image{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    [CmdletBinding(DefaultParameterSetName = 'Rect')]Param
+    (
+        [Parameter(Mandatory,Position=0)][System.Drawing.Bitmap]$Image
+        ,
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'EndPoint')]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Size'    )]
+        [int]$StartX
+        ,
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'EndPoint')]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Size'    )]
+        [int]$StartY
+        ,
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'EndPoint')]
+        [int]$EndX
+        ,
+        [Parameter(Mandatory,Position=4,ParameterSetName = 'EndPoint')]
+        [int]$EndY
+        ,
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'Size'    )]
+        [int]$Width
+        ,
+        [Parameter(Mandatory,Position=4,ParameterSetName = 'Size'    )]
+        [int]$Height
+        ,
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Rect'    )]
+        [System.Drawing.Rectangle]$rect
+        ,
+        [Switch]$New
+    )
+    Switch ($PSCmdlet.ParameterSetName)
+    {
+        'EndPoint'
+        {
+            $rect = [Drawing.Rectangle]::new($StartX, $StartY, ($EndX-$StartX), ($EndY-$StartY))
+        }
+        'Size'
+        {
+            $rect = [Drawing.Rectangle]::new($StartX, $StartY, $Width, $Height)
+        }
+    }
+    $newImg = $Image.Clone($rect, $Image.PixelFormat)
+    if(!$New){
+        $Image.Dispose()
+        return $newImg
+    }
+    else{
+        return $newImg
+    }
+}
+
 function Get-Image{
     #.COMPONENT
     #1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
-    [CmdletBinding(DefaultParameterSetName = 'Screen')]Param
+    [CmdletBinding(DefaultParameterSetName = 'Screen_FullSize')]Param
     (
-        [Parameter(Mandatory,ParameterSetName = 'Window')]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'Window_EndPoint')]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'Window_Size'    )]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'Window_Rect'    )]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'Window_FullSize')]
         [IntPtr]$Handle
         ,
-        [Parameter(Mandatory = $true,ParameterSetName = 'Screen')]
+        [Parameter(Mandatory,ParameterSetName = 'Screen_EndPoint')]
+        [Parameter(Mandatory,ParameterSetName = 'Screen_Size'    )]
+        [Parameter(Mandatory,ParameterSetName = 'Screen_Rect'    )]
+        [Parameter(Mandatory,ParameterSetName = 'Screen_FullSize')]
         [switch]$Screen
         ,
-        [Parameter(Mandatory,Position=0,ParameterSetName = 'File')]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'File_EndPoint'  )]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'File_Size'      )]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'File_Rect'      )]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'File_FullSize'  )]
         [String]$Path
+        ,
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_EndPoint')]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_EndPoint')]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'File_EndPoint'  )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_Size'    )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_Size'    )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'File_Size'      )]
+        [int]$StartX
+        ,
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_EndPoint')]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_EndPoint')]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'File_EndPoint'  )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_Size'    )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_Size'    )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'File_Size'      )]
+        [int]$StartY
+        ,
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'Window_EndPoint')]
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'Screen_EndPoint')]
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'File_EndPoint'  )]
+        [int]$EndX
+        ,
+        [Parameter(Mandatory,Position=4,ParameterSetName = 'Window_EndPoint')]
+        [Parameter(Mandatory,Position=4,ParameterSetName = 'Screen_EndPoint')]
+        [Parameter(Mandatory,Position=4,ParameterSetName = 'File_EndPoint'  )]
+        [int]$EndY
+        ,
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'Window_Size'    )]
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'Screen_Size'    )]
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'File_Size'      )]
+        [int]$Width
+        ,
+        [Parameter(Mandatory,Position=4,ParameterSetName = 'Window_Size'    )]
+        [Parameter(Mandatory,Position=4,ParameterSetName = 'Screen_Size'    )]
+        [Parameter(Mandatory,Position=4,ParameterSetName = 'File_Size'      )]
+        [int]$Height
+        ,
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_Rect'    )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_Rect'    )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'File_Rect'      )]
+        [System.Drawing.Rectangle]$Rect
     )
-    Switch ($PSCmdlet.ParameterSetName){
-        'Window'
+    if($EndX){
+        $rect = [Drawing.Rectangle]::new($StartX, $StartY, ($EndX-$StartX), ($EndY-$StartY))
+    }
+    if($Width){
+        $rect = [Drawing.Rectangle]::new($StartX, $StartY, $Width, $Height)
+    }
+
+    Switch -Wildcard ($PSCmdlet.ParameterSetName)
+    {
+        'Window*'
         {
-            return [psClickColor]::GetImage($handle)
+            if($rect){
+                return Cut-Image ([psClickColor]::GetImage($handle)) $rect
+            }
+            else{
+                return [psClickColor]::GetImage($handle)
+            }
         }
-        'Screen'
+        'Screen*'
         {
-            $rect = [Windows.Forms.Screen]::PrimaryScreen.Bounds
-            $scr = [System.Drawing.Bitmap]::new($Rect.Width, $Rect.Height)
+            if(!$rect){$rect = [Windows.Forms.Screen]::PrimaryScreen.Bounds}
+            $scr = [System.Drawing.Bitmap]::new($Rect.Width, $Rect.Height, [Drawing.Imaging.PixelFormat]::Format24bppRgb)
             $gfx = [System.Drawing.Graphics]::FromImage($scr)
             $gfx.CopyFromScreen($rect.Location,[Drawing.Point]::Empty,$rect.Size)
             $gfx.Dispose()
             return $scr
         }
-        'File'
+        'File*'
         {
-            return [System.Drawing.Bitmap]::new($path)
+            if($rect){
+                return Cut-Image ([System.Drawing.Bitmap]::new($path)) $rect
+            }
+            else{
+                return [System.Drawing.Bitmap]::new($path)
+            }
         }
     }
 }

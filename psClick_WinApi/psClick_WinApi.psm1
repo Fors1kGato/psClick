@@ -1,6 +1,6 @@
-﻿function WinApi{
+﻿function Invoke-WinApi{
     #.COMPONENT
-    #2.1
+    #2.2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     PARAM(
@@ -60,9 +60,9 @@
     $global:psClickWinApi.$method.invoke($params)
 }
 
-function Struct{
+function New-Struct{
     #.COMPONENT
-    #2
+    #2.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     PARAM(
@@ -190,7 +190,7 @@ function New-Delegate{
     [Reflection.BindingFlags]'NonPublic, Static') 
     ).Invoke(($args[0][-1]+$args[0][0]))
 }
-function ref {
+function New-Ref {
     #.COMPONENT
     #1
     #.SYNOPSIS

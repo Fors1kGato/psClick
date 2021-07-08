@@ -191,3 +191,36 @@ function Find-Window
         return $res
     }
 }
+
+function Show-MessageBox
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        [Parameter(Mandatory = $true  , Position = 0)]
+        [ValidateNotNullOrEmpty()]
+        [String]$Text
+        ,
+        [Parameter(Mandatory = $false , Position = 1)]
+        [String]$Title='psClick'
+        ,
+        [Parameter(Mandatory = $false , Position = 2)]
+        [ValidateSet('OK','OKCancel','AbortRetryIgnore','YesNoCancel','YesNo','RetryCancel')]
+        [String]$Buttons='OK'
+        ,
+        [Parameter(Mandatory = $false , Position = 3)]
+        [ValidateSet('None','Hand','Error','Stop','Question','Exclamation','Warning','Asterisk','Information')]
+        [String]$Icon='None'
+        ,
+        [Switch]$Topmost
+    )
+    [Windows.Forms.MessageBox]::Show(
+        [Windows.Forms.Form]@{Topmost = $Topmost.IsPresent}, 
+        [System.String]$Text, 
+        [System.String]$Title, 
+        [Windows.Forms.MessageBoxButtons]::$Buttons, 
+        [Windows.Forms.MessageBoxIcon]::$Icon
+    )
+}

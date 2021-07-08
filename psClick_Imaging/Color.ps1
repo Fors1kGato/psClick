@@ -103,7 +103,7 @@ function Get-Color{
     [psClickColor]::GetColor($x, $y, $handle)
 }
 
-function Resize-Image{
+function Cut-Image{
     #.COMPONENT
     #1
     #.SYNOPSIS
@@ -236,7 +236,7 @@ function Get-Image{
         'Window*'
         {
             if($rect){
-                return Resize-Image ([psClickColor]::GetImage($handle)) $rect
+                return Cut-Image ([psClickColor]::GetImage($handle)) $rect
             }
             else{
                 return [psClickColor]::GetImage($handle)
@@ -254,7 +254,7 @@ function Get-Image{
         'File*'
         {
             if($rect){
-                return Resize-Image ([System.Drawing.Bitmap]::new($path)) $rect
+                return Cut-Image ([System.Drawing.Bitmap]::new($path)) $rect
             }
             else{
                 return [System.Drawing.Bitmap]::new($path)

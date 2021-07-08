@@ -68,10 +68,10 @@
         [System.Drawing.Rectangle]$Rect
         ,
         [ValidateRange(0.0, 1.0)]
-        [Double]$deviation = 0.0
+        [Double]$Deviation = 0.0
         ,
         [ValidateRange(0, 100)]
-        [Int]$accuracy = 100
+        [Int]$Accuracy = 100
     )
 
     if($Image -is [String]){$smallBmp = [Drawing.Bitmap]::new($Image)}else{$smallBmp = $Image}

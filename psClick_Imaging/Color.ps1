@@ -1,6 +1,39 @@
-﻿function Find-Color{
+﻿class Color : System.IEquatable[Object] {
+    [Byte[]]$RGB
+    [String]$HEX
+
+    Color([Byte]$R,[Byte]$G,[Byte]$B){
+        $this.RGB = $R,$G,$B
+        $this.HEX = "{0:X2}{1:X2}{2:X2}" -f $R,$G,$B
+    }
+    Color([object]$RGB){
+        $this.RGB = $RGB[0],$RGB[1],$RGB[2]
+        $this.HEX = "{0:X2}{1:X2}{2:X2}" -f $RGB[0],$RGB[1],$RGB[2]
+    }
+    Color([String]$p){
+        $c = [System.Drawing.ColorTranslator]::FromHtml("#$p")
+        $this.HEX=$p
+        $this.RGB=$c.R,$c.G,$c.B
+    }
+    [bool] Equals([Object] $obj) {
+        return $this.HEX -eq ([Color]$obj).HEX
+    }
+}
+
+function New-Color{
     #.COMPONENT
     #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        $p
+    )
+    [Color]$p
+}
+
+function Find-Color{
+    #.COMPONENT
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = 'Screen')]Param
@@ -9,27 +42,17 @@
         [Parameter(Mandatory,Position=0,ParameterSetName = 'EndPoint')]
         [Parameter(Mandatory,Position=0,ParameterSetName = 'Size'    )]
         [Parameter(Mandatory,Position=0,ParameterSetName = 'Window'  )]
-        [Object[]]$Color
+        [Color]$Color
         ,
         [Parameter(Mandatory,Position=1,ParameterSetName = 'EndPoint')]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Size'    )]
-        [int]$StartX
+        $StartPos
         ,
         [Parameter(Mandatory,Position=2,ParameterSetName = 'EndPoint')]
+        $EndPos
+        ,
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Size'    )]
-        [int]$StartY
-        ,
-        [Parameter(Mandatory,Position=3,ParameterSetName = 'EndPoint')]
-        [int]$EndX
-        ,
-        [Parameter(Mandatory,Position=4,ParameterSetName = 'EndPoint')]
-        [int]$EndY
-        ,
-        [Parameter(Mandatory,Position=3,ParameterSetName = 'Size'    )]
-        [int]$Width
-        ,
-        [Parameter(Mandatory,Position=4,ParameterSetName = 'Size'    )]
-        [int]$Height
+        $Size
         ,
         [Parameter(Mandatory = $false,  ParameterSetName = 'Screen'  )]
         [Parameter(Mandatory = $false,  ParameterSetName = 'EndPoint')]
@@ -44,14 +67,12 @@
         [Parameter(ParameterSetName = 'Window')]
         [IntPtr]$Handle
     )
-    try{
-        if($color.count-eq 1)
-        {[Drawing.Color]$Color = [Drawing.Color]::FromArgb($color[0])}
-        else
-        {[Drawing.Color]$Color = [Drawing.Color]::FromArgb($color[0],$color[1],$color[2])}
+    #region Params Validating
+    if($StartPos -isnot [Drawing.Point]){
+        try{$StartPos = [Drawing.Point]::new.Invoke($StartPos)}catch{throw $_}
     }
-    catch{Write-Error "Неверно указан цвет";return}
-
+    
+    #endregion
     Switch ($PSCmdlet.ParameterSetName)
     {
         'Screen'
@@ -60,11 +81,13 @@
         }
         'EndPoint'
         {
-            $rect = [Drawing.Rectangle]::new($StartX, $StartY, ($EndX-$StartX), ($EndY-$StartY))
+            if(!$EndPos-is[Drawing.Point]){try{$EndPos=[Drawing.Point]::new.Invoke($EndPos)}catch{throw $_}}
+            $rect = [Drawing.Rectangle]::new($StartPos, ($EndPos.X-$StartPos.X), ($EndPos.Y-$StartPos.Y))
         }
         'Size'
         {
-            $rect = [Drawing.Rectangle]::new($StartX, $StartY, $Width, $Height)
+            if(!$Size-is[Drawing.Size]){try{$Size=[Drawing.Size]::new.Invoke($Size)}catch{throw $_}}
+            $rect = [Drawing.Rectangle]::new($StartPos, $Size)
         }
         'Window'
         {
@@ -74,7 +97,7 @@
     }
 
     $img = [System.Drawing.Bitmap]::new(1,1)
-    $img.SetPixel(0,0,$color)
+    $img.SetPixel(0,0,([Drawing.Color]::FromArgb($color)))
     
     if($PSCmdlet.ParameterSetName-ne'Window'){
         $scr = [System.Drawing.Bitmap]::new($Rect.Width, $Rect.Height)
@@ -92,45 +115,41 @@
 
 function Get-Color{
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [int]$X,
-        [int]$Y,
+        [Parameter(Mandatory, Position=0)]
+        $Position
+        ,
         [IntPtr]$Handle = [IntPtr]::Zero
     )
-    [psClickColor]::GetColor($x, $y, $handle)
+    if($Position -isnot [Drawing.Point]){
+        try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
+    }
+    $color = [psClickColor]::GetColor($Position.x, $Position.y, $handle)
+    [color]::new($color.R,$color.G,$color.B)
 }
 
 function Cut-Image{
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = 'Rect')]Param
     (
-        [Parameter(Mandatory,Position=0)][System.Drawing.Bitmap]$Image
+        [Parameter(Mandatory,Position=0)][System.Drawing.Bitmap]
+        $Image
         ,
         [Parameter(Mandatory,Position=1,ParameterSetName = 'EndPoint')]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Size'    )]
-        [int]$StartX
+        $StartPos
         ,
         [Parameter(Mandatory,Position=2,ParameterSetName = 'EndPoint')]
+        $EndPos
+        ,
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Size'    )]
-        [int]$StartY
-        ,
-        [Parameter(Mandatory,Position=3,ParameterSetName = 'EndPoint')]
-        [int]$EndX
-        ,
-        [Parameter(Mandatory,Position=4,ParameterSetName = 'EndPoint')]
-        [int]$EndY
-        ,
-        [Parameter(Mandatory,Position=3,ParameterSetName = 'Size'    )]
-        [int]$Width
-        ,
-        [Parameter(Mandatory,Position=4,ParameterSetName = 'Size'    )]
-        [int]$Height
+        $Size
         ,
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Rect'    )]
         [System.Drawing.Rectangle]$rect
@@ -141,11 +160,13 @@ function Cut-Image{
     {
         'EndPoint'
         {
-            $rect = [Drawing.Rectangle]::new($StartX, $StartY, ($EndX-$StartX), ($EndY-$StartY))
+            if(!$EndPos-is[Drawing.Point]){try{$EndPos=[Drawing.Point]::new.Invoke($EndPos)}catch{throw $_}}
+            $rect = [Drawing.Rectangle]::new($StartPos, ($EndPos.X-$StartPos.X), ($EndPos.Y-$StartPos.Y))
         }
         'Size'
         {
-            $rect = [Drawing.Rectangle]::new($StartX, $StartY, $Width, $Height)
+            if(!$Size-is[Drawing.Size]){try{$Size=[Drawing.Size]::new.Invoke($Size)}catch{throw $_}}
+            $rect = [Drawing.Rectangle]::new($StartPos, $Size)
         }
     }
     $newImg = $Image.Clone($rect, $Image.PixelFormat)
@@ -160,7 +181,7 @@ function Cut-Image{
 
 function Get-Image{
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = 'Screen_FullSize')]Param
@@ -189,35 +210,17 @@ function Get-Image{
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_Size'    )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_Size'    )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'File_Size'      )]
-        [int]$StartX
-        ,
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_EndPoint')]
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_EndPoint')]
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'File_EndPoint'  )]
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_Size'    )]
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_Size'    )]
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'File_Size'      )]
-        [int]$StartY
+        $StartPos
         ,
         [Parameter(Mandatory,Position=3,ParameterSetName = 'Window_EndPoint')]
         [Parameter(Mandatory,Position=3,ParameterSetName = 'Screen_EndPoint')]
         [Parameter(Mandatory,Position=3,ParameterSetName = 'File_EndPoint'  )]
-        [int]$EndX
-        ,
-        [Parameter(Mandatory,Position=4,ParameterSetName = 'Window_EndPoint')]
-        [Parameter(Mandatory,Position=4,ParameterSetName = 'Screen_EndPoint')]
-        [Parameter(Mandatory,Position=4,ParameterSetName = 'File_EndPoint'  )]
-        [int]$EndY
+        $EndPos
         ,
         [Parameter(Mandatory,Position=3,ParameterSetName = 'Window_Size'    )]
         [Parameter(Mandatory,Position=3,ParameterSetName = 'Screen_Size'    )]
         [Parameter(Mandatory,Position=3,ParameterSetName = 'File_Size'      )]
-        [int]$Width
-        ,
-        [Parameter(Mandatory,Position=4,ParameterSetName = 'Window_Size'    )]
-        [Parameter(Mandatory,Position=4,ParameterSetName = 'Screen_Size'    )]
-        [Parameter(Mandatory,Position=4,ParameterSetName = 'File_Size'      )]
-        [int]$Height
+        $Size
         ,
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_Rect'    )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_Rect'    )]
@@ -225,10 +228,12 @@ function Get-Image{
         [System.Drawing.Rectangle]$Rect
     )
     if($EndX){
-        $rect = [Drawing.Rectangle]::new($StartX, $StartY, ($EndX-$StartX), ($EndY-$StartY))
+        if(!$EndPos-is[Drawing.Point]){try{$EndPos=[Drawing.Point]::new.Invoke($EndPos)}catch{throw $_}}
+        $rect = [Drawing.Rectangle]::new($StartPos, ($EndPos.X-$StartPos.X), ($EndPos.Y-$StartPos.Y))
     }
     if($Width){
-        $rect = [Drawing.Rectangle]::new($StartX, $StartY, $Width, $Height)
+        if(!$Size-is[Drawing.Size]){try{$Size=[Drawing.Size]::new.Invoke($Size)}catch{throw $_}}
+        $rect = [Drawing.Rectangle]::new($StartPos, $Size)
     }
 
     Switch -Wildcard ($PSCmdlet.ParameterSetName)

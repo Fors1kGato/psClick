@@ -1,7 +1,7 @@
 ﻿function Find-Image
 {
     #.COMPONENT
-    #2
+    #2.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = 'Screen_FullSize')]Param
@@ -32,35 +32,17 @@
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_Size'    )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_Size'    )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'File_Size'      )]
-        [int]$StartX
-        ,
-        [Parameter(Mandatory,Position=3,ParameterSetName = 'Window_EndPoint')]
-        [Parameter(Mandatory,Position=3,ParameterSetName = 'Screen_EndPoint')]
-        [Parameter(Mandatory,Position=3,ParameterSetName = 'File_EndPoint'  )]
-        [Parameter(Mandatory,Position=3,ParameterSetName = 'Window_Size'    )]
-        [Parameter(Mandatory,Position=3,ParameterSetName = 'Screen_Size'    )]
-        [Parameter(Mandatory,Position=3,ParameterSetName = 'File_Size'      )]
-        [int]$StartY
+        $StartPos
         ,
         [Parameter(Mandatory,Position=4,ParameterSetName = 'Window_EndPoint')]
         [Parameter(Mandatory,Position=4,ParameterSetName = 'Screen_EndPoint')]
         [Parameter(Mandatory,Position=4,ParameterSetName = 'File_EndPoint'  )]
-        [int]$EndX
-        ,
-        [Parameter(Mandatory,Position=5,ParameterSetName = 'Window_EndPoint')]
-        [Parameter(Mandatory,Position=5,ParameterSetName = 'Screen_EndPoint')]
-        [Parameter(Mandatory,Position=5,ParameterSetName = 'File_EndPoint'  )]
-        [int]$EndY
+        $EndPos
         ,
         [Parameter(Mandatory,Position=4,ParameterSetName = 'Window_Size'    )]
         [Parameter(Mandatory,Position=4,ParameterSetName = 'Screen_Size'    )]
         [Parameter(Mandatory,Position=4,ParameterSetName = 'File_Size'      )]
-        [int]$Width
-        ,
-        [Parameter(Mandatory,Position=5,ParameterSetName = 'Window_Size'    )]
-        [Parameter(Mandatory,Position=5,ParameterSetName = 'Screen_Size'    )]
-        [Parameter(Mandatory,Position=5,ParameterSetName = 'File_Size'      )]
-        [int]$Height
+        $Size
         ,
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_Rect'    )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_Rect'    )]
@@ -77,10 +59,12 @@
     if($Image -is [String]){$smallBmp = [Drawing.Bitmap]::new($Image)}else{$smallBmp = $Image}
 
     if($EndX){
-        $rect = [Drawing.Rectangle]::new($StartX, $StartY, ($EndX-$StartX), ($EndY-$StartY))
+        if(!$EndPos-is[Drawing.Point]){try{$EndPos=[Drawing.Point]::new.Invoke($EndPos)}catch{throw $_}}
+        $rect = [Drawing.Rectangle]::new($StartPos, ($EndPos.X-$StartPos.X), ($EndPos.Y-$StartPos.Y))
     }
     if($Width){
-        $rect = [Drawing.Rectangle]::new($StartX, $StartY, $Width, $Height)
+        if(!$Size-is[Drawing.Size]){try{$Size=[Drawing.Size]::new.Invoke($Size)}catch{throw $_}}
+        $rect = [Drawing.Rectangle]::new($StartPos, $Size)
     }
 
     Switch -Wildcard ($PSCmdlet.ParameterSetName)

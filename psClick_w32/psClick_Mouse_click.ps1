@@ -1,18 +1,12 @@
 ﻿function Click-Mouse
 {
     #.COMPONENT
-    #1.3
+    #1.4
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [Parameter(Mandatory,Position=0,ParameterSetName = 'Point')]
-        [Drawing.Point]$Point
-        ,
-        [Parameter(Mandatory,Position=0,ParameterSetName = 'crds')]
-        [Int]$X
-        ,
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'crds')]
-        [Int]$Y
+        [Parameter(Mandatory, Position=0)]
+        $Position
         ,
         [switch]$Right
         ,
@@ -34,6 +28,9 @@
         [String[]]$With = [string[]]::new(0)
     )
     #region Params Validating 
+    if($Position -isnot [Drawing.Point]){
+        try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
+    }
     if($Down -and $Up){
         Write-Error "-Down , -Up: Допускается только один параметр";return
     }
@@ -52,7 +49,6 @@
     $count = 1
     if($Double ){$count = 2}
     if($Tripple){$count = 3}
-    if($point){$X=$Point.X;$Y=$Point.Y}
     #endregion
     #region Kleft 
     if(!$event){
@@ -60,12 +56,10 @@
         if($Right ){$button = "right" }
         if($Middle){$button = "Middle"}
         if($Handle){
-            $pt = [Drawing.Point]::new($x,$y)
-            [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$pt, 1)
-            $x = $pt.X ; $y = $pt.Y
+            [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$Position, 1)
         }
         $w = @{'Shift' = 0x10;'Control' = 0x11}
-        Move-Cursor $x $y
+        Move-Cursor $Position.x $Position.y
         $with|%{[w32KeyBoard]::keybd_event($w.$_, 0, 0x0000, 0)}
 
         if($Down){$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN"}
@@ -86,23 +80,23 @@
         $w = @{'Shift'=0x0004;'Control'=0x0008}
         $with|%{$wParams+=$w.$_}
         if($Down){
-            if(![w32]::PostMessage($handle, $button,   $wParams, ($x + 0x10000 * $y))){
-                [w32]::SendMessage($handle, $button,   $wParams, ($x + 0x10000 * $y))|Out-Null 
+            if(![w32]::PostMessage($handle, $button,   $wParams, ($Position.x + 0x10000 * $Position.y))){
+                [w32]::SendMessage($handle, $button,   $wParams, ($Position.x + 0x10000 * $Position.y))|Out-Null 
             }
         }
         elseif($Up){
-            if(![w32]::PostMessage($handle, $button+1, $wParams, ($x + 0x10000 * $y))){ 
-                [w32]::SendMessage($handle, $button+1, $wParams, ($x + 0x10000 * $y))|Out-Null
+            if(![w32]::PostMessage($handle, $button+1, $wParams, ($Position.x + 0x10000 * $Position.y))){ 
+                [w32]::SendMessage($handle, $button+1, $wParams, ($Position.x + 0x10000 * $Position.y))|Out-Null
             }
         }
         else{
             1..$count|%{    
-                if ([w32]::PostMessage($handle, $button,   $wParams, ($x + 0x10000 * $y))){
-                    [w32]::PostMessage($handle, $button+1, $wParams, ($x + 0x10000 * $y))|Out-Null 
+                if ([w32]::PostMessage($handle, $button,   $wParams, ($Position.x + 0x10000 * $Position.y))){
+                    [w32]::PostMessage($handle, $button+1, $wParams, ($Position.x + 0x10000 * $Position.y))|Out-Null 
                 }
                 else{
-                    [w32]::SendMessage($handle, $button,   $wParams, ($x + 0x10000 * $y))|Out-Null
-                    [w32]::SendMessage($handle, $button+1, $wParams, ($x + 0x10000 * $y))|Out-Null
+                    [w32]::SendMessage($handle, $button,   $wParams, ($Position.x + 0x10000 * $Position.y))|Out-Null
+                    [w32]::SendMessage($handle, $button+1, $wParams, ($Position.x + 0x10000 * $Position.y))|Out-Null
                 }
             }
         }

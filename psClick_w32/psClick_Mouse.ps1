@@ -104,10 +104,10 @@ function Drag-WithMouse
             $to.X  , $to.Y   = ($pt[0].X+$to.X-$from.X), ($pt[0].Y+$to.Y-$from.Y)
             $from.X, $from.Y = $pt[0].X, $pt[0].Y
         }
-        Move-Cursor $from.X $from.Y
+        Move-Cursor $from
         [w32Mouse]::mouse_event([w32Mouse+MouseEventFlags]::MOUSEEVENTF_LEFTDOWN, 0,0,0,0)
 
-        Move-Cursor $to.X $to.Y
+        Move-Cursor $to
         sleep -m $Delay
         [w32Mouse]::mouse_event([w32Mouse+MouseEventFlags]::MOUSEEVENTF_LEFTUP,   0,0,0,0)
     }

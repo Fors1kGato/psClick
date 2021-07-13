@@ -59,7 +59,7 @@
             [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$Position, 1)
         }
         $w = @{'Shift' = 0x10;'Control' = 0x11}
-        Move-Cursor $Position.x $Position.y
+        Move-Cursor $Position
         $with|%{[w32KeyBoard]::keybd_event($w.$_, 0, 0x0000, 0)}
 
         if($Down){$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN"}

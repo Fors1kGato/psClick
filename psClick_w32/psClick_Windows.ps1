@@ -1,4 +1,23 @@
-﻿function Get-ChildWindows
+﻿function Move-Window
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        [Parameter(Mandatory,Position=0)]
+        $Position
+        ,
+        [parameter(Mandatory,Position=1)]
+        [IntPtr]$Handle
+    )
+    if($Position -isnot [Drawing.Point]){
+        try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
+    }
+    [w32Windos]::SetWindowPos($Handle, [IntPtr]::Zero, $Position.X, $Position.Y, 0, 0, (0x0001 -bor 0x0004))
+}
+
+function Get-ChildWindows
 {
     #.COMPONENT
     #1

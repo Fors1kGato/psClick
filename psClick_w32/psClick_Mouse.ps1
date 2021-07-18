@@ -1,4 +1,42 @@
-﻿function Move-Cursor
+﻿function Scroll-Mouse{
+    #.COMPONENT
+    #1.1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        [Parameter(Mandatory, Position=0)]
+        $Position
+        ,
+        [IntPtr]$Handle
+        ,
+        [Parameter(Position=2)]
+        [int]$Steps=1
+        ,
+        [Switch]$Abs
+        ,
+        [Switch]$Up
+        ,
+        [Switch]$Down
+    )
+    $MOUSEEVENTF_WHEEL = 0x0800 
+    $WM_MOUSEWHEEL     = 0x020A 
+    if($Position -isnot [Drawing.Point]){
+        try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
+    }
+    if(!$Down -and !$Up){Write-Error "Укажите направление: -Down или -Up";return}
+    if($Down){$Steps = -$Steps}
+
+    if($Handle){
+        if($Abs){[void][w32Windos]::MapWindowPoints($handle, [IntPtr]::Zero, [ref]$Position, 1)}
+        [void][w32]::SendMessage($handle, $WM_MOUSEWHEEL, (120 * $Steps -shl 16), ($Position.x + ($Position.y -shl 16)))
+    }
+    else{
+        Move-Cursor $Position
+        [w32Mouse]::mouse_event($MOUSEEVENTF_WHEEL, 0, 0, (120 * $Steps), 0)
+    }
+}
+
+function Move-Cursor
 {
     #.COMPONENT
     #3

@@ -1,4 +1,5 @@
-﻿function Scroll-Mouse{
+﻿function Scroll-Mouse
+{
     #.COMPONENT
     #1.1
     #.SYNOPSIS
@@ -34,6 +35,20 @@
         Move-Cursor $Position
         [w32Mouse]::mouse_event($MOUSEEVENTF_WHEEL, 0, 0, (120 * $Steps), 0)
     }
+}
+
+function Get-CursorHandle
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+    )
+    $cursorinfo = [w32Mouse+CURSORINFO]::new()
+    $cursorinfo.cbSize = [Runtime.InteropServices.Marshal]::SizeOf([type][w32Mouse+CURSORINFO])
+    [void][w32Mouse]::GetCursorInfo([ref]$cursorinfo)
+    $cursorinfo.hCursor
 }
 
 function Move-Cursor

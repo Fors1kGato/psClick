@@ -1,4 +1,26 @@
-﻿function Move-Window
+﻿function Set-WindowTransparency
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        [Parameter(Mandatory,Position=0)]
+        [Byte]$Transparency
+        ,
+        [parameter(Mandatory,Position=1)]
+        [IntPtr]$Handle
+    )
+    $LWA_ALPHA = 2
+    $GWL_EXSTYLE = -20
+    $WS_EX_LAYERED = 0x80000
+
+    $WindowStyle = [w32Windos]::GetWindowLongPtr($handle, $GWL_EXSTYLE)
+    [Void][w32Windos]::SetWindowLongPtr($handle, $GWL_EXSTYLE, ($WindowStyle -bor $WS_EX_LAYERED))
+    [w32Windos]::SetLayeredWindowAttributes($handle, [IntPtr]::Zero, $transparency, $LWA_ALPHA)
+}
+
+function Move-Window
 {
     #.COMPONENT
     #1

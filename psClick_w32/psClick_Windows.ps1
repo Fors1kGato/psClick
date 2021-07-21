@@ -207,7 +207,7 @@ function Find-Window
             }
             $hwnd = [w32Windos]::FindWindowEx(0, $hwnd, [NullString]::Value, [NullString]::Value)
         }
-        return $res
+        return ,$res
     }
     if($Class){
         $hwnd = [w32Windos]::FindWindowEx(0, 0, $Class, [NullString]::Value)
@@ -219,17 +219,17 @@ function Find-Window
             $res.Add([PSCustomObject]@{handle = $hwnd;title = $name})
             $hwnd = [w32Windos]::FindWindowEx(0, $hwnd, $Class, [NullString]::Value)
         }
-        return $res
+        return ,$res
     }
     if($ProcessName){
         Get-Process|where([scriptblock]::Create("`$_.ProcessName -$option `$ProcessName"))|
         ForEach{$res.Add([PSCustomObject]@{handle = $_.MainWindowHandle;title = $_.MainWindowTitle})}
-        return $res
+        return ,$res
     }
     if($wPid){
         Get-Process -id $wPid|
         ForEach{$res.Add([PSCustomObject]@{handle = $_.MainWindowHandle;title = $_.MainWindowTitle})}
-        return $res
+        return ,$res
     }
 }
 

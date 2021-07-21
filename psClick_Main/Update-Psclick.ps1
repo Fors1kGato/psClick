@@ -46,7 +46,7 @@
     sal ngen (Join-Path ([Runtime.InteropServices.RuntimeEnvironment]::GetRuntimeDirectory()) ngen.exe)
     $psClickPath = [Environment]::GetFolderPath("MyDocuments") + "\psClick"
     (gci $psClickPath -rec *.dll).FullName|%{
-        ngen uninstall $_|Out-Null
+        #ngen uninstall $_|Out-Null
         ngen install $_ |Out-Null
     }
     if(!$er){Write-Host "Обновление завершено!" -Fore green}

@@ -61,6 +61,8 @@ function Find-Color{
         [ValidateRange(0.0, 1.0)]
         [Double]$deviation = 0.0
         ,
+        [Int16]$Count = 1
+        ,
         [Parameter(ParameterSetName = 'Screen')]
         [switch]$Screen
         ,
@@ -105,12 +107,12 @@ function Find-Color{
         $gfx.CopyFromScreen($Rect.Location,[Drawing.Point]::Empty,$Rect.Size)
     }
 
-    $res = [ImgSearcher]::searchBitmap($img, $scr, $deviation, 100)
-    $res.Location.X+=$rect.x;$res.Location.Y+=$rect.Y
+    $res = [ImgSearcher]::searchBitmap($img, $scr, $deviation, 100, $count)
+    0..($res.Count-1)|%{$res[$_].location.X+=$rect.x;$res[$_].location.Y+=$rect.Y}
     $scr.Dispose()
     $img.Dispose()
     if($gfx){$gfx.Dispose()}
-    return $res  
+    return ,$res  
 }
 
 function Get-Color{

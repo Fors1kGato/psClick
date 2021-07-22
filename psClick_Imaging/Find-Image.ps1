@@ -49,6 +49,8 @@
         [Parameter(Mandatory,Position=2,ParameterSetName = 'File_Rect'      )]
         [System.Drawing.Rectangle]$Rect
         ,
+        [Int16]$Count = 1
+        ,
         [ValidateRange(0.0, 1.0)]
         [Double]$Deviation = 0.0
         ,
@@ -97,9 +99,9 @@
         }
     }
 
-    $res = [ImgSearcher]::searchBitmap($smallBmp, $bigBmp, $deviation, $accuracy)
+    $res = [ImgSearcher]::searchBitmap($smallBmp, $bigBmp, $deviation, $accuracy, $count)
 
     if($Image -is [String]){$smallBmp.Dispose()}
     $bigBmp.Dispose()
-    return $res
+    return ,$res
 }

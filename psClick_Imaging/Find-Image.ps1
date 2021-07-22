@@ -1,12 +1,13 @@
 ﻿function Find-Image
 {
     #.COMPONENT
-    #2.1
+    #3
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
-    [CmdletBinding(DefaultParameterSetName = 'Screen_FullSize')]Param
+    [Alias('Find-Color')][CmdletBinding(DefaultParameterSetName = 'Screen_FullSize')]
+    Param
     (
-        [Parameter(Mandatory,Position=0)][Object]$Image
+        [Parameter(Mandatory,Position=0)][Object]$Target
         ,
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_EndPoint')]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_Size'    )]
@@ -24,6 +25,7 @@
         [Parameter(Mandatory,Position=1,ParameterSetName = 'File_Size'      )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'File_Rect'      )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'File_FullSize'  )]
+        [ValidateScript({Test-Path $_})]
         [String]$Path
         ,
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_EndPoint')]
@@ -58,19 +60,37 @@
         [Int]$Accuracy = 100
     )
 
-    if($Image -is [String]){$smallBmp = [Drawing.Bitmap]::new($Image)}else{$smallBmp = $Image}
-
-    if($EndX){
-        if(!$EndPos-is[Drawing.Point]){try{$EndPos=[Drawing.Point]::new.Invoke($EndPos)}catch{throw $_}}
-        $rect = [Drawing.Rectangle]::new($StartPos, ($EndPos.X-$StartPos.X), ($EndPos.Y-$StartPos.Y))
+    if($Target -isnot [Drawing.Bitmap]){
+        if($Target -isnot [color]){
+            try{
+                $color = New-Color $Target
+            }
+            catch{
+                throw "Неверно указана цель поиска"
+            }
+        }
+        $smallBmp = [System.Drawing.Bitmap]::new(1,1)
+        $smallBmp.SetPixel(0, 0, ([Drawing.Color]::FromArgb.Invoke([Object[]]$color.RGB)))
+        $Accuracy = 100
     }
-    if($Width){
-        if(!$Size-is[Drawing.Size]){try{$Size=[Drawing.Size]::new.Invoke($Size)}catch{throw $_}}
-        $rect = [Drawing.Rectangle]::new($StartPos, $Size)
+    else{
+        $smallBmp = $Target
     }
 
     Switch -Wildcard ($PSCmdlet.ParameterSetName)
     {
+        '*_Size'
+        {
+            if($StartPos -isnot [Drawing.Point]){try{$StartPos = [Drawing.Point]::new.Invoke($StartPos)}catch{throw $_}}
+            if($Size-isnot[Drawing.Size]){try{$Size=[Drawing.Size]::new.Invoke($Size)}catch{throw $_}}
+            $rect = [Drawing.Rectangle]::new($StartPos, $Size)
+        }
+        '*EndPoint'
+        {
+            if($StartPos -isnot [Drawing.Point]){try{$StartPos = [Drawing.Point]::new.Invoke($StartPos)}catch{throw $_}}
+            if($Size-isnot[Drawing.Size]){try{$Size=[Drawing.Size]::new.Invoke($Size)}catch{throw $_}}
+            $rect = [Drawing.Rectangle]::new($StartPos, $Size)
+        }
         'Window*'
         {
             if($rect){
@@ -100,8 +120,10 @@
     }
 
     $res = [ImgSearcher]::searchBitmap($smallBmp, $bigBmp, $deviation, $accuracy, $count)
-
-    if($Image -is [String]){$smallBmp.Dispose()}
+    if(($PSCmdlet.ParameterSetName) -notmatch "FullSize"){
+        0..($res.Count-1)|%{$res[$_].location.X+=$rect.x;$res[$_].location.Y+=$rect.Y}
+    }
+    if($Target -isnot [Drawing.Bitmap]){$smallBmp.Dispose()}
     $bigBmp.Dispose()
     return ,$res
 }

@@ -80,7 +80,7 @@ function Cut-Image{
         {
             if($StartPos -isnot [Drawing.Point]){try{$StartPos = [Drawing.Point]::new.Invoke($StartPos)}catch{throw $_}}
             if(!$EndPos-is[Drawing.Point]){try{$EndPos=[Drawing.Point]::new.Invoke($EndPos)}catch{throw $_}}
-            $rect = [Drawing.Rectangle]::new($StartPos, ($EndPos.X-$StartPos.X), ($EndPos.Y-$StartPos.Y))
+            $rect = [Drawing.Rectangle]::new($StartPos.x, $StartPos.y, ($EndPos.X-$StartPos.X), ($EndPos.Y-$StartPos.Y))
         }
         'Size'
         {

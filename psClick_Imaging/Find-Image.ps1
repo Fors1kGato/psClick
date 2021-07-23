@@ -7,7 +7,7 @@
     [Alias('Find-Color')][CmdletBinding(DefaultParameterSetName = 'Screen_FullSize')]
     Param
     (
-        [Parameter(Mandatory,Position=0)][Object]$Target
+        [Parameter(Mandatory,Position=0)][Alias("Color")][Object]$Image
         ,
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_EndPoint')]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_Size'    )]

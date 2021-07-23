@@ -8,51 +8,63 @@
     Param
     (
         [Parameter(Mandatory,Position=0)][Alias("Color")]
-        [Object]$Image
+        $Image
         ,
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_EndPoint')]
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_Size'    )]
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_Rect'    )]
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_FullSize')]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_EndPoint' )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_Size'     )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_Rect'     )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_FullSize' )]
         [IntPtr]$Handle
         ,
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_EndPoint')]
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_Size'    )]
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_Rect'    )]
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_FullSize')]
-        [switch]$Screen
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_EndPoint' )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_Size'     )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_Rect'     )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_FullSize' )]
+        [Switch]$Screen
         ,
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'File_EndPoint'  )]
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'File_Size'      )]
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'File_Rect'      )]
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'File_FullSize'  )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'File_EndPoint'   )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'File_Size'       )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'File_Rect'       )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'File_FullSize'   )]
         [ValidateScript({Test-Path $_})]
         [String]$Path
         ,
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_EndPoint')]
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_EndPoint')]
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'File_EndPoint'  )]
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_Size'    )]
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_Size'    )]
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'File_Size'      )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_EndPoint')]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_Size'    )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_Rect'    )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_FullSize')]
+        [Drawing.Bitmap]$Picture
+        ,
+
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_EndPoint' )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_EndPoint' )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'File_EndPoint'   )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Picture_EndPoint')]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_Size'     )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_Size'     )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'File_Size'       )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Picture_Size'    )]
         $StartPos
         ,
-        [Parameter(Mandatory,Position=4,ParameterSetName = 'Window_EndPoint')]
-        [Parameter(Mandatory,Position=4,ParameterSetName = 'Screen_EndPoint')]
-        [Parameter(Mandatory,Position=4,ParameterSetName = 'File_EndPoint'  )]
+        [Parameter(Mandatory,Position=4,ParameterSetName = 'Window_EndPoint' )]
+        [Parameter(Mandatory,Position=4,ParameterSetName = 'Screen_EndPoint' )]
+        [Parameter(Mandatory,Position=4,ParameterSetName = 'File_EndPoint'   )]
+        [Parameter(Mandatory,Position=4,ParameterSetName = 'Picture_EndPoint')]
         $EndPos
         ,
-        [Parameter(Mandatory,Position=4,ParameterSetName = 'Window_Size'    )]
-        [Parameter(Mandatory,Position=4,ParameterSetName = 'Screen_Size'    )]
-        [Parameter(Mandatory,Position=4,ParameterSetName = 'File_Size'      )]
+        [Parameter(Mandatory,Position=4,ParameterSetName = 'Window_Size'     )]
+        [Parameter(Mandatory,Position=4,ParameterSetName = 'Screen_Size'     )]
+        [Parameter(Mandatory,Position=4,ParameterSetName = 'File_Size'       )]
+        [Parameter(Mandatory,Position=4,ParameterSetName = 'Picture_Size'    )]
         $Size
         ,
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_Rect'    )]
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_Rect'    )]
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'File_Rect'      )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_Rect'     )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_Rect'     )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'File_Rect'       )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Picture_Rect'    )]
         [Drawing.Rectangle]$Rect
         ,
-        [Int16]$Count = 1
+        [UInt16]$Count = 1
         ,
         [ValidateRange(0.0, 1.0)]
         [Double]$Deviation = 0.0
@@ -118,6 +130,15 @@
                 $bigBmp = [System.Drawing.Bitmap]::new($path)
             }
         }
+        'Picture*'
+        {
+            if($rect){
+                $bigBmp = Cut-Image $Picture $rect -New
+            }
+            else{
+                $bigBmp = $Picture
+            }
+        }
     }
 
     $res = @([ImgSearcher]::searchBitmap($smallBmp, $bigBmp, $deviation, $accuracy, $count))
@@ -128,6 +149,6 @@
         }
     }
     if($Image -isnot [Drawing.Bitmap]){$smallBmp.Dispose()}
-    $bigBmp.Dispose()
+    if(!$Picture){$bigBmp.Dispose()}
     return ,$res
 }

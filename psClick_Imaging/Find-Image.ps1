@@ -1,4 +1,4 @@
-﻿function Find-Image1
+﻿function Find-Image
 {
     #.COMPONENT
     #3

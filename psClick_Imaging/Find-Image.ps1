@@ -88,8 +88,7 @@
         '*EndPoint'
         {
             if($StartPos -isnot [Drawing.Point]){try{$StartPos = [Drawing.Point]::new.Invoke($StartPos)}catch{throw $_}}
-            if($Size-isnot[Drawing.Size]){try{$Size=[Drawing.Size]::new.Invoke($Size)}catch{throw $_}}
-            $rect = [Drawing.Rectangle]::new($StartPos, $Size)
+            if($EndPos -isnot [Drawing.Point]){try{$EndPos = [Drawing.Point]::new.Invoke($EndPos)}catch{throw $_}}
         }
         'Window*'
         {

@@ -7,7 +7,8 @@
     [Alias('Find-Color')][CmdletBinding(DefaultParameterSetName = 'Screen_FullSize')]
     Param
     (
-        [Parameter(Mandatory,Position=0)][Alias("Color")][Object]$Image
+        [Parameter(Mandatory,Position=0)][Alias("Color")]
+        [Object]$Image
         ,
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_EndPoint')]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_Size'    )]
@@ -49,7 +50,7 @@
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_Rect'    )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_Rect'    )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'File_Rect'      )]
-        [System.Drawing.Rectangle]$Rect
+        [Drawing.Rectangle]$Rect
         ,
         [Int16]$Count = 1
         ,
@@ -60,10 +61,10 @@
         [Int]$Accuracy = 100
     )
 
-    if($Target -isnot [Drawing.Bitmap]){
-        if($Target -isnot [color]){
+    if($Image -isnot [Drawing.Bitmap]){
+        if($Image -isnot [color]){
             try{
-                $color = New-Color $Target
+                $color = New-Color $Image
             }
             catch{
                 throw "Неверно указана цель поиска"
@@ -74,7 +75,7 @@
         $Accuracy = 100
     }
     else{
-        $smallBmp = $Target
+        $smallBmp = $Image
     }
 
     Switch -Wildcard ($PSCmdlet.ParameterSetName)
@@ -122,11 +123,11 @@
     $res = @([ImgSearcher]::searchBitmap($smallBmp, $bigBmp, $deviation, $accuracy, $count))
     if($PSCmdlet.ParameterSetName -notmatch "FullSize" -and $res.Count){
         0..($res.Count-1)|%{$res[$_].location.X+=$rect.x;$res[$_].location.Y+=$rect.Y}
-        if($Target -is [Drawing.Bitmap]){
+        if($Image -is [Drawing.Bitmap]){
             0..($res.Count-1)|%{$res[$_].firstPixel.X+=$rect.x;$res[$_].firstPixel.Y+=$rect.Y}
         }
     }
-    if($Target -isnot [Drawing.Bitmap]){$smallBmp.Dispose()}
+    if($Image -isnot [Drawing.Bitmap]){$smallBmp.Dispose()}
     $bigBmp.Dispose()
     return ,$res
 }

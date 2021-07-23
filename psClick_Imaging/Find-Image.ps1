@@ -119,9 +119,12 @@
         }
     }
 
-    $res = [ImgSearcher]::searchBitmap($smallBmp, $bigBmp, $deviation, $accuracy, $count)
-    if(($PSCmdlet.ParameterSetName) -notmatch "FullSize"){
+    $res = @([ImgSearcher]::searchBitmap($smallBmp, $bigBmp, $deviation, $accuracy, $count))
+    if($PSCmdlet.ParameterSetName -notmatch "FullSize" -and $res.Count){
         0..($res.Count-1)|%{$res[$_].location.X+=$rect.x;$res[$_].location.Y+=$rect.Y}
+        if($Target -is [Drawing.Bitmap]){
+            0..($res.Count-1)|%{$res[$_].firstPixel.X+=$rect.x;$res[$_].firstPixel.Y+=$rect.Y}
+        }
     }
     if($Target -isnot [Drawing.Bitmap]){$smallBmp.Dispose()}
     $bigBmp.Dispose()

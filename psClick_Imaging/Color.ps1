@@ -172,7 +172,7 @@ function Get-Image
         'Window*'
         {
             if($rect){
-                return Cut-Image ([psClickColor]::GetImage($handle)) $rect
+                return Cut-Image ([psClickColor]::GetImage($handle)) -Rect $rect
             }
             else{
                 return [psClickColor]::GetImage($handle)
@@ -181,7 +181,7 @@ function Get-Image
         'Screen*'
         {
             if(!$rect){$rect = [Windows.Forms.Screen]::PrimaryScreen.Bounds}
-            $scr = [System.Drawing.Bitmap]::new($Rect.Width, $Rect.Height)
+            $scr = [System.Drawing.Bitmap]::new($Rect.Width, $Rect.Height, [Drawing.Imaging.PixelFormat]::Format24bppRgb)
             $gfx = [System.Drawing.Graphics]::FromImage($scr)
             $gfx.CopyFromScreen($rect.Location,[Drawing.Point]::Empty,$rect.Size)
             $gfx.Dispose()
@@ -190,7 +190,7 @@ function Get-Image
         'File*'
         {
             if($rect){
-                return Cut-Image ([System.Drawing.Bitmap]::new($path)) $rect
+                return Cut-Image ([System.Drawing.Bitmap]::new($path)) -Rect $rect
             }
             else{
                 return [System.Drawing.Bitmap]::new($path)

@@ -107,7 +107,7 @@
         'Window*'
         {
             if($rect){
-                $bigBmp = Cut-Image ([psClickColor]::GetImage($handle)) $rect
+                $bigBmp = Cut-Image ([psClickColor]::GetImage($handle)) -Rect $rect
             }
             else{
                 $bigBmp = [psClickColor]::GetImage($handle)
@@ -124,7 +124,7 @@
         'File*'
         {
             if($rect){
-                $bigBmp = Cut-Image ([System.Drawing.Bitmap]::new($path)) $rect
+                $bigBmp = Cut-Image ([System.Drawing.Bitmap]::new($path)) -Rect $rect
             }
             else{
                 $bigBmp = [System.Drawing.Bitmap]::new($path)
@@ -133,7 +133,7 @@
         'Picture*'
         {
             if($rect){
-                $bigBmp = Cut-Image $Picture $rect -New
+                $bigBmp = Cut-Image $Picture -Rect $rect -New
             }
             else{
                 $bigBmp = $Picture

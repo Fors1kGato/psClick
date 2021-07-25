@@ -1,4 +1,17 @@
-﻿function Set-WindowTransparency
+﻿function Get-WindowRectangle
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    param(
+        [Parameter(Mandatory)]
+        [IntPtr]$Handle
+    )
+    [w32Windos]::GetWindowRectangle($Handle)
+}
+
+function Set-WindowTransparency
 {
     #.COMPONENT
     #1

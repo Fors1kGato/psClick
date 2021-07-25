@@ -106,7 +106,7 @@ function Cut-Image
 function Get-Image
 {
     #.COMPONENT
-    #2
+    #2.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = 'Screen_FullSize')]
@@ -153,6 +153,12 @@ function Get-Image
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_Rect'    )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'File_Rect'      )]
         [Drawing.Rectangle]$Rect
+        ,
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'Window_EndPoint')]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'Window_Size'    )]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'Window_Rect'    )]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'Window_FullSize')]
+        [Switch]$Visivble
     )
 
     Switch -Wildcard ($PSCmdlet.ParameterSetName)
@@ -171,11 +177,24 @@ function Get-Image
         }
         'Window*'
         {
-            if($rect){
-                return Cut-Image ([psClickColor]::GetImage($handle)) -Rect $rect
+            if($Visivble){
+                $wRect = [w32Windos]::GetWindowRectangle($Handle)
+                if($rect){
+                    $wRect = [System.Drawing.Rectangle]::new(($wRect.x+$Rect.x), ($wRect.y+$Rect.y), $Rect.Width, $Rect.Height)
+                }
+                $scr = [System.Drawing.Bitmap]::new($wRect.Width, $wRect.Height, [Drawing.Imaging.PixelFormat]::Format24bppRgb)
+                $gfx = [System.Drawing.Graphics]::FromImage($scr)
+                $gfx.CopyFromScreen($wRect.Location,[Drawing.Point]::Empty,$wrect.Size)
+                $gfx.Dispose()
+                return $scr
             }
             else{
-                return [psClickColor]::GetImage($handle)
+                if( $rect ){
+                    return Cut-Image ([psClickColor]::GetImage($handle)) -Rect $rect
+                }
+                else{
+                    return [psClickColor]::GetImage($handle)
+                }
             }
         }
         'Screen*'

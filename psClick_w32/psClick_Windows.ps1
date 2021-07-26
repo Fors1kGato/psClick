@@ -7,8 +7,26 @@
     param(
         [Parameter(Mandatory)]
         [IntPtr]$Handle
+        ,
+        [Switch]$Withborder
     )
-    [w32Windos]::GetWindowRectangle($Handle)
+    $wInfo = [w32Windos]::GetWindowInformation($Handle)
+    if(!$Withborder){
+        [Drawing.Rectangle]::new(
+            $wInfo.rcClient.Left,
+            $wInfo.rcClient.Top,
+            $wInfo.rcClient.Right -$wInfo.rcClient.Left,
+            $wInfo.rcClient.Bottom-$wInfo.rcClient.Top
+        )
+    }
+    else{
+        [Drawing.Rectangle]::new(
+            $wInfo.rcWindow.Left,
+            $wInfo.rcWindow.Top,
+            $wInfo.rcWindow.Right -$wInfo.rcWindow.Left,
+            $wInfo.rcWindow.Bottom-$wInfo.rcWindow.Top
+        )
+    }
 }
 
 function Set-WindowTransparency

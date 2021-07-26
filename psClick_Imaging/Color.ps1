@@ -154,11 +154,11 @@ function Get-Image
         [Parameter(Mandatory,Position=1,ParameterSetName = 'File_Rect'      )]
         [Drawing.Rectangle]$Rect
         ,
-        [Parameter(Mandatory,Position=0,ParameterSetName = 'Window_EndPoint')]
-        [Parameter(Mandatory,Position=0,ParameterSetName = 'Window_Size'    )]
-        [Parameter(Mandatory,Position=0,ParameterSetName = 'Window_Rect'    )]
-        [Parameter(Mandatory,Position=0,ParameterSetName = 'Window_FullSize')]
-        [Switch]$Visivble
+        [Parameter(ParameterSetName = 'Window_EndPoint')]
+        [Parameter(ParameterSetName = 'Window_Size'    )]
+        [Parameter(ParameterSetName = 'Window_Rect'    )]
+        [Parameter(ParameterSetName = 'Window_FullSize')]
+        [Switch]$Visible
     )
 
     Switch -Wildcard ($PSCmdlet.ParameterSetName)
@@ -177,8 +177,8 @@ function Get-Image
         }
         'Window*'
         {
-            if($Visivble){
-                $wRect = [w32Windos]::GetWindowRectangle($Handle)
+            if($Visible){
+                $wRect = Get-WindowRectangle $Handle
                 if($rect){
                     $wRect = [System.Drawing.Rectangle]::new(($wRect.x+$Rect.x), ($wRect.y+$Rect.y), $Rect.Width, $Rect.Height)
                 }

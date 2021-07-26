@@ -106,7 +106,7 @@ function Cut-Image
 function Get-Image
 {
     #.COMPONENT
-    #2.1
+    #2.2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = 'Screen_FullSize')]
@@ -129,7 +129,7 @@ function Get-Image
         [Parameter(Mandatory,Position=0,ParameterSetName = 'File_Rect'      )]
         [Parameter(Mandatory,Position=0,ParameterSetName = 'File_FullSize'  )]
         [ValidateScript({Test-Path $_})]
-        [String]$Path
+        [String[]]$Path
         ,
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_EndPoint')]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_EndPoint')]
@@ -209,10 +209,10 @@ function Get-Image
         'File*'
         {
             if($rect){
-                return Cut-Image ([System.Drawing.Bitmap]::new($path)) -Rect $rect
+                return ($path|ForEach{Cut-Image ([Drawing.Bitmap]::new($_)) -Rect $rect})
             }
             else{
-                return [System.Drawing.Bitmap]::new($path)
+                return ($path|ForEach{[Drawing.Bitmap]::new($_)})
             }
         }
     }

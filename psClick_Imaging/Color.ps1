@@ -26,9 +26,9 @@ function New-Color{
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        $p
+        $color
     )
-    [Color]$p
+    [Color]$color
 }
 
 function Get-Color{

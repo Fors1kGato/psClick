@@ -120,7 +120,7 @@ function Send-Text
 function Type-Text
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -128,32 +128,68 @@ function Type-Text
         [String]$Text
         ,
         [int]$Delay = 32
+        ,
+        [Switch]$Hardware
+        ,
+        [Switch]$ShiftEOL
     )
 
+    $text = $text-replace"(`r`n|`r)","`n"
     $chars = $Text.ToCharArray()
     $rus = [w32KeyBoard]::LoadKeyboardLayout("00000419", 0)
     $eng = [w32KeyBoard]::LoadKeyboardLayout("00000409", 0)
     $window = [w32Windos]::GetForegroundWindow()
+    
+    if($Hardware){
+        if($Delay -lt 16){$delay = 16}
+        $arduino = [System.IO.Ports.SerialPort]::new(@(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.Properties|?{ $_.name -like '*USB*'}).value)[0])
+        [void]$arduino.Open()
+    }
+
     ForEach($c in $chars){
         if([Text.Encoding]::Default.GetBytes($c) -ge 184){
-            [w32]::PostMessage($window, 0x0050, 0x0001, $rus)
+            [Void][w32]::PostMessage($window, 0x0050, 0x0001, $rus)
             $vk = [w32KeyBoard]::VkKeyScanEx($c, $rus)
         }
         else{
-            [w32]::PostMessage($window, 0x0050, 0x0001, $eng)
+            [Void][w32]::PostMessage($window, 0x0050, 0x0001, $eng)
             $vk = [w32KeyBoard]::VkKeyScanEx($c, $eng)
         }
+        if($Hardware){
+            if($vk -band 256 -or ($ShiftEOL -and $vk -eq 525)){
+                if($vk -eq 525){$vk=176}else{$vk-=256}
+                $arduino.Write("3129");Sleep -m $Delay
 
-        if($vk -band 256){
-            [w32KeyBoard]::keybd_event(0xA0, 0, 0x0000, 0)
-            [w32KeyBoard]::keybd_event($vk , 0, 0x0000, 0)
-            [w32KeyBoard]::keybd_event($vk , 0, 0x0002, 0)
-            [w32KeyBoard]::keybd_event(0xA0, 0, 0x0002, 0)
+                $arduino.Write("3$vk");Sleep -m $Delay
+                $arduino.Write("4$vk");Sleep -m $Delay
+
+                $arduino.Write("4129");Sleep -m $Delay
+            }
+            else{
+            #>                
+                $arduino.Write("3193");Sleep -m $Delay
+                $arduino.Write("4193");Sleep -m $Delay
+
+                $arduino.Write("3$vk");Sleep -m $Delay
+                $arduino.Write("4$vk");Sleep -m $Delay
+
+                $arduino.Write("3193");Sleep -m $Delay
+                $arduino.Write("4193");Sleep -m $Delay
+            }
         }
         else{
-            [w32KeyBoard]::keybd_event($vk , 0, 0x0000, 0)
-            [w32KeyBoard]::keybd_event($vk , 0, 0x0002, 0)
+            if($vk -band 256 -or ($ShiftEOL -and $vk -eq 525)){
+                [w32KeyBoard]::keybd_event(0xA0, 0, 0x0000, 0)
+                [w32KeyBoard]::keybd_event($vk , 0, 0x0000, 0)
+                [w32KeyBoard]::keybd_event($vk , 0, 0x0002, 0)
+                [w32KeyBoard]::keybd_event(0xA0, 0, 0x0002, 0)
+            }
+            else{
+                [w32KeyBoard]::keybd_event($vk , 0, 0x0000, 0)
+                [w32KeyBoard]::keybd_event($vk , 0, 0x0002, 0)
+            }
+            Sleep -m $Delay
         }
-        Sleep -m $Delay
     }
+    if($Hardware){$arduino.Close();$arduino.Dispose()}
 }

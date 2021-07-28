@@ -120,7 +120,7 @@ function Send-Text
 function Type-Text
 {
     #.COMPONENT
-    #1.1
+    #1.2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -143,38 +143,46 @@ function Type-Text
     if($Hardware){
         if($Delay -lt 16){$delay = 16}
         $arduino = [System.IO.Ports.SerialPort]::new(@(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.Properties|?{ $_.name -like '*USB*'}).value)[0])
-        [void]$arduino.Open()
+        try{$arduino.Open()}catch{throw $_}
     }
 
-    ForEach($c in $chars){
-        if([Text.Encoding]::Default.GetBytes($c) -ge 184){
+    ForEach($char in $chars){
+        if([Text.Encoding]::Default.GetBytes($char) -ge 184){
             [Void][w32]::PostMessage($window, 0x0050, 0x0001, $rus)
-            $vk = [w32KeyBoard]::VkKeyScanEx($c, $rus)
+            $vk = [w32KeyBoard]::VkKeyScanEx($char, $rus)
         }
         else{
             [Void][w32]::PostMessage($window, 0x0050, 0x0001, $eng)
-            $vk = [w32KeyBoard]::VkKeyScanEx($c, $eng)
+            $vk = [w32KeyBoard]::VkKeyScanEx($char, $eng)
         }
+
         if($Hardware){
-            if($vk -band 256 -or ($ShiftEOL -and $vk -eq 525)){
-                if($vk -eq 525){$vk=176}else{$vk-=256}
+            if($ShiftEOL -and $vk -eq 525){
                 $arduino.Write("3129");Sleep -m $Delay
 
-                $arduino.Write("3$vk");Sleep -m $Delay
-                $arduino.Write("4$vk");Sleep -m $Delay
+                $arduino.Write("3176");Sleep -m $Delay
+                $arduino.Write("4176");Sleep -m $Delay
 
                 $arduino.Write("4129");Sleep -m $Delay
             }
-            else{
-            #>                
-                $arduino.Write("3193");Sleep -m $Delay
-                $arduino.Write("4193");Sleep -m $Delay
+            elseif($vk -band 256){
+                if($char -notmatch "\p{L}"){
+                    $arduino.Write("3129");Sleep -m $Delay
 
+                    $arduino.Write("3$vk");Sleep -m $Delay
+                    $arduino.Write("4$vk");Sleep -m $Delay
+
+                    $arduino.Write("4129");Sleep -m $Delay
+                }
+                else{
+                    $arduino.Write("3$vk");Sleep -m $Delay
+                    $arduino.Write("4$vk");Sleep -m $Delay
+                }
+            }
+            else{
+                if($char -match "\p{L}"){$vk+=32}
                 $arduino.Write("3$vk");Sleep -m $Delay
                 $arduino.Write("4$vk");Sleep -m $Delay
-
-                $arduino.Write("3193");Sleep -m $Delay
-                $arduino.Write("4193");Sleep -m $Delay
             }
         }
         else{

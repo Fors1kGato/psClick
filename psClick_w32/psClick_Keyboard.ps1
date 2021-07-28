@@ -157,11 +157,12 @@ function Type-Text
         }
 
         if($Hardware){
-            if($ShiftEOL -and $vk -eq 525){
+            if($vk -eq 525){$vk=176}
+            if($ShiftEOL -and $vk -eq 176){
                 $arduino.Write("3129");Sleep -m $Delay
 
-                $arduino.Write("3176");Sleep -m $Delay
-                $arduino.Write("4176");Sleep -m $Delay
+                $arduino.Write("3$vk");Sleep -m $Delay
+                $arduino.Write("4$vk");Sleep -m $Delay
 
                 $arduino.Write("4129");Sleep -m $Delay
             }

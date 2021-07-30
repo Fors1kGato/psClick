@@ -54,23 +54,35 @@ function Get-CursorHandle
 function Move-Cursor
 {
     #.COMPONENT
-    #3
+    #4
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
+    [CmdletBinding(DefaultParameterSetName = 'ScreenCursor')]
     Param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'ScreenEvent' )]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'ScreenCursor')]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'WindowEvent' )]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'WindowCursor')]
         $Position
         ,
+        [Parameter(Mandatory,ParameterSetName = 'WindowEvent' )]
+        [Parameter(Mandatory,ParameterSetName = 'WindowCursor')]
         [IntPtr]$Handle
         ,
+        [Parameter(Mandatory,ParameterSetName = 'WindowEvent' )]
         [Switch]$Event
+        ,
+        [Parameter(ParameterSetName = 'ScreenCursor')]
+        [Parameter(ParameterSetName = 'WindowCursor')]
+        [Switch]$Hardware
+        #,
+        #[Parameter(ParameterSetName = 'Screen')]
+        #[Switch]$Screen
     )
     if($Position -isnot [Drawing.Point]){
         try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
     }
-    if($event -and !$handle){
-        Write-Error "-Event: Требуется указать handle окна";return
-    }
+
     if($Event){
         if(![w32]::PostMessage($handle, 0x0200, 0, ($Position.X + 0x10000 * $Position.Y))){
             [w32]::SendMessage($handle, 0x0200, 0, ($Position.X + 0x10000 * $Position.Y))|Out-Null 
@@ -80,7 +92,27 @@ function Move-Cursor
         if($handle){
             [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$Position, 1)
         }
-        [Windows.Forms.Cursor]::Position = $Position
+
+        if($Hardware){
+            $arduino = [System.IO.Ports.SerialPort]::new(@(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.Properties|?{ $_.name -like '*USB*'}).value)[0])
+            try{$arduino.Open()}catch{throw $_}
+
+            $offset = $Position - [System.Windows.Forms.Cursor]::Position
+
+            $param  = "5{0}{1}{2}" -f (
+                $(if($offset.x -ge 0){"+"}else{"-"}), 
+                $(if($offset.y -ge 0){"+"}else{"-"}),
+                $([math]::Abs($offset.x) * 0xFFFF + [math]::Abs($offset.y))
+            )
+
+            $arduino.Write($param)
+
+            $arduino.Close()
+            $arduino.Dispose()
+        }
+        else{
+            [Windows.Forms.Cursor]::Position = $Position
+        }
     }
 }
 

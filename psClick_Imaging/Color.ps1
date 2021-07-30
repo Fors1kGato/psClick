@@ -31,19 +31,33 @@ function New-Color{
     [Color]$color
 }
 
-function Get-Color{
+function Get-Color
+{
     #.COMPONENT
-    #1.1
+    #1.2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
+    [CmdletBinding(DefaultParameterSetName = 'Screen')]
     Param(
-        [Parameter(Mandatory, Position=0)]
+        [Parameter(Mandatory, Position=0,ParameterSetName = 'Screen')]
+        [Parameter(Mandatory, Position=0,ParameterSetName = 'Window')]
         $Position
         ,
+        [Parameter(Mandatory,ParameterSetName = 'Window'  )]
         [IntPtr]$Handle = [IntPtr]::Zero
+        ,
+        [Parameter(ParameterSetName = 'Window')]
+        [Switch]$Visible
+        ,
+        [Parameter(ParameterSetName = 'Screen')]
+        [Switch]$Screen
     )
     if($Position -isnot [Drawing.Point]){
         try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
+    }
+    if($Visible){
+        [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$Position, 1)
+        $Handle = [IntPtr]::Zero
     }
     $color = [psClickColor]::GetColor($Position.x, $Position.y, $handle)
     [color]::new($color.R,$color.G,$color.B)

@@ -54,7 +54,7 @@ function Get-CursorHandle
 function Move-Cursor
 {
     #.COMPONENT
-    #4
+    #4.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = 'ScreenCursor')]
@@ -94,7 +94,12 @@ function Move-Cursor
         }
 
         if($Hardware){
-            $arduino = [System.IO.Ports.SerialPort]::new(@(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.Properties|?{ $_.name -like '*USB*'}).value)[0])
+            $arduino = [SnT.IO.Ports.SerialPort]::new()
+            $arduino.PortName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.Properties|?{ $_.name -like '*USB*'}).value)[0]
+            $arduino.ReadBufferSize  = 64
+            $arduino.WriteBufferSize = 64
+            $arduino.ReadTimeout = 4000
+            $arduino.DiscardInBuffer()
             try{$arduino.Open()}catch{throw $_}
 
             $offset = $Position - [System.Windows.Forms.Cursor]::Position
@@ -105,10 +110,18 @@ function Move-Cursor
                 $([math]::Abs($offset.x) * 0xFFFF + [math]::Abs($offset.y))
             )
 
-            $arduino.Write($param)
-
-            $arduino.Close()
-            $arduino.Dispose()
+            try{
+                $arduino.Write($param)
+                $t = (date).AddSeconds(4)
+                while(!$arduino.ReadExisting() -and ((date) -lt $t)){sleep -m 8}
+            }
+            catch{
+                throw $_
+            }
+            finally{
+                #$arduino.Close()
+                $arduino.Dispose()
+            }
         }
         else{
             [Windows.Forms.Cursor]::Position = $Position

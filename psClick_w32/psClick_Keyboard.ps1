@@ -124,10 +124,10 @@ function Type-Text
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [parameter(Mandatory=$true )]
+        [parameter(Mandatory=$true)]
         [String]$Text
         ,
-        [int]$Delay = 32
+        [UInt16]$Delay = 16
         ,
         [Switch]$Hardware
         ,
@@ -141,9 +141,14 @@ function Type-Text
     $window = [w32Windos]::GetForegroundWindow()
     
     if($Hardware){
-        if($Delay -lt 16){$delay = 16}
-        $arduino = [System.IO.Ports.SerialPort]::new(@(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.Properties|?{ $_.name -like '*USB*'}).value)[0])
-        try{$arduino.Open()}catch{throw $_}
+        $arduino = [SnT.IO.Ports.SerialPort]::new()
+        $arduino.PortName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").
+                            psobject.Properties|where{$_.name -like  '*USB*'}).value)[0]
+        $arduino.ReadBufferSize  = 64
+        $arduino.WriteBufferSize = 64
+        $arduino.ReadTimeout = 4000
+        $arduino.DiscardInBuffer()
+        try{$o=$arduino.Open();if(!$o){throw "Не удалось открыть порт"}}catch{throw $_}
     }
 
     ForEach($char in $chars){
@@ -159,31 +164,31 @@ function Type-Text
         if($Hardware){
             if($vk -eq 525){$vk=176}
             if($ShiftEOL -and $vk -eq 176){
-                $arduino.Write("3129");Sleep -m $Delay
+                Send-ArduinoCommand $arduino "3129"
 
-                $arduino.Write("3$vk");Sleep -m $Delay
-                $arduino.Write("4$vk");Sleep -m $Delay
+                Send-ArduinoCommand $arduino "3$vk"
+                Send-ArduinoCommand $arduino "4$vk"
 
-                $arduino.Write("4129");Sleep -m $Delay
+                Send-ArduinoCommand $arduino "4129"
             }
             elseif($vk -band 256){
                 if($char -notmatch "\p{L}"){
-                    $arduino.Write("3129");Sleep -m $Delay
+                    Send-ArduinoCommand $arduino "3129"
 
-                    $arduino.Write("3$vk");Sleep -m $Delay
-                    $arduino.Write("4$vk");Sleep -m $Delay
+                    Send-ArduinoCommand $arduino "3$vk"
+                    Send-ArduinoCommand $arduino "4$vk"
 
-                    $arduino.Write("4129");Sleep -m $Delay
+                    Send-ArduinoCommand $arduino "4129"
                 }
                 else{
-                    $arduino.Write("3$vk");Sleep -m $Delay
-                    $arduino.Write("4$vk");Sleep -m $Delay
+                    Send-ArduinoCommand $arduino "3$vk"
+                    Send-ArduinoCommand $arduino "4$vk"
                 }
             }
             else{
                 if($char -match "\p{L}"){$vk+=32}
-                $arduino.Write("3$vk");Sleep -m $Delay
-                $arduino.Write("4$vk");Sleep -m $Delay
+                Send-ArduinoCommand $arduino "3$vk"
+                Send-ArduinoCommand $arduino "4$vk"
             }
         }
         else{
@@ -197,8 +202,8 @@ function Type-Text
                 [w32KeyBoard]::keybd_event($vk , 0, 0x0000, 0)
                 [w32KeyBoard]::keybd_event($vk , 0, 0x0002, 0)
             }
-            Sleep -m $Delay
         }
+        Sleep -m $Delay
     }
-    if($Hardware){$arduino.Close();$arduino.Dispose()}
+    if($arduino){$arduino.Dispose()}
 }

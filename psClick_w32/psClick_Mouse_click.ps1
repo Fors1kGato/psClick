@@ -1,7 +1,7 @@
 ﻿function Click-Mouse
 {
     #.COMPONENT
-    #1.4
+    #1.5
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -23,6 +23,8 @@
         [Switch]$Tripple
         ,
         [Switch]$Event
+        ,
+        [Switch]$Hardware
         ,
         [ValidateSet('Shift','Control')]
         [String[]]$With = [string[]]::new(0)
@@ -52,23 +54,53 @@
     #endregion
     #region Kleft 
     if(!$event){
-        $button = "left"
-        if($Right ){$button = "right" }
-        if($Middle){$button = "Middle"}
         if($Handle){
             [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$Position, 1)
         }
-        $w = @{'Shift' = 0x10;'Control' = 0x11}
-        Move-Cursor $Position
-        $with|%{[w32KeyBoard]::keybd_event($w.$_, 0, 0x0000, 0)}
+        if($Hardware){
+            Move-Cursor $Position -Hardware
+            $w = @{'Shift' = "129";'Control' = "128"}
 
-        if($Down){$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN"}
-        elseif($Up){$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP"}
-        else{$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN" -bor [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP"}
+            $arduino = [SnT.IO.Ports.SerialPort]::new()
+            $arduino.PortName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").
+                                psobject.Properties|where{$_.name -like  '*USB*'}).value)[0]
+            $arduino.ReadBufferSize  = 64
+            $arduino.WriteBufferSize = 64
+            $arduino.ReadTimeout = 4000
+            $arduino.DiscardInBuffer()
+            try{$o=$arduino.Open();if(!$o){throw "Не удалось открыть порт"}}catch{throw $_}
+            
+            $button = 1
+            if($Right ){$button = 2}
+            if($Middle){$button = 4}
+
+            $with|%{Send-ArduinoCommand $arduino "3$($w.$_)"}
+
+            if($Down){Send-ArduinoCommand $arduino "7$button"}
+            elseif($Up){Send-ArduinoCommand $arduino "8$button"}
+            else{1..$count|%{Send-ArduinoCommand $arduino "6$button"}}
+
+            $with|%{Send-ArduinoCommand $arduino "4$($w.$_)"}
+
+            if($arduino){$arduino.Dispose()}
+        }
+        else{
+            $button = "left"
+            if($Right ){$button = "right" }
+            if($Middle){$button = "Middle"}
+            
+            $w = @{'Shift' = 0x10;'Control' = 0x11}
+            Move-Cursor $Position
+            $with|%{[w32KeyBoard]::keybd_event($w.$_, 0, 0x0000, 0)}
+
+            if($Down){$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN"}
+            elseif($Up){$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP"}
+            else{$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN" -bor [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP"}
         
-        1..$count|%{[w32Mouse]::mouse_event($dwFlags,0,0,0,0)}
+            1..$count|%{[w32Mouse]::mouse_event($dwFlags,0,0,0,0)}
 
-        $with|%{[w32KeyBoard]::keybd_event($w.$_, 0, 0x0002, 0)}
+            $with|%{[w32KeyBoard]::keybd_event($w.$_, 0, 0x0002, 0)}
+        }
     }
     #endregion
     #region left 

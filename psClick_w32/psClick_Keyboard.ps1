@@ -141,14 +141,11 @@ function Type-Text
     $window = [w32Windos]::GetForegroundWindow()
     
     if($Hardware){
-        $arduino = [SnT.IO.Ports.SerialPort]::new()
-        $arduino.PortName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").
-                            psobject.Properties|where{$_.name -like  '*USB*'}).value)[0]
-        $arduino.ReadBufferSize  = 64
-        $arduino.WriteBufferSize = 64
-        $arduino.ReadTimeout = 4000
-        $arduino.DiscardInBuffer()
-        try{$o=$arduino.Open();if(!$o){throw "Не удалось открыть порт"}}catch{throw $_}
+        $portName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.
+                    Properties|where{$_.name -like  '*USB*'}).value)[0].replace("COM","")
+        $arduino = [arduino]::Open($PortName)
+        $error = "Не удалось открыть порт. Err code: $arduino"
+        if([int]$arduino -le 0){throw $error}
     }
 
     ForEach($char in $chars){
@@ -205,5 +202,5 @@ function Type-Text
         }
         Sleep -m $Delay
     }
-    if($arduino){$arduino.Dispose()}
+    if($Hardware){[arduino]::Close($arduino)}
 }

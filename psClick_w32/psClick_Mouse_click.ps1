@@ -61,14 +61,11 @@
             Move-Cursor $Position -Hardware
             $w = @{'Shift' = "129";'Control' = "128"}
 
-            $arduino = [SnT.IO.Ports.SerialPort]::new()
-            $arduino.PortName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").
-                                psobject.Properties|where{$_.name -like  '*USB*'}).value)[0]
-            $arduino.ReadBufferSize  = 64
-            $arduino.WriteBufferSize = 64
-            $arduino.ReadTimeout = 4000
-            $arduino.DiscardInBuffer()
-            try{$o=$arduino.Open();if(!$o){throw "Не удалось открыть порт"}}catch{throw $_}
+            $portName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.
+                        Properties|where{$_.name -like  '*USB*'}).value)[0].replace("COM","")
+            $arduino = [arduino]::Open($PortName)
+            $error = "Не удалось открыть порт. Err code: $arduino"
+            if([int]$arduino -le 0){throw $error}
             
             $button = 1
             if($Right ){$button = 2}
@@ -82,7 +79,7 @@
 
             $with|%{Send-ArduinoCommand $arduino "4$($w.$_)"}
 
-            if($arduino){$arduino.Dispose()}
+            if($Hardware){[void][arduino]::Close($arduino)}
         }
         else{
             $button = "left"

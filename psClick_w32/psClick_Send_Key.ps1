@@ -1,7 +1,7 @@
 ﻿function Send-Key
 {
     #.COMPONENT
-    #2
+    #2.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = '__AllParameterSets')]
@@ -65,7 +65,10 @@
                 $error = "Не удалось открыть порт. Err code: $arduino"
                 if([int]$arduino -le 0){throw $error}
 
-                if($key -match "^(\p{L}|D\d)$"){
+                if($key -match "^\p{L}$"){
+                    $hKey = [Windows.Forms.Keys]::$key.value__+32
+                }
+                elseif($key -match "^D\d$"){
                     $hKey = [Windows.Forms.Keys]::$key.value__
                 }
                 else{

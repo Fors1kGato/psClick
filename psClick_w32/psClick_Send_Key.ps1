@@ -6,9 +6,9 @@
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = '__AllParameterSets')]
     Param(
-        [parameter(Mandatory,position = 1,ParameterSetName = "Event_Click")]
-        [parameter(Mandatory,position = 1,ParameterSetName = "Event_Down")]
-        [parameter(Mandatory,position = 1,ParameterSetName = "Event_Up")]
+        [parameter(Mandatory,ParameterSetName = "Event_Click")]
+        [parameter(Mandatory,ParameterSetName = "Event_Down")]
+        [parameter(Mandatory,ParameterSetName = "Event_Up")]
         [IntPtr]$Handle
         ,
         [parameter(Mandatory,ParameterSetName = "Sys_Down")]

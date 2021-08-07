@@ -53,8 +53,10 @@ function Send-ArduinoCommand
         ,
         [Parameter(Mandatory, Position=1)]
         [String]$Command 
+        ,
+        [UInt16]$Wait
     )
-    if(![arduino]::SendCommand($Arduino, $Command)){
+    if(![arduino]::SendCommand($Arduino, $Command, $Wait)){
         [void][arduino]::Close($Arduino)
         $error = "Arduino write / read exception"
         throw $error 
@@ -138,6 +140,10 @@ function Move-Cursor
         [Parameter(ParameterSetName = 'ScreenCursor')]
         [Parameter(ParameterSetName = 'WindowCursor')]
         [Switch]$Hardware
+        ,
+        [Parameter(ParameterSetName = 'ScreenCursor')]
+        [Parameter(ParameterSetName = 'WindowCursor')]
+        [UInt16]$Wait = 5000
     )
     if($Position -isnot [Drawing.Point]){
         try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
@@ -168,7 +174,7 @@ function Move-Cursor
                 $([math]::Abs($offset.x) * 0xFFFF + [math]::Abs($offset.y))
             )
 
-            Send-ArduinoCommand $arduino $param
+            Send-ArduinoCommand $arduino $param $Wait
             if($Hardware){[void][arduino]::Close($arduino)}
         }
         else{

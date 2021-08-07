@@ -30,6 +30,11 @@
         [parameter(ParameterSetName = "Hardware_Down")]
         [parameter(ParameterSetName = "Event_Down")]
         [UInt16]$Delay = 32
+        ,
+        [parameter(Mandatory,ParameterSetName = "Hardware_Click")]
+        [parameter(Mandatory,ParameterSetName = "Hardware_Down")]
+        [parameter(Mandatory,ParameterSetName = "Hardware_Up")]
+        [UInt16]$Wait = 5000
     )
     DynamicParam {
         $attribute = [Management.Automation.ParameterAttribute]::new()
@@ -123,9 +128,9 @@
                     }.$key
                 }
 
-                if($down){Send-ArduinoCommand $arduino "3$hKey"}
-                elseif($up){Send-ArduinoCommand $arduino "4$hKey"}
-                else{Send-ArduinoCommand $arduino "1$hKey"}
+                if($down){Send-ArduinoCommand $arduino "3$hKey" $Wait}
+                elseif($up){Send-ArduinoCommand $arduino "4$hKey" $Wait}
+                else{Send-ArduinoCommand $arduino "1$hKey" $Wait}
                 if($Hardware){[arduino]::Close($arduino)}
             }
             else{

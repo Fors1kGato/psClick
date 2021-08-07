@@ -76,6 +76,8 @@ function Type-Text
         [Switch]$Hardware
         ,
         [Switch]$ShiftEOL
+        ,
+        [UInt16]$Wait = 5000
     )
 
     $text = $text-replace"(`r`n|`r)","`n"
@@ -105,31 +107,31 @@ function Type-Text
         if($Hardware){
             if($vk -eq 525){$vk=176}
             if($ShiftEOL -and $vk -eq 176){
-                Send-ArduinoCommand $arduino "3129"
+                Send-ArduinoCommand $arduino "3129" $Wait
 
-                Send-ArduinoCommand $arduino "3$vk"
-                Send-ArduinoCommand $arduino "4$vk"
+                Send-ArduinoCommand $arduino "3$vk" $Wait
+                Send-ArduinoCommand $arduino "4$vk" $Wait
 
-                Send-ArduinoCommand $arduino "4129"
+                Send-ArduinoCommand $arduino "4129" $Wait
             }
             elseif($vk -band 256){
                 if($char -notmatch "\p{L}"){
-                    Send-ArduinoCommand $arduino "3129"
+                    Send-ArduinoCommand $arduino "3129" $Wait
 
-                    Send-ArduinoCommand $arduino "3$vk"
-                    Send-ArduinoCommand $arduino "4$vk"
+                    Send-ArduinoCommand $arduino "3$vk" $Wait
+                    Send-ArduinoCommand $arduino "4$vk" $Wait
 
-                    Send-ArduinoCommand $arduino "4129"
+                    Send-ArduinoCommand $arduino "4129" $Wait
                 }
                 else{
-                    Send-ArduinoCommand $arduino "3$vk"
-                    Send-ArduinoCommand $arduino "4$vk"
+                    Send-ArduinoCommand $arduino "3$vk" $Wait
+                    Send-ArduinoCommand $arduino "4$vk" $Wait
                 }
             }
             else{
                 if($char -match "\p{L}"){$vk+=32}
-                Send-ArduinoCommand $arduino "3$vk"
-                Send-ArduinoCommand $arduino "4$vk"
+                Send-ArduinoCommand $arduino "3$vk" $Wait
+                Send-ArduinoCommand $arduino "4$vk" $Wait
             }
         }
         else{

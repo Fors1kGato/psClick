@@ -28,6 +28,8 @@
         ,
         [ValidateSet('Shift','Control')]
         [String[]]$With = [string[]]::new(0)
+        ,
+        [UInt16]$Wait = 5000
     )
     #region Params Validating 
     if($Position -isnot [Drawing.Point]){
@@ -71,13 +73,13 @@
             if($Right ){$button = 2}
             if($Middle){$button = 4}
 
-            $with|%{Send-ArduinoCommand $arduino "3$($w.$_)"}
+            $with|%{Send-ArduinoCommand $arduino "3$($w.$_)" $Wait}
 
-            if($Down){Send-ArduinoCommand $arduino "7$button"}
-            elseif($Up){Send-ArduinoCommand $arduino "8$button"}
-            else{1..$count|%{Send-ArduinoCommand $arduino "6$button"}}
+            if($Down){Send-ArduinoCommand $arduino "7$button" $Wait}
+            elseif($Up){Send-ArduinoCommand $arduino "8$button" $Wait}
+            else{1..$count|%{Send-ArduinoCommand $arduino "6$button" $Wait}}
 
-            $with|%{Send-ArduinoCommand $arduino "4$($w.$_)"}
+            $with|%{Send-ArduinoCommand $arduino "4$($w.$_)" $Wait}
 
             if($Hardware){[void][arduino]::Close($arduino)}
         }

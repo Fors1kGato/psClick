@@ -5,16 +5,16 @@
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [UInt16]$mouseDelay
+        [UInt16]$MouseDelay
         ,
-        [UInt16]$mousemoveDelay
+        [UInt16]$MousemoveDelay
         ,
         [ValidateRange(1, 127)]
-        [UInt16]$mousemoveOffset
+        [UInt16]$MousemoveOffset
         ,
-        [UInt16[]]$keyRandomDelay
+        [UInt16]$KeyRandomDelay
         ,
-        [UInt16[]]$MouseRandomDelay
+        [UInt16]$MouseRandomDelay
     )
     $portName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.
                 Properties|where{$_.name -like  '*USB*'}).value)[0].replace("COM","")
@@ -22,22 +22,20 @@
     $error = "Не удалось открыть порт. Err code: $arduino"
     if([int]$arduino -le 0){throw $error}
 
-    if($mouseDelay){
+    if($MouseDelay){
         Send-ArduinoCommand $arduino "01$mouseDelay"
     }
-    if($mousemoveDelay){
+    if($MousemoveDelay){
         Send-ArduinoCommand $arduino "02$mousemoveDelay"
     }
-    if($mousemoveOffset){
+    if($MousemoveOffset){
         Send-ArduinoCommand $arduino "03$mousemoveOffset"
     }
-    if($keyRandomDelay){
-        $rnd = Get-Random -Minimum $keyRandomDelay[0] -Maximum $keyRandomDelay[1]
-        Send-ArduinoCommand $arduino "04$rnd"
+    if($KeyRandomDelay){
+        Send-ArduinoCommand $arduino "04$keyRandomDelay"
     }
     if($MouseRandomDelay){
-        $rnd = Get-Random -Minimum $MouseRandomDelay[0] -Maximum $MouseRandomDelay[1]
-        Send-ArduinoCommand $arduino "05$rnd"
+        Send-ArduinoCommand $arduino "05$MouseRandomDelay"
     }
 
     [arduino]::Close($arduino)

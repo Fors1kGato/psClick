@@ -54,8 +54,8 @@ function Send-ArduinoCommand
         [Parameter(Mandatory, Position=1)]
         [String]$Command 
         ,
-        [Parameter(Mandatory, Position=2)]
-        [UInt16]$Wait
+        [Parameter(Position=2)]
+        [UInt16]$Wait = 5000
     )
     if(![arduino]::SendCommand($Arduino, $Command, $Wait)){
         [void][arduino]::Close($Arduino)

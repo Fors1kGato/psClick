@@ -1,19 +1,24 @@
 ﻿function Set-ArduinoSetting
 {
     #.COMPONENT
-    #1.1
+    #1.2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
+        [parameter(ParameterSetName = "cus")]
         [UInt16]$MouseDelay
         ,
+        [parameter(ParameterSetName = "cus")]
         [UInt16]$MouseMoveDelay
         ,
         [ValidateRange(1, 127)]
+        [parameter(ParameterSetName = "cus")]
         [UInt16]$MouseMoveOffset
         ,
+        [parameter(ParameterSetName = "cus")]
         [UInt16]$KeyRandomDelay
         ,
+        [parameter(ParameterSetName = "cus")]
         [UInt16]$MouseRandomDelay
         ,
         [parameter(Mandatory,ParameterSetName = "def")]
@@ -48,7 +53,7 @@
         Send-ArduinoCommand $arduino "05$MouseRandomDelay"
     }
 
-    [arduino]::Close($arduino)
+    [Void][arduino]::Close($arduino)
 }
 
 function Send-ArduinoCommand

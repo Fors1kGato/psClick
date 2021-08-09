@@ -64,7 +64,7 @@ function Send-Text
 function Type-Text
 {
     #.COMPONENT
-    #1.2
+    #1.3
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -82,6 +82,7 @@ function Type-Text
 
     $text = $text-replace"(`r`n|`r)","`n"
     $chars = $Text.ToCharArray()
+    $ruCh = 192..255+168+184
     $rus = [w32KeyBoard]::LoadKeyboardLayout("00000419", 0)
     $eng = [w32KeyBoard]::LoadKeyboardLayout("00000409", 0)
     $window = [w32Windos]::GetForegroundWindow()
@@ -95,43 +96,28 @@ function Type-Text
     }
 
     ForEach($char in $chars){
-        if([Text.Encoding]::Default.GetBytes($char) -ge 184){
+        $byte = [Text.Encoding]::Default.GetBytes($char)[0]
+        if($byte -in $ruCh){
             [Void][w32]::PostMessage($window, 0x0050, 0x0001, $rus)
             $vk = [w32KeyBoard]::VkKeyScanEx($char, $rus)
+            $cr = $vk
+            if(!($vk -band 256)){$cr+=32}
+            if($char-ceq"ё"){$cr=96}elseif($char-ceq"Ё"){$cr=126}
         }
         else{
             [Void][w32]::PostMessage($window, 0x0050, 0x0001, $eng)
             $vk = [w32KeyBoard]::VkKeyScanEx($char, $eng)
+            if($Hardware){$cr = $byte}
         }
 
         if($Hardware){
-            if($vk -eq 525){$vk=176}
-            if($ShiftEOL -and $vk -eq 176){
+            if($ShiftEOL -and $vk -eq 525){
                 Send-ArduinoCommand $arduino "3129" $Wait
-
-                Send-ArduinoCommand $arduino "3$vk" $Wait
-                Send-ArduinoCommand $arduino "4$vk" $Wait
-
+                Send-ArduinoCommand $arduino "1176" $Wait
                 Send-ArduinoCommand $arduino "4129" $Wait
             }
-            elseif($vk -band 256){
-                if($char -notmatch "\p{L}"){
-                    Send-ArduinoCommand $arduino "3129" $Wait
-
-                    Send-ArduinoCommand $arduino "3$vk" $Wait
-                    Send-ArduinoCommand $arduino "4$vk" $Wait
-
-                    Send-ArduinoCommand $arduino "4129" $Wait
-                }
-                else{
-                    Send-ArduinoCommand $arduino "3$vk" $Wait
-                    Send-ArduinoCommand $arduino "4$vk" $Wait
-                }
-            }
             else{
-                if($char -match "\p{L}"){$vk+=32}
-                Send-ArduinoCommand $arduino "3$vk" $Wait
-                Send-ArduinoCommand $arduino "4$vk" $Wait
+                Send-ArduinoCommand $arduino "1$cr" $Wait
             }
         }
         else{
@@ -148,5 +134,5 @@ function Type-Text
         }
         Sleep -m $Delay
     }
-    if($Hardware){[arduino]::Close($arduino)}
+    if($Hardware){[Void][arduino]::Close($arduino)}
 }

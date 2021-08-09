@@ -271,61 +271,68 @@ function Get-CursorPosition
 function Drag-WithMouse
 {
     #.COMPONENT
-    #1
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
+    [CmdletBinding(DefaultParameterSetName = '__AllParameterSets')]
     Param(
-        [parameter(Mandatory=$true)]
+        [parameter(Mandatory, Position = 0)]
         $From
         ,
-        [parameter(Mandatory=$true)]
+        [parameter(Mandatory, Position = 1)]
         $To
         ,
+        [parameter(ParameterSetName = "Hardware")]
+        [parameter(Mandatory, ParameterSetName = "Window")]
         [IntPtr]$Handle
         ,
+        [parameter(ParameterSetName = "Window")]
         [Switch]$Event
         ,
-        [Int]$Delay = 64
+        [parameter(Mandatory, ParameterSetName = "Hardware")]
+        [Switch]$Hardware
+        ,
+        [UInt16]$Delay = 64
+        ,
+        [parameter(ParameterSetName = "Hardware")]
+        [UInt16]$Wait = 5000
     )
-    #region Params Validating
     if($From -isnot [Drawing.Point]){
         try{$From = [Drawing.Point]::new.Invoke($From)}catch{throw $_}
     }
     if($To -isnot [Drawing.Point]){
         try{$To = [Drawing.Point]::new.Invoke($To)}catch{throw $_}
     }
-    if($event -and !$handle){
-        Write-Error "-Event: Требуется указать handle окна";return
-    }
-    #endregion
-    #region Kleft 
     if(!$event){
-        $button = "left"
         if($Handle){
-            $pt = [Drawing.Point]::new($From.X, $From[1])
-            [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$pt, 1)
-            $to.X  , $to.Y   = ($pt[0].X+$to.X-$from.X), ($pt[0].Y+$to.Y-$from.Y)
-            $from.X, $from.Y = $pt[0].X, $pt[0].Y
+            [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$from, 1)
+            [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$to  , 1)
         }
-        Move-Cursor $from
-        [w32Mouse]::mouse_event([w32Mouse+MouseEventFlags]::MOUSEEVENTF_LEFTDOWN, 0,0,0,0)
+        if($Hardware){
+            Click-Mouse $from -Hardware -Down 
+            Sleep -m $Delay
+            Click-Mouse $to -Hardware -Up
+        }
+        else{
+            Move-Cursor $from
+            [w32Mouse]::mouse_event([w32Mouse+MouseEventFlags]::MOUSEEVENTF_LEFTDOWN, 0,0,0,0)
 
-        Move-Cursor $to
-        sleep -m $Delay
-        [w32Mouse]::mouse_event([w32Mouse+MouseEventFlags]::MOUSEEVENTF_LEFTUP,   0,0,0,0)
+            Move-Cursor $to
+            Sleep -m $Delay
+            [w32Mouse]::mouse_event([w32Mouse+MouseEventFlags]::MOUSEEVENTF_LEFTUP,   0,0,0,0)
+        }
     }
-    #endregion
-    #region left 
     else{   
         if ([w32]::PostMessage($handle, 0x0201, $wParams, ($From.X + 0x10000 * $From.Y))){
             [w32]::PostMessage($handle, 0x0200, $wParams, ($to.X   + 0x10000 * $to.Y  ))|Out-Null
+            Sleep -m $Delay
             [w32]::PostMessage($handle, 0x0202, $wParams, ($to.X   + 0x10000 * $to.Y  ))|Out-Null 
         }
         else{
             [w32]::SendMessage($handle, 0x0201, $wParams, ($From.X + 0x10000 * $From.Y))|Out-Null
             [w32]::SendMessage($handle, 0x0200, $wParams, ($to.X   + 0x10000 * $to.Y  ))|Out-Null
+            Sleep -m $Delay
             [w32]::SendMessage($handle, 0x0202, $wParams, ($to.X   + 0x10000 * $to.Y  ))|Out-Null
         }
     }
-    #endregion
 }

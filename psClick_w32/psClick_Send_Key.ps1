@@ -31,9 +31,9 @@
         [parameter(ParameterSetName = "Event_Down")]
         [UInt16]$Delay = 32
         ,
-        [parameter(Mandatory,ParameterSetName = "Hardware_Click")]
-        [parameter(Mandatory,ParameterSetName = "Hardware_Down")]
-        [parameter(Mandatory,ParameterSetName = "Hardware_Up")]
+        [parameter(ParameterSetName = "Hardware_Click")]
+        [parameter(ParameterSetName = "Hardware_Down")]
+        [parameter(ParameterSetName = "Hardware_Up")]
         [UInt16]$Wait = 5000
     )
     DynamicParam {

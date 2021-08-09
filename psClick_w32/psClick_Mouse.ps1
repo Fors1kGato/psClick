@@ -82,39 +82,74 @@ function Send-ArduinoCommand
 function Scroll-Mouse
 {
     #.COMPONENT
-    #1.1
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [Parameter(Mandatory, Position=0)]
+        [Parameter(Mandatory, Position=0, ParameterSetName = "SysUP")]
+        [Parameter(Mandatory, Position=0, ParameterSetName = "SysDown")]
+        [Parameter(Mandatory, Position=0, ParameterSetName = "HandleDown")]
+        [Parameter(Mandatory, Position=0, ParameterSetName = "HandleUP")]
+        [Parameter(Mandatory, Position=0, ParameterSetName = "HardwareDown")]
+        [Parameter(Mandatory, Position=0, ParameterSetName = "HardwareUP")]
         $Position
         ,
+        [Parameter(Mandatory, ParameterSetName = "HandleDown")]
+        [Parameter(Mandatory, ParameterSetName = "HandleUP")]
         [IntPtr]$Handle
         ,
-        [Parameter(Position=2)]
-        [int]$Steps=1
+        [Parameter(Position=1)]
+        [int]$Steps = 1
         ,
+        [Parameter(ParameterSetName = "HandleDown")]
+        [Parameter(ParameterSetName = "HandleUP")]
         [Switch]$Abs
         ,
+        [Parameter(Mandatory, ParameterSetName = "SysUP")]
+        [Parameter(Mandatory, ParameterSetName = "HandleUP")]
+        [Parameter(Mandatory, ParameterSetName = "HardwareUP")]
         [Switch]$Up
         ,
+        [Parameter(Mandatory, ParameterSetName = "SysDown")]
+        [Parameter(Mandatory, ParameterSetName = "HardwareDown")]
+        [Parameter(Mandatory, ParameterSetName = "HandleDown")]
         [Switch]$Down
+        ,
+        [Parameter(Mandatory, ParameterSetName = "HardwareDown")]
+        [Parameter(Mandatory, ParameterSetName = "HardwareUP")]
+        [Switch]$Hardware
+        ,
+        [Parameter(ParameterSetName = "HardwareDown")]
+        [Parameter(ParameterSetName = "HardwareUP")]
+        [UInt16]$Wait = 5000
     )
-    $MOUSEEVENTF_WHEEL = 0x0800 
-    $WM_MOUSEWHEEL     = 0x020A 
+    $WM_MOUSEWHEEL = 0x020A 
     if($Position -isnot [Drawing.Point]){
         try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
     }
-    if(!$Down -and !$Up){Write-Error "Укажите направление: -Down или -Up";return}
     if($Down){$Steps = -$Steps}
 
     if($Handle){
-        if($Abs){[void][w32Windos]::MapWindowPoints($handle, [IntPtr]::Zero, [ref]$Position, 1)}
-        [void][w32]::SendMessage($handle, $WM_MOUSEWHEEL, (120 * $Steps -shl 16), ($Position.x + ($Position.y -shl 16)))
+        if($Abs){[Void][w32Windos]::MapWindowPoints($handle, [IntPtr]::Zero, [ref]$Position, 1)}
+        [Void][w32]::SendMessage($handle, $WM_MOUSEWHEEL, (120 * $Steps -shl 16), ($Position.x + ($Position.y -shl 16)))
     }
     else{
-        Move-Cursor $Position
-        [w32Mouse]::mouse_event($MOUSEEVENTF_WHEEL, 0, 0, (120 * $Steps), 0)
+        if($Hardware){
+            Move-Cursor $Position -Hardware
+            $portName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.
+                        Properties|where{$_.name -like  '*USB*'}).value)[0].replace("COM","")
+            $arduino = [arduino]::Open($PortName)
+            $error = "Не удалось открыть порт. Err code: $arduino"
+            if([int]$arduino -le 0){throw $error}
+
+            Send-ArduinoCommand $arduino "9$Steps" $Wait
+
+            [Void][arduino]::Close($arduino)
+        }
+        else{
+            Move-Cursor $Position
+            [w32Mouse]::mouse_event([w32Mouse+MouseEventFlags]::MOUSEEVENTF_WHEEL, 0, 0, (120 * $Steps), 0)
+        }
     }
 }
 

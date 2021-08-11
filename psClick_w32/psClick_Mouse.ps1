@@ -271,7 +271,7 @@ function Get-CursorPosition
 function Drag-WithMouse
 {
     #.COMPONENT
-    #2
+    #2.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = '__AllParameterSets')]
@@ -308,30 +308,21 @@ function Drag-WithMouse
             [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$from, 1)
             [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$to  , 1)
         }
-        if($Hardware){
-            Click-Mouse $from -Hardware -Down 
-            Sleep -m $Delay
-            Click-Mouse $to -Hardware -Up
-        }
-        else{
-            Move-Cursor $from
-            [w32Mouse]::mouse_event([w32Mouse+MouseEventFlags]::MOUSEEVENTF_LEFTDOWN, 0,0,0,0)
-
-            Move-Cursor $to
-            Sleep -m $Delay
-            [w32Mouse]::mouse_event([w32Mouse+MouseEventFlags]::MOUSEEVENTF_LEFTUP,   0,0,0,0)
-        }
+        Click-Mouse $from -Hardware:$Hardware -Down 
+        Sleep -m $Delay
+        Click-Mouse $to -Hardware:$Hardware -Up
     }
     else{   
         if ([w32]::PostMessage($handle, 0x0201, $wParams, ($From.X + 0x10000 * $From.Y))){
-            [w32]::PostMessage($handle, 0x0200, $wParams, ($to.X   + 0x10000 * $to.Y  ))|Out-Null
             Sleep -m $Delay
+            [w32]::PostMessage($handle, 0x0200, $wParams, ($to.X   + 0x10000 * $to.Y  ))|Out-Null
+            
             [w32]::PostMessage($handle, 0x0202, $wParams, ($to.X   + 0x10000 * $to.Y  ))|Out-Null 
         }
         else{
             [w32]::SendMessage($handle, 0x0201, $wParams, ($From.X + 0x10000 * $From.Y))|Out-Null
-            [w32]::SendMessage($handle, 0x0200, $wParams, ($to.X   + 0x10000 * $to.Y  ))|Out-Null
             Sleep -m $Delay
+            [w32]::SendMessage($handle, 0x0200, $wParams, ($to.X   + 0x10000 * $to.Y  ))|Out-Null
             [w32]::SendMessage($handle, 0x0202, $wParams, ($to.X   + 0x10000 * $to.Y  ))|Out-Null
         }
     }

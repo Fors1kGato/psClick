@@ -1,7 +1,7 @@
 ﻿function Click-Mouse
 {
     #.COMPONENT
-    #1.5
+    #1.6
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -30,6 +30,8 @@
         [String[]]$With = [string[]]::new(0)
         ,
         [UInt16]$Wait = 5000
+        ,
+        [UInt16]$DelayUp = 64
     )
     #region Params Validating 
     if($Position -isnot [Drawing.Point]){
@@ -93,7 +95,7 @@
             $with|%{[w32KeyBoard]::keybd_event($w.$_, 0, 0x0000, 0)}
 
             if($Down){$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN"}
-            elseif($Up){$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP"}
+            elseif($Up){Sleep -m $DelayUP;$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP"}
             else{$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN" -bor [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP"}
         
             1..$count|%{[w32Mouse]::mouse_event($dwFlags,0,0,0,0)}

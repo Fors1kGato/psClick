@@ -1,4 +1,14 @@
-﻿function Get-Bytes{
+﻿function Stop-Script{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+    )
+    Break (New-Guid)
+}
+
+function Get-Bytes{
     #.COMPONENT
     #1
     #.SYNOPSIS
@@ -31,4 +41,34 @@ function Get-String{
     $codaPage = [System.Text.Encoding]::$Encoding
     if($Encoding-eq"ANSI"){$codaPage = [System.Text.Encoding]::GetEncoding('windows-1251')}
     $codaPage.GetString($Bytes)
+}
+
+function Change-Location{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    [alias("cl")]Param(
+        $path
+    )
+    cd $path
+    [Environment]::CurrentDirectory = $path
+}
+
+function Invoke-Ternary{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    [alias('??')]PARAM(
+    [parameter(ValueFromPipeline, Mandatory)]
+    [Boolean]$bool,
+    [parameter(Position = 0,Mandatory=$true)]
+    $trueV,
+    [parameter(Position = 1,Mandatory=$true)]
+    [ValidatePattern(":")]$s,
+    [parameter(Position = 2,Mandatory=$true)]
+    $falseV
+    )if($bool){$val=$trueV}else{$val=$falseV}
+    if($val-is[scriptblock]){&$val}else{$val}
 }

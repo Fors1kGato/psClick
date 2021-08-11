@@ -5,7 +5,7 @@
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
     )
-    Break (New-Guid)
+    Break "ThisScript!"
 }
 
 function Get-Bytes{

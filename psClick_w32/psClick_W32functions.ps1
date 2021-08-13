@@ -5,10 +5,13 @@
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
+        [Parameter(Mandatory)]
         [IntPtr]$Address
         ,
+        [Parameter(Mandatory)]
         [Diagnostics.Process]$Process
         ,
+        [Parameter(Mandatory)]
         $Data
     )
 
@@ -37,17 +40,17 @@ function Read-ProcessMemory
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = 'Type')]
     Param(
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory, Position = 0)]
         [IntPtr]$Address
         ,
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory, Position = 1)]
         [Diagnostics.Process]$Process
         ,
-        [Parameter(Mandatory, ParameterSetName = "Type")]
+        [Parameter(Mandatory, Position = 2, ParameterSetName = "Type")]
         [ValidateSet('Int16','Int32','Int64','UInt16','UInt32','UInt64','Single','Double')]
         [String]$Read
         ,
-        [Parameter(Mandatory, ParameterSetName = "Size")]
+        [Parameter(Mandatory, Position = 2, ParameterSetName = "Size")]
         [Int]$Size
     )
     if($size){$Data = [byte[]]::new($size)}

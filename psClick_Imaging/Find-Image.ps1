@@ -87,6 +87,9 @@
                 throw "Неверно указана цель поиска"
             }
         }
+        else{
+            $color = $Image
+        }
         $smallBmp = [System.Drawing.Bitmap]::new(1,1)
         $smallBmp.SetPixel(0, 0, ([Drawing.Color]::FromArgb.Invoke([Object[]]$color.RGB)))
         $Accuracy = 100

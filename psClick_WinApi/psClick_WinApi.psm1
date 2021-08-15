@@ -5,19 +5,19 @@
     #Author: Fors1k ; Link: https://psClick.ru
     PARAM(
         [Parameter(Position = 0, Mandatory = $True )]
-        [String]$method
+        [String]$Method
         ,
         [Parameter(Position = 1, Mandatory = $False)]
-        [Object[]]$params = [Object[]]::new(0)
+        [Object[]]$Params = [Object[]]::new(0)
         ,
         [Parameter(Position = 2, Mandatory = $False)]
-        [Type]$return = [Boolean]
+        [Type]$Return = [Boolean]
         ,
         [Parameter(Position = 3, Mandatory = $False)]
-        [String]$dll = 'User32.dll'
+        [String]$Dll = 'User32.dll'
         ,
         [Parameter(Position = 4, Mandatory = $False)]
-        [Int]$charSet = 4
+        [Int]$Charset = 4
         ,
         [Switch]$Override
         ,
@@ -80,6 +80,7 @@ function New-Struct{
         [Switch]$AutoSize
     )
     PROCESS{
+        $charSet = 'Auto'
         if($AutoSize -and !$New){
             Write-Error "-AutoSize: Expected -New with -AutoSize";return
         }

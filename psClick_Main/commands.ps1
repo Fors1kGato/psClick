@@ -23,7 +23,7 @@ function Get-Bytes{
     )
     $codaPage = [System.Text.Encoding]::$Encoding
     if($Encoding-eq"ANSI"){$codaPage = [System.Text.Encoding]::GetEncoding('windows-1251')}
-    $codaPage.GetBytes($text)
+    ,$codaPage.GetBytes($text)
 }
 
 function Get-String{

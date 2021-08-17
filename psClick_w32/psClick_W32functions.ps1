@@ -67,7 +67,7 @@ function Read-ProcessMemory
         )
         $err = [Runtime.InteropServices.Marshal]::GetLastWin32Error()
         if(!$CallResult){throw "Read process memory error: $err"}
-        if(!$size){[BitConverter]::"To$Read"($Data,0)}else{$Data}
+        if(!$size){[BitConverter]::"To$Read"($Data,0)}else{,$Data}
     }
     else{
         $memInfo = [w32Memory+MEMORY_BASIC_INFORMATION]::new()
@@ -107,4 +107,43 @@ function Read-ProcessMemory
         }
         $string.ToString()
     }
+}
+
+function Get-ProcessModules
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Cirus, Fors1k ; Link: https://psClick.ru
+    param(
+        [Parameter(Mandatory)]
+        [Diagnostics.Process]$Process
+    )
+    $TH32CS_SNAPMODULE   = 0x00000008
+    $TH32CS_SNAPMODULE32 = 0x00000010
+
+    $me32 = [w32Memory+MODULEENTRY32]::new()
+    $me32.dwSize = [Runtime.InteropServices.Marshal]::SizeOf($me32)
+
+    $hModuleSnap = [w32Memory]::CreateToolhelp32Snapshot(
+        ($TH32CS_SNAPMODULE -bor $TH32CS_SNAPMODULE32), 
+        $Process.Id
+    )
+    $err = [Runtime.InteropServices.Marshal]::GetLastWin32Error()
+    if(!$hModuleSnap){throw "Creating Tool help 32 Snapshot error: $err"}
+
+    $CallResult = [w32Memory]::Module32First($hModuleSnap, [ref]$me32) 
+    $err = [Runtime.InteropServices.Marshal]::GetLastWin32Error()
+    if(!$CallResult){throw "Getting Module 32 First error: $err"}
+
+    $modules = [Collections.Generic.List[PSCustomObject]]::new()
+
+    $modules.Add([PSCustomObject]@{Name = $me32.szModule;Address = $me32.modBaseAddr;Path = $me32.szExePath})
+
+    while([w32Memory]::Module32Next($hModuleSnap, [ref]$me32)){
+        $modules.Add([PSCustomObject]@{Name = $me32.szModule;Address = $me32.modBaseAddr;Path = $me32.szExePath})    
+    }   
+               
+    [Void][w32]::CloseHandle($hModuleSnap)
+    ,$modules
 }

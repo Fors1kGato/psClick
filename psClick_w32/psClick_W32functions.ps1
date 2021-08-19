@@ -1,22 +1,35 @@
 ﻿function Write-ProcessMemory
 {
     #.COMPONENT
-    #1
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
+    [CmdletBinding(DefaultParameterSetName = '__AllParameterSets')]
     Param(
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory,Position = 0)]
         [IntPtr]$Address
         ,
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory,Position = 1)]
         [Diagnostics.Process]$Process
         ,
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory,Position = 2)]
         $Data
+        ,
+        [Parameter(Mandatory,ParameterSetName = 'Unicode')]
+        [switch]$Unicode
+        ,
+        [Parameter(Mandatory,ParameterSetName = 'Ansi')]
+        [switch]$Ansi
     )
+    if($Data -isnot [String] -and ($Unicode -or $Ansi)){throw "Переданные данные не являются строкой"}
 
     if($Data.GetType() -in [Int16],[Int32],[Int64],[UInt16],[UInt32],[UInt64],[Float],[Double]){
         $Data = [BitConverter]::GetBytes($Data)
+    }
+    elseif ($Data -is [String]){
+        if ($Unicode){$Data = [Text.Encoding]::Unicode.GetBytes("$Data`0`0")}
+        elseif($Ansi){$Data = [Text.Encoding]::GetEncoding('windows-1251').GetBytes("$Data`0")}
+        else{throw "Укажите кодировку"}
     }
     if($Data -isnot [Byte[]]){throw "Incorrect data type"}
     [UInt32]$BytesWritten = 0
@@ -35,7 +48,7 @@
 function Read-ProcessMemory
 {
     #.COMPONENT
-    #2
+    #3
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = 'Type')]
@@ -52,8 +65,20 @@ function Read-ProcessMemory
         ,
         [Parameter(Mandatory, Position = 2, ParameterSetName = "Size")]
         [Int]$Size
+        ,
+        [String]$Module
     )
     [UInt32]$BytesRead = 0
+
+    if($module){
+        $processModules = Get-ProcessModules $Process
+        $processModule  = ($processModules|Where-Object{$_.Name -ceq $module})-as $processModules.GetType()
+        if($processModule.count -ne 1){
+            throw "Ошибка поиска модуля. Модулей [$module] найдено: $($processModule.count)"   
+        }
+        [IntPtr]$Address= [Int64]$Address + [Int64]$processModule.Address
+    }
+
     if($Read -notin ('ANSI', 'Unicode')){
         if($size){$Data = [byte[]]::new($size)}
         else{$Data = [byte[]]::new([Runtime.InteropServices.Marshal]::SizeOf([type]$Read))}
@@ -79,7 +104,7 @@ function Read-ProcessMemory
             [Runtime.InteropServices.Marshal]::SizeOf($memInfo)
         )
         $err = [Runtime.InteropServices.Marshal]::GetLastWin32Error()
-        if(!$queryResult){throw "Read process memory error: $err"}
+        if(!$queryResult){throw "Virtual Query error: $err"}
 
         [int]$size = $memInfo.RegionSize - ([int64]$Address - [int64]$memInfo.BaseAddress)
         $string = [System.Text.StringBuilder]::new($size)
@@ -127,10 +152,10 @@ function Get-ProcessModules
 
     $modules = [Collections.Generic.List[PSCustomObject]]::new()
 
-    $modules.Add([PSCustomObject]@{Name = $me32.szModule;Address = $me32.modBaseAddr;Path = $me32.szExePath})
+    $modules.Add([PSCustomObject]@{Name = [string]$me32.szModule;Address = [IntPtr]$me32.modBaseAddr;Path = [string]$me32.szExePath})
 
     while([w32Memory]::Module32Next($hModuleSnap, [ref]$me32)){
-        $modules.Add([PSCustomObject]@{Name = $me32.szModule;Address = $me32.modBaseAddr;Path = $me32.szExePath})    
+        $modules.Add([PSCustomObject]@{Name = [string]$me32.szModule;Address = [IntPtr]$me32.modBaseAddr;Path = [string]$me32.szExePath})    
     }   
                
     [Void][w32]::CloseHandle($hModuleSnap)

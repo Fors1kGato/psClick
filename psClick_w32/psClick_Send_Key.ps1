@@ -1,7 +1,7 @@
 ﻿function Send-Key
 {
     #.COMPONENT
-    #2.2
+    #2.3
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = '__AllParameterSets')]
@@ -34,7 +34,9 @@
         [parameter(ParameterSetName = "Hardware_Click")]
         [parameter(ParameterSetName = "Hardware_Down")]
         [parameter(ParameterSetName = "Hardware_Up")]
-        [UInt16]$Wait = 5000
+        [UInt16]$Timeout = 5000
+        ,
+        [UInt16]$Sleep
     )
     DynamicParam {
         $attribute = [Management.Automation.ParameterAttribute]::new()
@@ -193,5 +195,6 @@
             }
         }
         #endregion
+        Sleep -m $Sleep
     }
 }

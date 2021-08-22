@@ -1,7 +1,7 @@
 ﻿function Send-Key
 {
     #.COMPONENT
-    #2.1
+    #2.2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = '__AllParameterSets')]
@@ -168,11 +168,11 @@
             if($Down){
                 Start-ThreadJob -Name "$key`_Down_Event" {
                     while($true){
-                        if ([w32]::PostMessage([IntPtr]$args[2] ,0x0101, [Windows.Forms.Keys]::[string]$args[1], 0)){
+                        if ([w32]::PostMessage([IntPtr]$args[2] ,0x0100, [Windows.Forms.Keys]::[string]$args[1], 0)){
                             #[w32]::PostMessage($handle ,0x0101, [Windows.Forms.Keys]::[string]$args[1], 0)|Out-Null 
                         }
                         else{
-                            [w32]::SendMessage([IntPtr]$args[2] ,0x0101, [Windows.Forms.Keys]::[string]$args[1], 0)|Out-Null
+                            [w32]::SendMessage([IntPtr]$args[2] ,0x0100, [Windows.Forms.Keys]::[string]$args[1], 0)|Out-Null
                             #[w32]::SendMessage($handle ,0x0101, [Windows.Forms.Keys]::[string]$args[1], 0)|Out-Null
                         }
                         sleep -m $args[0]
@@ -183,11 +183,11 @@
                 Remove-Job -Name "$key`_Down_Event" -Force
             }
             else{  
-                if ([w32]::PostMessage($handle ,0x0101, [Windows.Forms.Keys]::$key, 0)){
+                if ([w32]::PostMessage($handle ,0x0100, [Windows.Forms.Keys]::$key, 0)){
                     #[w32]::PostMessage($handle ,0x0101, [Windows.Forms.Keys]::$key, 0)|Out-Null 
                 }
                 else{
-                    [w32]::SendMessage($handle ,0x0101, [Windows.Forms.Keys]::$key, 0)|Out-Null
+                    [w32]::SendMessage($handle ,0x0100, [Windows.Forms.Keys]::$key, 0)|Out-Null
                     #[w32]::SendMessage($handle ,0x0101, [Windows.Forms.Keys]::$key, 0)|Out-Null
                 }
             }

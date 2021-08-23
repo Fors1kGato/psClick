@@ -34,7 +34,7 @@
         [parameter(ParameterSetName = "Hardware_Click")]
         [parameter(ParameterSetName = "Hardware_Down")]
         [parameter(ParameterSetName = "Hardware_Up")]
-        [UInt16]$Timeout = 5000
+        [UInt16]$Wait = 5000
         ,
         [UInt16]$Sleep
     )

@@ -1,11 +1,11 @@
 ﻿function Pause-Script{
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Cirus, Fors1k ; Link: https://psClick.ru
     Param(
         [parameter(Mandatory)]
-        [UInt16]$timeout
+        [UInt64]$Timeout
     )
     $time = (Get-DAte).AddMilliseconds($timeout)
     while((Get-Date) -lt $time){ 

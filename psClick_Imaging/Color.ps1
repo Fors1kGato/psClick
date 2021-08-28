@@ -260,6 +260,7 @@ function Show-Hint
 
     $brush = [System.Drawing.SolidBrush]::new([Drawing.Color]::FromArgb.Invoke([Object[]]$color.RGB))
     $Graphics = [System.Drawing.Graphics]::FromHwnd($objForm.Handle)
+    $Graphics.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::SingleBitPerPixelGridFit
 
     $time = (Get-DAte).AddMilliseconds($Duration)
 

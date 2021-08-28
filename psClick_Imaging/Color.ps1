@@ -231,3 +231,47 @@ function Get-Image
         }
     }
 }
+
+function Show-Hint
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    param(
+        [string]$Text
+        ,
+        [uint32]$Duration = 3000
+        ,
+        [color]$Color = [color](0, 0, 0)
+    )
+    $objForm = [Windows.Forms.Form]::new()
+
+    $objForm.AutoScaleMode = 0
+    $objForm.Text="psClickHint"
+
+    $objForm.Topmost = $True
+    $objForm.ShowInTaskbar = $false
+    $objForm.FormBorderStyle = "None"
+    $objForm.WindowState = "maximized"
+    $objForm.TransparencyKey = $objForm.BackColor
+
+    [void] $objForm.Show()
+
+    $brush = [System.Drawing.SolidBrush]::new([Drawing.Color]::FromArgb.Invoke([Object[]]$color.RGB))
+    $Graphics = [System.Drawing.Graphics]::FromHwnd($objForm.Handle)
+
+    $time = (Get-DAte).AddMilliseconds($Duration)
+
+    while((Get-Date) -lt $time){
+        $Graphics.DrawString(
+            $text, 
+            [Drawing.Font]::new("Fixedsys", 30),
+            $brush,
+            207, 30
+        )
+        sleep -m 1
+    }
+    $objForm.Close()
+    $Graphics.Dispose()
+}

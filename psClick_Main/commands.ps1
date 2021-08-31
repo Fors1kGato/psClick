@@ -1,4 +1,36 @@
-﻿function Pause-Script{
+﻿function Pausable
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        $key = "Escape"
+    )
+    if(Get-EventSubscriber -ea 0 -SourceIdentifier pausable){return}
+    $timer = [System.Timers.Timer]::new(100)
+    $mwh = (Get-Process -id $pid).MainWindowHandle
+    $timerAction = [scriptblock]::Create("
+        
+        `$playPause = {(Get-KeyState $key) -and (Get-ForegroundWindow) -eq $mwh}
+
+        if(.`$playPause){
+            Write-Warning 'Скрипт приостановлен'
+            sleep -m 400
+            while(!(.`$playPause)){
+                sleep -m 4
+            }
+            Write-Host 'Работа скрипта возобновлена' -ForegroundColor DarkGreen
+            sleep -m 400
+        }
+    ")
+
+    Register-ObjectEvent -SourceIdentifier pausable -InputObject $timer -EventName Elapsed -Action $timerAction|Out-Null 
+    Get-KeyState $key|Out-Null
+    $timer.Start()
+}
+
+function Pause-Script{
     #.COMPONENT
     #1.1
     #.SYNOPSIS

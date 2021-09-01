@@ -1,4 +1,39 @@
-﻿function Write-ProcessMemory
+﻿function Get-PointsDistance
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Cirus, Fors1k ; Link: https://psClick.ru
+    Param(
+        [Parameter(Mandatory, Position=0)]
+        $Point1
+        ,
+        [Parameter(Mandatory, Position=1)]
+        $Point2
+        ,
+        [Switch]$Round
+    )
+    if($point1 -isnot [Drawing.Point]){
+        try{$point1 = [Drawing.Point]::new.Invoke($point1)}catch{throw $_}
+    }
+    if($point2 -isnot [Drawing.Point]){
+        try{$point2 = [Drawing.Point]::new.Invoke($point2)}catch{throw $_}
+    }
+    if(!$Round){
+        [math]::Sqrt(
+            [math]::Pow($point1.X - $point2.X, 2) + 
+            [math]::Pow($point1.Y - $point2.Y, 2)
+        )
+    }
+    else{
+        [math]::Round([math]::Sqrt(
+            [math]::Pow($point1.X - $point2.X, 2) + 
+            [math]::Pow($point1.Y - $point2.Y, 2)
+        ))
+    }
+}
+
+function Write-ProcessMemory
 {
     #.COMPONENT
     #2

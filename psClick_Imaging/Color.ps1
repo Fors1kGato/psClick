@@ -235,44 +235,104 @@ function Get-Image
 function Show-Hint
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     param(
-        [string]$Text
+        [String]$Text
         ,
-        [uint32]$Duration = 3000
+        [UInt32]$Duration = 3000
         ,
-        [color]$Color = [color](0, 0, 0)
+        [Color]$Color = [color](36, 239, 53)
+        ,
+        $Position = [Drawing.Point]::new(100, 50)
+        ,
+        [UInt16]$Size = 25
+        ,
+        [Switch]$New
     )
-    $objForm = [Windows.Forms.Form]::new()
-
-    $objForm.AutoScaleMode = 0
-    $objForm.Text="psClickHint"
-
-    $objForm.Topmost = $True
-    $objForm.ShowInTaskbar = $false
-    $objForm.FormBorderStyle = "None"
-    $objForm.WindowState = "maximized"
-    $objForm.TransparencyKey = $objForm.BackColor
-
-    [void] $objForm.Show()
-
-    $brush = [System.Drawing.SolidBrush]::new([Drawing.Color]::FromArgb.Invoke([Object[]]$color.RGB))
-    $Graphics = [System.Drawing.Graphics]::FromHwnd($objForm.Handle)
-    $Graphics.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::SingleBitPerPixelGridFit
-
-    $time = (Get-DAte).AddMilliseconds($Duration)
-
-    while((Get-Date) -lt $time){
-        $Graphics.DrawString(
-            $text, 
-            [Drawing.Font]::new("Fixedsys", 30),
-            $brush,
-            207, 30
-        )
-        sleep -m 1
+    if($Position -isnot [Drawing.Point]){
+        try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
     }
-    $objForm.Close()
-    $Graphics.Dispose()
+    <#
+    if(!$new){
+        $h = (Find-Window -Title "psClickHint").handle
+        if($h){$h|%{[void][w32]::SendMessage($_, 0x0112, 0xF060, 0)}}
+    }
+    #>
+    $fPath = (Convert-Path "$psscriptroot\Jura.otf")
+    $fColor = [Drawing.Color]::FromArgb.Invoke([Object[]]$color.RGB)
+    $handle = 
+    $hint = {
+        param(
+            $Text,
+            $Duration,
+            $fColor,
+            $Position,
+            $Size,
+            $fPath,
+            [bool]$New
+        )
+        $w = (Find-Window -Title "psClickHint").handle[0]
+        if(!$w){$new = $true}
+        if($New){
+            $f = [System.Windows.Forms.Form]::new()
+            $f.ShowInTaskbar = $false
+            $f.FormBorderStyle = "none"
+            $f.TransparencyKey = $f.BackColor
+            $f.TopMost = $true
+            $f.Size = [System.Drawing.Size]::Empty
+            $f.AutoSize = $true
+            $f.StartPosition = 0
+            $f.Text = "psClickHint"
+            $f.Location = $Position
+            $f.Opacity = 0.82
+
+            $fc = [System.Drawing.Text.PrivateFontCollection]::new()
+            $fc.AddFontFile($fPath)
+
+            $lb = [System.Windows.Forms.Label]::new()
+            $lb.Size = [Drawing.Size]::Empty
+            $lb.BackColor = [Drawing.Color]::FromArgb(255, 1, 36, 86)
+            $lb.AutoSize = $true
+            $lb.BorderStyle = [System.Windows.Forms.BorderStyle]::Fixed3D
+            $lb.Font = [Drawing.Font]::new($fc.Families[0], $size, [System.Drawing.FontStyle]::Bold)
+            $lb.ForeColor = $fColor
+            $lb.Text = $Text
+            $lb.Parent = $f
+
+            $tb = [Windows.Forms.TextBox]@{
+                Location = [Drawing.point]::Empty
+                Size = [Drawing.Size]::Empty
+                Parent = $f
+            }
+
+            $timer = [Windows.Forms.Timer]::new()
+            $timer.Interval = $Duration
+            $timer.add_tick({ $f.Close() })
+            $timer.Start()
+
+            $tb.Add_TextChanged({
+                $lb.Text = $tb.Text
+                $f.TopMost = $true
+                $timer.Stop()
+                $timer.Start()
+            })
+            $f.Add_Shown({ $f.TopMost = $true })
+            $f.Add_Closed({ $timer.Stop() })
+
+            #$f.Visible = $false
+            $f.ShowDialog()|out-null
+        }
+        else{
+            $h = Get-ChildWindows -Handle $w|where wClass -match "EDIT"
+            $send = Invoke-WinApi SendMessage(
+                $h.wHandle,
+                0x000C,
+                0,
+                $text
+            )
+        }
+    }
+    Start-ThreadJob $hint -ArgumentList ($Text,$Duration,$fColor,$Position,$Size,$fPath,$New) -Name psclickhint -StreamingHost $host|out-null
 }

@@ -235,7 +235,7 @@ function Get-Image
 function Show-Hint
 {
     #.COMPONENT
-    #1.1
+    #1.2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     param(
@@ -243,13 +243,15 @@ function Show-Hint
         ,
         [UInt32]$Duration = 3000
         ,
-        [Color]$Color = [color](36, 239, 53)
+        [Color]$Color = [color](0, 255, 255)
         ,
         $Position = [Drawing.Point]::new(100, 50)
         ,
         [UInt16]$Size = 25
         ,
         [Switch]$New
+        ,
+        [Switch]$Transparent
     )
     if($Position -isnot [Drawing.Point]){
         try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
@@ -271,11 +273,12 @@ function Show-Hint
             $Position,
             $Size,
             $fPath,
-            [bool]$New
+            [bool]$New,
+            [bool]$Transparent
         )
         $w = (Find-Window -Title "psClickHint").handle[0]
         if(!$w){$new = $true}
-        if($New){
+        if($New -and $Transparent){
             $f = [System.Windows.Forms.Form]::new()
             $f.ShowInTaskbar = $false
             $f.FormBorderStyle = "none"
@@ -293,6 +296,7 @@ function Show-Hint
 
             $lb = [System.Windows.Forms.Label]::new()
             $lb.Size = [Drawing.Size]::Empty
+            $lb.Location = [System.Drawing.Point]::Empty
             $lb.BackColor = [Drawing.Color]::FromArgb(255, 1, 36, 86)
             $lb.AutoSize = $true
             $lb.BorderStyle = [System.Windows.Forms.BorderStyle]::Fixed3D
@@ -324,8 +328,74 @@ function Show-Hint
             #$f.Visible = $false
             $f.ShowDialog()|out-null
         }
+        elseif($New -and !$Transparent){
+            $f = [System.Windows.Forms.Form]::new()
+            $f.ShowInTaskbar = $false
+            $f.FormBorderStyle = "none"
+            $f.TransparencyKey = $f.BackColor
+            $f.TopMost = $true
+            $f.Size = [System.Drawing.Size]::Empty
+            $f.AutoSize = $true
+            $f.StartPosition = 0
+            $f.Text = "psClickHint"
+            $f.Location = $Position
+            $f.Opacity = 0.82
+
+            $fc = [System.Drawing.Text.PrivateFontCollection]::new()
+            $fc.AddFontFile($fPath)
+            $font = [Drawing.Font]::new($fc.Families[0], $size, [System.Drawing.FontStyle]::Bold)
+
+            $lb = [System.Windows.Forms.Label]::new()
+            $lb.Size = [Drawing.Size]::Empty
+            $lb.Location = [System.Drawing.Point]::empty
+            $lb.BackColor = [Drawing.Color]::FromArgb(255, 1, 36, 86)
+            $lb.AutoSize = $true
+            $lb.Font = $font
+            $lb.Text = $Text
+
+            $tb1 = [Windows.Forms.TextBox]@{
+                Location = [Drawing.point]::Empty
+                Size = [Drawing.Size]::Empty
+                Parent = $f
+            }
+
+            $tb = [Windows.Forms.TextBox]::new()
+            $tb.Location = [Drawing.point]::Empty
+            $tb.Size = [Drawing.Size]::Empty
+            $tb.BackColor = [Drawing.Color]::FromArgb(255,1, 36, 86)
+            $tb.BorderStyle = [System.Windows.Forms.BorderStyle]::Fixed3D
+            $tb.ForeColor = $fColor
+            $tb.Multiline = $true
+            $tb.TabStop = $false
+            $tb.ReadOnly = $true
+            $tb.AutoSize = $true
+            $tb.Font = $lb.Font
+            $tb.Text = $lb.Text
+
+            $f.Controls.Add($tb)
+            $f.Controls.Add($lb)
+
+            $timer = [Windows.Forms.Timer]::new()
+            $timer.Interval = $Duration
+            $timer.add_tick({ $f.Close() })
+            $timer.Start()
+
+            $tb1.Add_TextChanged({
+                $tb.Text = $tb1.Text
+                $lb.Text = $tb.Text
+                $tb.Size = $lb.Size
+                $f.TopMost = $true
+                $timer.Stop()
+                $timer.Start()
+            })
+            $f.Add_Shown({ $f.TopMost = $true;$tb.Size = $lb.Size  })
+            $f.Add_Closed({ $timer.Stop() })
+
+            #$f.Visible = $false
+            $f.ShowDialog()|out-null
+        }
         else{
-            $h = Get-ChildWindows -Handle $w|where wClass -match "EDIT"
+            $h = @(Get-ChildWindows -Handle $w|where wClass -match "EDIT")[0]
             $send = Invoke-WinApi SendMessage(
                 $h.wHandle,
                 0x000C,
@@ -334,5 +404,5 @@ function Show-Hint
             )
         }
     }
-    Start-ThreadJob $hint -ArgumentList ($Text,$Duration,$fColor,$Position,$Size,$fPath,$New) -Name psclickhint -StreamingHost $host|out-null
+    Start-ThreadJob $hint -ArgumentList ($Text,$Duration,$fColor,$Position,$Size,$fPath,$New,$Transparent) -Name psclickhint -StreamingHost $host|out-null
 }

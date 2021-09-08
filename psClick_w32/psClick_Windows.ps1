@@ -86,7 +86,7 @@ function Get-ChildWindows
 function Set-WindowText
 {
     #.COMPONENT
-    #1
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -94,8 +94,20 @@ function Set-WindowText
         [IntPtr]$Handle
         ,
         [String]$Text
+        ,
+        [Switch]$ToField
     )
-    [w32Windos]::SetWindowText($Handle, $Text)
+    if($ToField){
+        Invoke-WinApi SendMessage(
+            $Handle,
+            0x000C,
+            0,
+            $Text
+        ) -Override
+    }
+    else{
+        [w32Windos]::SetWindowText($Handle, $Text)
+    }
 }
 
 function Get-WindowText

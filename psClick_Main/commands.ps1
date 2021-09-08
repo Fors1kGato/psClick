@@ -1,4 +1,24 @@
-﻿function Pausable
+﻿function Send-Message
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    param(
+        [IntPtr]$hWnd,
+        $Msg,
+        $wParam = 0,
+        $lParam = 0
+    )
+    Invoke-WinApi SendMessage(
+        $hWnd,
+        $Msg,
+        $wParam,
+        $lParam
+    ) -Override
+}
+
+function Pausable
 {
     #.COMPONENT
     #1

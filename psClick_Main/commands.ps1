@@ -18,6 +18,26 @@
     ) -Override
 }
 
+function Post-Message
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    param(
+        [IntPtr]$hWnd,
+        $Msg,
+        $wParam = 0,
+        $lParam = 0
+    )
+    Invoke-WinApi PostMessage(
+        $hWnd,
+        $Msg,
+        $wParam,
+        $lParam
+    ) -Override
+}
+
 function Pausable
 {
     #.COMPONENT

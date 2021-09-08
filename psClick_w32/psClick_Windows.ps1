@@ -95,7 +95,7 @@ function Set-WindowText
         ,
         [String]$Text
         ,
-        [Switch]$ToField
+        [Switch]$ToControl
     )
     if($ToField){
         Invoke-WinApi SendMessage(

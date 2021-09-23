@@ -106,7 +106,8 @@ function Set-WindowText
         ) -Override
     }
     else{
-        [w32Windos]::SetWindowText($Handle, $Text)
+        [Void][w32Windos]::SetWindowText($Handle, $Text)
+        Invoke-WinApi InvalidateRect($Handle, 0, 1)|Out-Null
     }
 }
 

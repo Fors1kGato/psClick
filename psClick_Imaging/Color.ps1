@@ -326,6 +326,16 @@ function Show-Hint
             $f.Add_Closed({ $timer.Stop() })
 
             #$f.Visible = $false
+            $WS_EX_TRANSPARENT = 0x00000020
+            $WS_EX_LAYERED = 0x00080000
+            $GWL_EXSTYLE   = -20
+
+            Invoke-WinApi SetWindowLongPtr(
+                $f.Handle, 
+                $GWL_EXSTYLE, 
+                ($WS_EX_LAYERED -bor $WS_EX_TRANSPARENT)
+            ) -Override
+
             $f.ShowDialog()|out-null
         }
         elseif($New -and !$Transparent){

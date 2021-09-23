@@ -8,7 +8,7 @@
         [Parameter(Mandatory)]
         [String[]]$Message
     )
-    ."$psscriptroot\psClick_bot.exe" -id="$me" -content="$message" -msg
+    ."$psscriptroot\psClick_bot.exe" -id="$me" -content="$message" -msg|out-null
 }
 
 function Send-TelegramFile
@@ -21,7 +21,7 @@ function Send-TelegramFile
         [Parameter(Mandatory)]
         [String]$Path
     )
-    ."$psscriptroot\psClick_bot.exe" -id="$me" -content="$path"
+    ."$psscriptroot\psClick_bot.exe" -id="$me" -content="$path"|out-null
 }
 
 function Send-TelegramImage
@@ -35,5 +35,5 @@ function Send-TelegramImage
         [Drawing.Bitmap]$Image
     )
     $Image.Save("$env:TEMP\picture.png", [System.Drawing.Imaging.ImageFormat]::Png)
-    ."$psscriptroot\psClick_bot.exe" -id="$me" -content="$env:TEMP\picture.png"
+    ."$psscriptroot\psClick_bot.exe" -id="$me" -content="$env:TEMP\picture.png"|out-null
 }

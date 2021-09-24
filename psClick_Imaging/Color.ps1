@@ -12,15 +12,20 @@
     }
     Color([String]$p){
         $c = [System.Drawing.ColorTranslator]::FromHtml("#$p")
-        $this.HEX=$p
-        $this.RGB=$c.R,$c.G,$c.B
+        $this.HEX = $p
+        $this.RGB = $c.R,$c.G,$c.B
+    }
+    Color([Drawing.Color]$c){
+        $this.RGB = $c.R,$c.G,$c.B
+        $this.HEX = "{0:X2}{1:X2}{2:X2}" -f $c.R,$c.G,$c.B
     }
     [bool] Equals([Object] $obj) {
         return $this.HEX -eq ([Color]$obj).HEX
     }
 }
 
-function New-Color{
+function New-Color
+{
     #.COMPONENT
     #1
     #.SYNOPSIS
@@ -34,16 +39,17 @@ function New-Color{
 function Get-Color
 {
     #.COMPONENT
-    #1.2
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = 'Screen')]
     Param(
         [Parameter(Mandatory, Position=0,ParameterSetName = 'Screen')]
         [Parameter(Mandatory, Position=0,ParameterSetName = 'Window')]
+        [Parameter(Mandatory, Position=0,ParameterSetName = 'Image' )]
         $Position
         ,
-        [Parameter(Mandatory,ParameterSetName = 'Window'  )]
+        [Parameter(Mandatory,ParameterSetName = 'Window')]
         [IntPtr]$Handle = [IntPtr]::Zero
         ,
         [Parameter(ParameterSetName = 'Window')]
@@ -51,16 +57,25 @@ function Get-Color
         ,
         [Parameter(ParameterSetName = 'Screen')]
         [Switch]$Screen
+        ,
+        [Parameter(ParameterSetName = 'Image')]
+        [Drawing.Bitmap]$Image
     )
     if($Position -isnot [Drawing.Point]){
         try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
     }
-    if($Visible){
-        [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$Position, 1)
-        $Handle = [IntPtr]::Zero
+    if($Image){
+        $color = $Image.GetPixel($Position.x, $Position.y)
+        [color]::new($color.R,$color.G,$color.B)
     }
-    $color = [psClickColor]::GetColor($Position.x, $Position.y, $handle)
-    [color]::new($color.R,$color.G,$color.B)
+    else{
+        if($Visible){
+            [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$Position, 1)
+            $Handle = [IntPtr]::Zero
+        }
+        $color = [psClickColor]::GetColor($Position.x, $Position.y, $handle)
+        [color]::new($color.R,$color.G,$color.B)
+    }
 }
 
 function Cut-Image

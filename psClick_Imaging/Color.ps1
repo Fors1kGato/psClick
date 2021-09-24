@@ -27,13 +27,20 @@
 function New-Color
 {
     #.COMPONENT
-    #1
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        $color
+        $Color,
+        [Switch]$Raw
     )
-    [Color]$color
+    $c = [Color]$color
+    if($raw){
+        [Drawing.Color]::FromArgb($c.RGB[0],$c.RGB[1],$c.RGB[2])
+    }
+    else{
+        $c
+    }
 }
 
 function Get-Color
@@ -59,14 +66,15 @@ function Get-Color
         [Switch]$Screen
         ,
         [Parameter(ParameterSetName = 'Image')]
-        [Drawing.Bitmap]$Image
+        [Drawing.Bitmap]$Picture
+        ,
+        [switch]$Raw
     )
     if($Position -isnot [Drawing.Point]){
         try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
     }
-    if($Image){
-        $color = $Image.GetPixel($Position.x, $Position.y)
-        [color]::new($color.R,$color.G,$color.B)
+    if($Picture){
+        $color = $Picture.GetPixel($Position.x, $Position.y)
     }
     else{
         if($Visible){
@@ -74,6 +82,11 @@ function Get-Color
             $Handle = [IntPtr]::Zero
         }
         $color = [psClickColor]::GetColor($Position.x, $Position.y, $handle)
+    }
+    if($raw){
+        $color
+    }
+    else{
         [color]::new($color.R,$color.G,$color.B)
     }
 }
@@ -260,7 +273,7 @@ function Show-Hint
         ,
         [Color]$Color = [color](0, 255, 255)
         ,
-        $Position = [Drawing.Point]::new(100, 50)
+        $Position = [Drawing.Point]::new(0, 0)
         ,
         [UInt16]$Size = 25
         ,

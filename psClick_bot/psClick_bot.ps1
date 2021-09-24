@@ -1,7 +1,7 @@
 ﻿function Send-TelegramMessage
 {
     #.COMPONENT
-    #2
+    #2.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -14,7 +14,7 @@
 function Send-TelegramFile
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -27,7 +27,7 @@ function Send-TelegramFile
 function Send-TelegramImage
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(

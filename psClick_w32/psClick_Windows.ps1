@@ -313,7 +313,7 @@ function Show-MessageBox
 function Close-Window
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -321,10 +321,18 @@ function Close-Window
         [IntPtr]$Handle
         ,
         [Switch]$Force
+        ,
+        [Switch]$Wait
     )
-    Invoke-WinApi EndTask(
-      $Handle,
-      $False,
-      [bool]$Force
-    ) -over
+    $WM_SYSCOMMAND = 0x0112
+    $SC_CLOSE = 0xF060
+    if($Wait){
+        [w32]::SendMessage($Handle, $WM_SYSCOMMAND, $SC_CLOSE, 0)
+    }
+    elseif($Force){
+        Invoke-WinApi EndTask($Handle, $False, $True)
+    }
+    else{
+        [w32]::PostMessage($Handle, $WM_SYSCOMMAND, $SC_CLOSE, 0)
+    }
 }

@@ -14,27 +14,23 @@
         [Parameter(Mandatory, Position = 2)]
         [Scriptblock]$Action
     )
-    if(Get-EventSubscriber $Name -ea 0){
-        Write-Warning "Такое имя для таймера уже использовалось"
-        $name = [regex]::new("_?\d*$").Replace(
-            $name,     
-            {
-                [int]$c = "$args"-replace"_"
-                $c++
-                "_$c"
-            },
-            1
-        )
-        Write-Host "Будет использовано имя $name" -ForegroundColor Red
+    if($Global:timers.$name){
+        $err = "Таймер с таким именем уже существует"
+        throw $err
     }
     if(!(gv timers -Scope global -ea 0)){
         @{}|nv timers -Option Constant -Scope global
     }
+    $Action = [scriptblock]::Create("if(`$Global:timers.$name.Enabled){$Action}")
     $timer = [System.Timers.Timer]::new($Interval)
     $Global:timers.$name = $timer
 
+    $removeTimer = [scriptblock]::Create("
+        Unregister-Event -SourceIdentifier $name
+    ")
+    Unregister-Event -SourceIdentifier "kill$name" -ea 0
     Register-ObjectEvent -SourceIdentifier $name -InputObject $Global:timers.$name -EventName Elapsed  -Action $Action|Out-Null
-    
+    Register-ObjectEvent -SourceIdentifier "kill$name" -InputObject $Global:timers.$name -EventName Disposed -Action $removeTimer|Out-Null
     $timer.Start()
 }
 
@@ -51,10 +47,7 @@ function Delete-Timer
     if(!$Global:timers.ContainsKey($name)){
         return
     }
-    $event = (Get-EventSubscriber $name)
-    $event.SourceObject.Stop()
-    $event.SourceObject.Dispose()
-    $event.Action.Dispose()
+    $Global:timers.$name.Dispose()
     $Global:timers.Remove($name)
 }
 

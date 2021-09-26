@@ -444,3 +444,65 @@ function Show-Hint
     }
     Start-ThreadJob $hint -ArgumentList ($Text,$Duration,$fColor,$Position,$Size,$fPath,$New,$Transparent) -Name psclickhint -StreamingHost $host|out-null
 }
+
+Function Compare-Color
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Cirus ; Link: https://psClick.ru
+    Param(
+        [Parameter(Mandatory, Position = 0)]
+        $Color1
+        ,
+        [Parameter(Mandatory, Position = 1)]
+        $Color2
+        ,
+        $Deviation = 0
+        ,
+        $Rmin = 0
+        ,
+        $Gmin = 0
+        ,
+        $Bmin = 0
+        ,
+        $Rmax = 0
+        ,
+        $Gmax = 0
+        ,
+        $Bmax = 0
+        ,
+        [switch]$Percent
+    )
+
+    $Color1 = New-Color $Color1 
+    $Color2 = New-Color $Color2
+    
+    if ($Deviation) {
+        if ($Percent) {
+            $Rmin = 255 * $Deviation 
+            $Gmin = 255 * $Deviation 
+            $Bmin = 255 * $Deviation 
+            $Rmax = 255 * $Deviation 
+            $Gmax = 255 * $Deviation  
+            $Bmax = 255 * $Deviation 
+        }
+        else {
+            $Rmin = $Deviation 
+            $Gmin = $Deviation 
+            $Bmin = $Deviation 
+            $Rmax = $Deviation 
+            $Gmax = $Deviation  
+            $Bmax = $Deviation 
+        }
+    }
+        
+    if ($Color1.RGB[0] -gt ($Color2.RGB[0] + $Rmin)) { return $false }   
+    if ($Color1.RGB[1] -gt ($Color2.RGB[1] + $Gmin)) { return $false }   
+    if ($Color1.RGB[2] -gt ($Color2.RGB[2] + $Bmin)) { return $false }           
+    if ($Color1.RGB[0] -lt ($Color2.RGB[0] - $Rmax)) { return $false }   
+    if ($Color1.RGB[1] -lt ($Color2.RGB[1] - $Gmax)) { return $false }   
+    if ($Color1.RGB[2] -lt ($Color2.RGB[2] - $Bmax)) { return $false }                 
+    
+    return $true
+}

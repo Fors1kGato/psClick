@@ -1,7 +1,7 @@
 ﻿function Start-timer
 {
     #.COMPONENT
-    #1
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(

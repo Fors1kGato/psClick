@@ -21,13 +21,11 @@
     if(!(gv timers -Scope global -ea 0)){
         @{}|nv timers -Option Constant -Scope global
     }
+    $removeTimer = [scriptblock]::Create("Unregister-Event -SourceIdentifier $name")
     $Action = [scriptblock]::Create("if(`$Global:timers.$name.Enabled){$Action}")
     $timer = [System.Timers.Timer]::new($Interval)
     $Global:timers.$name = $timer
 
-    $removeTimer = [scriptblock]::Create("
-        Unregister-Event -SourceIdentifier $name
-    ")
     Unregister-Event -SourceIdentifier "kill$name" -ea 0
     Register-ObjectEvent -SourceIdentifier $name -InputObject $Global:timers.$name -EventName Elapsed  -Action $Action|Out-Null
     Register-ObjectEvent -SourceIdentifier "kill$name" -InputObject $Global:timers.$name -EventName Disposed -Action $removeTimer|Out-Null

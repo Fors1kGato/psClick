@@ -309,3 +309,22 @@ function Show-MessageBox
         [Windows.Forms.MessageBoxIcon]::$Icon
     )
 }
+
+function Close-Window
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        [parameter(Mandatory,Position=1)]
+        [IntPtr]$Handle
+        ,
+        [Switch]$Force
+    )
+    Invoke-WinApi EndTask(
+      $Handle,
+      $False,
+      [bool]$Force
+    ) -over
+}

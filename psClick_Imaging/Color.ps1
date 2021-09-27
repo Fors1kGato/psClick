@@ -263,15 +263,15 @@ function Get-Image
 function Show-Hint
 {
     #.COMPONENT
-    #1.2
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     param(
         [String]$Text
         ,
-        [UInt32]$Duration = 3000
+        [Int32]$Duration = 3000
         ,
-        [Color]$Color = [color](0, 255, 255)
+        $FColor = [Drawing.Color]::Cyan
         ,
         $Position = [Drawing.Point]::new(0, 0)
         ,
@@ -279,10 +279,26 @@ function Show-Hint
         ,
         [Switch]$New
         ,
-        [Switch]$Transparent
+        [Switch]$Ghost
+        ,
+        [ValidateRange(0.0, 1.0)]
+        [Double]$Transparency = 0.82
+        ,
+        $BgColor = [Drawing.Color]::FromArgb(255, 1, 36, 86)
+        ,
+        [String]$Name
     )
+    if($Duration -eq 0){
+        $Duration = [Int32]::MaxValue
+    }
     if($Position -isnot [Drawing.Point]){
         try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
+    }
+    if($BgColor -isnot [Drawing.Color]){
+        $BgColor = New-Color $BgColor -Raw
+    }
+    if($fColor -isnot [Drawing.Color]){
+        $fColor = New-Color $fColor -Raw
     }
     <#
     if(!$new){
@@ -291,8 +307,7 @@ function Show-Hint
     }
     #>
     $fPath = (Convert-Path "$psscriptroot\Jura.otf")
-    $fColor = [Drawing.Color]::FromArgb.Invoke([Object[]]$color.RGB)
-    $handle = 
+    #$handle = 
     $hint = {
         param(
             $Text,
@@ -302,11 +317,14 @@ function Show-Hint
             $Size,
             $fPath,
             [bool]$New,
-            [bool]$Transparent
+            [bool]$Ghost,
+            $Name,
+            $BgColor,
+            $Transparency
         )
         $w = (Find-Window -Title "psClickHint").handle[0]
         if(!$w){$new = $true}
-        if($New -and $Transparent){
+        if($New -and $Ghost){
             $f = [System.Windows.Forms.Form]::new()
             $f.ShowInTaskbar = $false
             $f.FormBorderStyle = "none"
@@ -315,9 +333,9 @@ function Show-Hint
             $f.Size = [System.Drawing.Size]::Empty
             $f.AutoSize = $true
             $f.StartPosition = 0
-            $f.Text = "psClickHint"
+            $f.Text = "psClickHint$Name"
             $f.Location = $Position
-            $f.Opacity = 0.82
+            $f.Opacity = $Transparency
 
             $fc = [System.Drawing.Text.PrivateFontCollection]::new()
             $fc.AddFontFile($fPath)
@@ -325,7 +343,7 @@ function Show-Hint
             $lb = [System.Windows.Forms.Label]::new()
             $lb.Size = [Drawing.Size]::Empty
             $lb.Location = [System.Drawing.Point]::Empty
-            $lb.BackColor = [Drawing.Color]::FromArgb(255, 1, 36, 86)
+            $lb.BackColor = $BgColor
             $lb.AutoSize = $true
             $lb.BorderStyle = [System.Windows.Forms.BorderStyle]::Fixed3D
             $lb.Font = [Drawing.Font]::new($fc.Families[0], $size, [System.Drawing.FontStyle]::Bold)
@@ -366,7 +384,7 @@ function Show-Hint
 
             $f.ShowDialog()|out-null
         }
-        elseif($New -and !$Transparent){
+        elseif($New -and !$Ghost){
             $f = [System.Windows.Forms.Form]::new()
             $f.ShowInTaskbar = $false
             $f.FormBorderStyle = "none"
@@ -375,9 +393,9 @@ function Show-Hint
             $f.Size = [System.Drawing.Size]::Empty
             $f.AutoSize = $true
             $f.StartPosition = 0
-            $f.Text = "psClickHint"
+            $f.Text = "psClickHint$Name"
             $f.Location = $Position
-            $f.Opacity = 0.82
+            $f.Opacity = $Transparency
 
             $fc = [System.Drawing.Text.PrivateFontCollection]::new()
             $fc.AddFontFile($fPath)
@@ -386,7 +404,7 @@ function Show-Hint
             $lb = [System.Windows.Forms.Label]::new()
             $lb.Size = [Drawing.Size]::Empty
             $lb.Location = [System.Drawing.Point]::empty
-            $lb.BackColor = [Drawing.Color]::FromArgb(255, 1, 36, 86)
+            $lb.BackColor = $BgColor
             $lb.AutoSize = $true
             $lb.Font = $font
             $lb.Text = $Text
@@ -426,7 +444,7 @@ function Show-Hint
                 $timer.Stop()
                 $timer.Start()
             })
-            $f.Add_Shown({ $f.TopMost = $true;$tb.Size = $lb.Size  })
+            $f.Add_Shown({ $f.TopMost = $true;$tb.Size = $lb.Size })
             $f.Add_Closed({ $timer.Stop() })
 
             #$f.Visible = $false
@@ -442,7 +460,25 @@ function Show-Hint
             )
         }
     }
-    Start-ThreadJob $hint -ArgumentList ($Text,$Duration,$fColor,$Position,$Size,$fPath,$New,$Transparent) -Name psclickhint -StreamingHost $host|out-null
+    Start-ThreadJob $hint -Name psclickhint -StreamingHost $host -ArgumentList @(
+        $Text,$Duration,$fColor,
+        $Position,$Size,$fPath,
+        $New,$Ghost,$Name,
+        $BgColor,$Transparency
+    )|out-null
+}
+
+Function Close-Hint
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Cirus ; Link: https://psClick.ru
+    Param(
+        [String]$Name
+    )
+    $w = (Find-Window -Title "psClickHint$name").handle[0]
+    Close-Window $w
 }
 
 Function Compare-Color

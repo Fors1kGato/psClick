@@ -1,4 +1,4 @@
-﻿function Start-timer
+﻿function Start-Timer
 {
     #.COMPONENT
     #3

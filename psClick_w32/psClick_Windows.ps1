@@ -327,12 +327,12 @@ function Close-Window
     $WM_SYSCOMMAND = 0x0112
     $SC_CLOSE = 0xF060
     if($Force){
-        Invoke-WinApi EndTask($Handle, $False, $True)
+        Invoke-WinApi -re Void EndTask($Handle, $False, $True)
     }
     elseif($Wait){
-        [w32]::SendMessage($Handle, $WM_SYSCOMMAND, $SC_CLOSE, 0)
+        [Void][w32]::SendMessage($Handle, $WM_SYSCOMMAND, $SC_CLOSE, 0)
     }
     else{
-        [w32]::PostMessage($Handle, $WM_SYSCOMMAND, $SC_CLOSE, 0)
+        [Void][w32]::PostMessage($Handle, $WM_SYSCOMMAND, $SC_CLOSE, 0)
     }
 }

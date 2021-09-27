@@ -18,18 +18,15 @@
         $err = "Таймер с таким именем уже запущен"
         throw $err
     }
-    if(!(gv timers -Scope global -ea 0)){
-        @{}|nv timers -Option Constant -Scope global
-    }
+    if(!(gv timers -Scope global -ea 0)){@{}|nv timers -Option Constant -Scope global}
     $removeTimer = [scriptblock]::Create("`$Global:timers.Remove('$name');Unregister-Event -SourceIdentifier $name")
     $Action = [scriptblock]::Create("if(`$Global:timers.$name.timer.Enabled){`$Global:timers.$name.event=`$event;`n$Action}")
-    $timer = [System.Timers.Timer]::new($Interval)
-    $Global:timers.$name = @{timer = $timer}
+    $Global:timers.$name = @{timer = [System.Timers.Timer]::new($Interval)}
 
     Unregister-Event -SourceIdentifier "kill$name" -ea 0
     Register-ObjectEvent -SourceIdentifier $name -InputObject $Global:timers.$name.timer -EventName Elapsed  -Action $Action|Out-Null
     Register-ObjectEvent -SourceIdentifier "kill$name" -InputObject $Global:timers.$name.timer -EventName Disposed -Action $removeTimer|Out-Null
-    $timer.Start()
+    $Global:timers.$name.timer.Start()
 }
 
 function Delete-Timer

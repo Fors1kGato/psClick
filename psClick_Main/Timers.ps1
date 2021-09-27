@@ -35,7 +35,7 @@
 function Delete-Timer
 {
     #.COMPONENT
-    #1
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -48,6 +48,7 @@ function Delete-Timer
         return
     }
     $Global:timers.$name.timer.Dispose()
+    $Global:timers.$name.Remove('timer')
     if($Force){
         $Global:timers.$name.event.messagedata.foo.Enabled = $false
     }
@@ -56,7 +57,7 @@ function Delete-Timer
 function Get-Timer
 {
     #.COMPONENT
-    #1.1
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -67,7 +68,7 @@ function Get-Timer
         [Switch]$All
     )
     if($Name){
-        $Global:timers.ContainsKey($name)
+        [bool]$Global:timers.$name.timer
     }
     else{
         $Global:timers.Keys

@@ -263,19 +263,19 @@ function Get-Image
 function Show-Hint
 {
     #.COMPONENT
-    #2
+    #3
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     param(
         [String]$Text
         ,
-        [ValidateRange(0, [Int32]::MaxValue)]
-        [Int32]$Duration = 3000
-        ,
         [Parameter(Mandatory)]
         [String]$Name
         ,
         $Position = [Drawing.Point]::Empty
+        ,
+        [ValidateRange(0, [Int32]::MaxValue)]
+        [Int32]$Duration = 3000
         ,
         [UInt16]$Size = 25
         ,
@@ -471,7 +471,7 @@ function Show-Hint
 Function Close-Hint
 {
     #.COMPONENT
-    #1
+    #2
     #.SYNOPSIS
     #Author: Cirus ; Link: https://psClick.ru
     Param(

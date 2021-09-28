@@ -269,24 +269,24 @@ function Show-Hint
     param(
         [String]$Text
         ,
+        [ValidateRange(0, [Int32]::MaxValue)]
         [Int32]$Duration = 3000
         ,
-        $FColor = [Drawing.Color]::Cyan
+        [Parameter(Mandatory)]
+        [String]$Name
         ,
-        $Position = [Drawing.Point]::new(0, 0)
+        $Position = [Drawing.Point]::Empty
         ,
         [UInt16]$Size = 25
         ,
-        [Switch]$New
+        [Switch]$Vision
         ,
-        [Switch]$Ghost
+        [ValidateRange(0, 100)]
+        [UInt16]$Transparency = 82
         ,
-        [ValidateRange(0.0, 1.0)]
-        [Double]$Transparency = 0.82
+        $FColor = [Drawing.Color]::Cyan
         ,
         $BgColor = [Drawing.Color]::FromArgb(255, 1, 36, 86)
-        ,
-        [String]$Name
     )
     if($Duration -eq 0){
         $Duration = [Int32]::MaxValue
@@ -300,6 +300,7 @@ function Show-Hint
     if($fColor -isnot [Drawing.Color]){
         $fColor = New-Color $fColor -Raw
     }
+    $Transparency = [double]$Transparency/100
     <#
     if(!$new){
         $h = (Find-Window -Title "psClickHint").handle
@@ -316,14 +317,13 @@ function Show-Hint
             $Position,
             $Size,
             $fPath,
-            [bool]$New,
             [bool]$Ghost,
             $Name,
             $BgColor,
             $Transparency
         )
-        $w = (Find-Window -Title "psClickHint").handle[0]
-        if(!$w){$new = $true}
+        $w = (Find-Window -Title "psClickHint_$name" -Option EQ).handle
+        if(!$w){$new = $true}else{$w = $w[0]}
         if($New -and $Ghost){
             $f = [System.Windows.Forms.Form]::new()
             $f.ShowInTaskbar = $false
@@ -333,7 +333,7 @@ function Show-Hint
             $f.Size = [System.Drawing.Size]::Empty
             $f.AutoSize = $true
             $f.StartPosition = 0
-            $f.Text = "psClickHint$Name"
+            $f.Text = "psClickHint_$Name"
             $f.Location = $Position
             $f.Opacity = $Transparency
 
@@ -393,7 +393,7 @@ function Show-Hint
             $f.Size = [System.Drawing.Size]::Empty
             $f.AutoSize = $true
             $f.StartPosition = 0
-            $f.Text = "psClickHint$Name"
+            $f.Text = "psClickHint_$Name"
             $f.Location = $Position
             $f.Opacity = $Transparency
 
@@ -463,8 +463,8 @@ function Show-Hint
     Start-ThreadJob $hint -Name psclickhint -StreamingHost $host -ArgumentList @(
         $Text,$Duration,$fColor,
         $Position,$Size,$fPath,
-        $New,$Ghost,$Name,
-        $BgColor,$Transparency
+        $Vision,$Name,$BgColor,
+        $Transparency
     )|out-null
 }
 
@@ -475,10 +475,35 @@ Function Close-Hint
     #.SYNOPSIS
     #Author: Cirus ; Link: https://psClick.ru
     Param(
+        [Parameter(Mandatory)]
         [String]$Name
     )
-    $w = (Find-Window -Title "psClickHint$name").handle[0]
-    Close-Window $w
+    $w = (Find-Window -Title "psClickHint_$name" -Option EQ).handle
+    if(!$w){Write-Host "По имени $name Hint не найден";return}
+    Close-Window $w[0]
+}
+
+Function Get-Hint
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Cirus ; Link: https://psClick.ru
+    Param(
+        [Parameter(Mandatory, Position = 0,ParameterSetName = "Name")]
+        [String]$Name
+        ,
+        [Parameter(Mandatory, Position = 0,ParameterSetName = "All")]
+        [Switch]$All
+    )
+    if($Name){
+        $w = Find-Window -Title "psClickHint_$name" -Option EQ
+        if($w){$true}else{$false}
+    }
+    else{
+        $w = (Find-Window -Title "psClickHint_").title.replace("psClickHint_","")
+        if($w){return $w}
+    }
 }
 
 Function Compare-Color

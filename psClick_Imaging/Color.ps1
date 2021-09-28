@@ -300,7 +300,7 @@ function Show-Hint
     if($fColor -isnot [Drawing.Color]){
         $fColor = New-Color $fColor -Raw
     }
-    $Transparency = [double]$Transparency/100
+    [double]$Transparency = [double]($Transparency/100)
     <#
     if(!$new){
         $h = (Find-Window -Title "psClickHint").handle
@@ -478,9 +478,10 @@ Function Close-Hint
         [Parameter(Mandatory)]
         [String]$Name
     )
-    $w = (Find-Window -Title "psClickHint_$name" -Option EQ).handle
-    if(!$w){Write-Host "По имени $name Hint не найден";return}
+    $w = (Find-Window -Title "psClickHint_$name").handle
+    if(!$w){Write-Host "По имени '$name' Hint не найден" -fo DarkRed;return}
     Close-Window $w[0]
+    Sleep -m 2
 }
 
 Function Get-Hint
@@ -501,8 +502,8 @@ Function Get-Hint
         if($w){$true}else{$false}
     }
     else{
-        $w = (Find-Window -Title "psClickHint_").title.replace("psClickHint_","")
-        if($w){return $w}
+        $w = Find-Window -Title "psClickHint_"
+        if($w){return ,($w).title.replace("psClickHint_","")}
     }
 }
 

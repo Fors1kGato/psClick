@@ -478,7 +478,7 @@ Function Close-Hint
         [Parameter(Mandatory)]
         [String]$Name
     )
-    $w = (Find-Window -Title "psClickHint_$name").handle
+    $w = (Find-Window -Title "psClickHint_$name" -Option EQ).handle
     if(!$w){Write-Host "По имени '$name' Hint не найден" -fo DarkRed;return}
     Close-Window $w[0]
     Sleep -m 2
@@ -503,7 +503,7 @@ Function Get-Hint
     }
     else{
         $w = Find-Window -Title "psClickHint_"
-        if($w){return ,($w).title.replace("psClickHint_","")}
+        if($w){return ($w).title.replace("psClickHint_","")}
     }
 }
 

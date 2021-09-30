@@ -284,7 +284,7 @@ function Show-Hint
         [ValidateRange(0, 100)]
         [UInt16]$Transparency = 82
         ,
-        $FColor = [Drawing.Color]::Cyan
+        $TextColor = [Drawing.Color]::Cyan
         ,
         $BgColor = [Drawing.Color]::FromArgb(255, 1, 36, 86)
     )

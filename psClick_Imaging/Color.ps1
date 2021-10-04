@@ -461,7 +461,7 @@ function Show-Hint
         }
     }
     Start-ThreadJob $hint -Name psclickhint -StreamingHost $host -ArgumentList @(
-        $Text,$Duration,$fColor,
+        $Text,$Duration,$TextColor,
         $Position,$Size,$fPath,
         $Vision,$Name,$BgColor,
         $Transparency

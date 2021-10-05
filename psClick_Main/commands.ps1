@@ -142,6 +142,69 @@ function Change-Location{
     [Environment]::CurrentDirectory = $path
 }
 
+function Show-FileDialog
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Cirus, Fors1k ; Link: https://psClick.ru
+    Param(
+        [String]$Title
+        ,
+        [String]$InitialDirectory = "$env:HOMEDRIVE\"
+        ,
+        [String]$Filter = "All Files (*.*)|*.*|Text Files (*.txt)|*.txt"
+        ,
+        [Switch]$Name
+        ,
+        [Parameter(ParameterSetName = 'Open')]
+        [Switch]$MultiSelect
+        ,
+        [Parameter(ParameterSetName = 'Save')]
+        [String]$DefaultExt
+        ,
+        [Parameter(Mandatory,ParameterSetName = 'Save')]
+        [Switch]$Save
+        ,
+        [Parameter(ParameterSetName = 'Save')]
+        [Switch]$OverwritePrompt       
+    )
+
+    if($Save){
+        $Dialog = [System.Windows.Forms.SaveFileDialog]::new()
+        $Dialog.OverwritePrompt = $OverwritePrompt
+        $Dialog.DefaultExt = $DefaultExt
+    }
+    else{
+        $Dialog = [System.Windows.Forms.OpenFileDialog]::new()
+        $Dialog.Multiselect = $Multiselect
+    }
+    $Dialog.Title = $Title
+    $Dialog.InitialDirectory= $InitialDirectory
+    $Dialog.Filter = $Filter
+
+    $result = $Dialog.ShowDialog()
+    $Dialog.Dispose()
+
+    if($result -eq "OK"){    
+        if($Save){
+            if($Name){
+                return ($Dialog.FileName -replace ".+\\", "")
+            }
+            else{
+                return $Dialog.FileName
+            }
+        }
+
+        if($Name){
+            return $Dialog.SafeFileNames
+        }
+        else{
+            return $Dialog.FileNames
+        }
+    }
+}
+
 function Invoke-Ternary{
     #.COMPONENT
     #1

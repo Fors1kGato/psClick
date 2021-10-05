@@ -263,7 +263,7 @@ function Get-Image
 function Show-Hint
 {
     #.COMPONENT
-    #3
+    #3.2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     param(
@@ -295,10 +295,12 @@ function Show-Hint
         try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
     }
     if($BgColor -isnot [Drawing.Color]){
+        Write-Host 777
         $BgColor = New-Color $BgColor -Raw
     }
-    if($fColor -isnot [Drawing.Color]){
-        $fColor = New-Color $fColor -Raw
+    if($TextColor -isnot [Drawing.Color]){
+        Write-Host 888
+        $TextColor = New-Color $TextColor -Raw
     }
     [double]$Transparency = [double]($Transparency/100)
     <#

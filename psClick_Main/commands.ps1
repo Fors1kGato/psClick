@@ -185,23 +185,44 @@ function Show-FileDialog
 
     $result = $Dialog.ShowDialog()
     $Dialog.Dispose()
-
-    if($result -eq "OK"){    
-        if($Save){
-            if($Name){
-                return ($Dialog.FileName -replace ".+\\", "")
-            }
-            else{
-                return $Dialog.FileName
-            }
-        }
-
+    if($result -ne "OK"){ return } 
+      
+    if($Save){
         if($Name){
-            return $Dialog.SafeFileNames
+            return ($Dialog.FileName|Split-Path -Leaf)
         }
         else{
-            return $Dialog.FileNames
+            return $Dialog.FileName
         }
+    }
+    if($Name){
+        return $Dialog.SafeFileNames
+    }
+    else{
+        return $Dialog.FileNames
+    }
+}
+
+function Show-FolderDialog
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k, Cirus ; Link: https://psClick.ru
+    Param(
+        [ValidateSet('AdminTools','ApplicationData','CDBurning','CommonAdminTools','CommonApplicationData','CommonDesktopDirectory','CommonDocuments','CommonMusic','CommonOemLinks','CommonPictures','CommonProgramFiles','CommonProgramFilesX86','CommonPrograms','CommonStartMenu','CommonStartup','CommonTemplates','CommonVideos','Cookies','Desktop','DesktopDirectory','Favorites','Fonts','History','InternetCache','LocalApplicationData','LocalizedResources','MyComputer','MyDocuments','MyMusic','MyPictures','MyVideos','NetworkShortcuts','PrinterShortcuts','ProgramFiles','ProgramFilesX86','Programs','Recent','Resources','SendTo','StartMenu','Startup','System','SystemX86','Templates','UserProfile','Windows')]
+        [String]$RootFolder = "Desktop",
+        [String]$Description, 
+        [Switch]$Minimize     
+    )
+
+    $Dialog = [System.Windows.Forms.FolderBrowserDialog]::new()
+    $Dialog.RootFolder  = $RootFolder
+    $Dialog.Description = $Description
+    $result = $Dialog.ShowDialog([Windows.Forms.Form]@{Topmost = $true;TopLevel = $true})
+    $Dialog.Dispose()
+    if($result -eq "OK"){ 
+        $Dialog.SelectedPath
     }
 }
 

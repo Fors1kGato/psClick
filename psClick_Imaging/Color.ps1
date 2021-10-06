@@ -295,11 +295,9 @@ function Show-Hint
         try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
     }
     if($BgColor -isnot [Drawing.Color]){
-        Write-Host 777
         $BgColor = New-Color $BgColor -Raw
     }
     if($TextColor -isnot [Drawing.Color]){
-        Write-Host 888
         $TextColor = New-Color $TextColor -Raw
     }
     [double]$Transparency = [double]($Transparency/100)

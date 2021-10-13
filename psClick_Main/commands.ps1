@@ -142,6 +142,10 @@ function Change-Location{
     [Environment]::CurrentDirectory = $path
 }
 
+function Uninstall-Psclick{
+    split-path $psscriptroot|ri -force -rec -ea 0
+}
+
 function Show-FileDialog
 {
     #.COMPONENT

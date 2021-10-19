@@ -13,7 +13,7 @@
         [Switch]$Toggle
     )
     if($MyInvocation.InvocationName -match 'Clear'){
-        [Void][w32KeyBoard]::GetKeyState([Windows.Forms.Keys]::$key);return
+        [Void][w32KeyBoard]::GetAsyncKeyState([Windows.Forms.Keys]::$key);return
     }
     if($Toggle){
         if($Key-notin("Scroll","NumLock","CapsLock")){

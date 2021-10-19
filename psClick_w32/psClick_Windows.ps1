@@ -48,7 +48,7 @@ function Set-WindowTransparency
 
     $WindowStyle = [w32Windos]::GetWindowLongPtr($handle, $GWL_EXSTYLE)
     [Void][w32Windos]::SetWindowLongPtr($handle, $GWL_EXSTYLE, ($WindowStyle -bor $WS_EX_LAYERED))
-    [w32Windos]::SetLayeredWindowAttributes($handle, [IntPtr]::Zero, $transparency, $LWA_ALPHA)
+    [Void][w32Windos]::SetLayeredWindowAttributes($handle, [IntPtr]::Zero, $transparency, $LWA_ALPHA)
 }
 
 function Move-Window
@@ -67,7 +67,28 @@ function Move-Window
     if($Position -isnot [Drawing.Point]){
         try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
     }
-    [w32Windos]::SetWindowPos($Handle, [IntPtr]::Zero, $Position.X, $Position.Y, 0, 0, (0x0001 -bor 0x0004))
+    [Void][w32Windos]::SetWindowPos($Handle, [IntPtr]::Zero, $Position.X, $Position.Y, 0, 0, (0x0001 -bor 0x0004))
+}
+
+function Resize-Window
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        [Parameter(Mandatory,Position=0)]
+        $Size
+        ,
+        [parameter(Mandatory,Position=1)]
+        [IntPtr]$Handle
+    )
+    $SWP_NOZORDER = 0x0004
+    $SWP_NOMOVE   = 0x0002
+    if($Size -isnot [Drawing.Size]){
+        try{$Size = [Drawing.Size]::new.Invoke($Size)}catch{throw $_}
+    }
+    [Void][w32Windos]::SetWindowPos($Handle, [IntPtr]::Zero, 0, 0, $Size.Width, $Size.Height, ($SWP_NOZORDER -bor $SWP_NOMOVE))
 }
 
 function Get-ChildWindows
@@ -166,7 +187,7 @@ function Set-ForegroundWindow
         [parameter(Mandatory=$true)]
         [IntPtr]$Handle
     )
-    [w32Windos]::SetForegroundWindow($Handle)
+    [Void][w32Windos]::SetForegroundWindow($Handle)
 }
 
 function Show-Window
@@ -207,9 +228,9 @@ function Show-Window
     }
 
     if($State -in $ShowWindow.Keys)
-    {[w32Windos]::ShowWindow($Handle, $ShowWindow.$State)}
+    {[Void][w32Windos]::ShowWindow($Handle, $ShowWindow.$State)}
     else
-    {[w32Windos]::SetWindowPos($Handle, $SetWindowPos.$State, 0,0,0,0, (0x0001 -bor 0x0002))}
+    {[Void][w32Windos]::SetWindowPos($Handle, $SetWindowPos.$State, 0,0,0,0, (0x0001 -bor 0x0002))}
 }
 
 function Find-Window

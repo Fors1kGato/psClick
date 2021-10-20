@@ -9,7 +9,7 @@
     )
     $lpdw = 0
     $idThread =  [w32Windos]::GetWindowThreadProcessId($Handle, [ref]$lpdw) 
-    $lang = [int][w32KeyBoard]::GetKeyboardLayout($idThread)
+    $lang = [w32KeyBoard]::GetKeyboardLayout($idThread)
     [Windows.Forms.InputLanguage]::FromCulture(
         [Globalization.CultureInfo]::GetCultureInfo($lang -shr 16)
     )
@@ -33,10 +33,10 @@ function Set-KeyboardLayout
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [Parameter(Mandatory,ParameterSetName = 'Layout')]
+        [Parameter(Mandatory, ValueFromPipeline, ParameterSetName = 'Layout')]
         [Windows.Forms.InputLanguage]$Layout
         ,
-        [Parameter(Mandatory,ParameterSetName = 'Id')]
+        [Parameter(Mandatory, ValueFromPipeline, ParameterSetName = 'Id')]
         [Int]$Id
         ,
         [IntPtr]$Handle = (Get-ForegroundWindow)

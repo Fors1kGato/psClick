@@ -29,6 +29,24 @@
     }
 }
 
+function Get-FocusWindow
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+    )
+    $thisPrc = Invoke-WinApi -re UInt32 -dll kernel32 GetCurrentThreadId -o
+    $target  = Invoke-WinApi -re uint32 GetWindowThreadProcessId(
+        (Get-ForegroundWindow), [System.IntPtr]::Zero
+    ) -o
+    Invoke-WinApi -re Void AttachThreadInput($thisPrc, $target, $true) -o
+    $focus = Invoke-WinApi -re intptr GetFocus
+    Invoke-WinApi -re Void AttachThreadInput($thisPrc, $target, $false) -o
+    $focus
+}
+
 function Set-WindowTransparency
 {
     #.COMPONENT

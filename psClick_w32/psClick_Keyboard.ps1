@@ -1,4 +1,19 @@
-﻿function Get-KeyState
+﻿function Get-KeyboardLayout
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+    )
+    $idThread =  Invoke-WinApi -return uint32 GetWindowThreadProcessId ((Get-ForegroundWindow), 0) 
+    $lang = Invoke-WinApi -return int GetKeyboardLayout $idThread
+    [Windows.Forms.InputLanguage]::FromCulture(
+        [Globalization.CultureInfo]::GetCultureInfo($lang -shr 16)
+    )
+}
+
+function Get-KeyState
 {
     #.COMPONENT
     #2.1

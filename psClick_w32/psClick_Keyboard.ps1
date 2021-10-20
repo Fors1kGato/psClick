@@ -1,14 +1,15 @@
 ﻿function Get-KeyboardLayout
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
         [IntPtr]$Handle = (Get-ForegroundWindow)
     )
-    $idThread =  Invoke-WinApi -return uint32 GetWindowThreadProcessId ($Handle, 0) 
-    $lang = Invoke-WinApi -return int GetKeyboardLayout $idThread
+    $lpdw = 0
+    $idThread =  [w32Windos]::GetWindowThreadProcessId($Handle, [ref]$lpdw) 
+    $lang = [w32KeyBoard]::GetKeyboardLayout($idThread)
     [Windows.Forms.InputLanguage]::FromCulture(
         [Globalization.CultureInfo]::GetCultureInfo($lang -shr 16)
     )
@@ -32,11 +33,16 @@ function Set-KeyboardLayout
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [parameter(Mandatory)]
-        [Windows.Forms.InputLanguage]$Layout,
+        [Parameter(Mandatory,ParameterSetName = 'Layout')]
+        [Windows.Forms.InputLanguage]$Layout
+        ,
+        [Parameter(Mandatory,ParameterSetName = 'Id')]
+        [Int]$Id
+        ,
         [IntPtr]$Handle = (Get-ForegroundWindow)
     )
-    [Void][w32]::PostMessage($Handle, 0x0050, 0x0001, $Layout.Handle)
+    if(!$Id){$Id = $Layout.Handle}
+    [Void][w32]::PostMessage($Handle, 0x0050, 0x0001, $Id)
 }
 
 function Get-KeyState

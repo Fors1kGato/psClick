@@ -32,18 +32,18 @@
 function Get-FocusWindow
 {
     #.COMPONENT
-    #1
+    #1.2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
     )
-    $thisPrc = Invoke-WinApi -re UInt32 -dll kernel32 GetCurrentThreadId -o
-    $target  = Invoke-WinApi -re uint32 GetWindowThreadProcessId(
-        (Get-ForegroundWindow), [System.IntPtr]::Zero
-    ) -o
-    Invoke-WinApi -re Void AttachThreadInput($thisPrc, $target, $true) -o
-    $focus = Invoke-WinApi -re intptr GetFocus
-    Invoke-WinApi -re Void AttachThreadInput($thisPrc, $target, $false) -o
+    $thisPrc = [w32]::GetCurrentThreadId()
+    $target  = [w32Windos]::GetWindowThreadProcessId(
+        (Get-ForegroundWindow), [IntPtr]::Zero
+    )
+    [Void][w32]::AttachThreadInput($thisPrc, $target, $true)
+    $focus = [w32Windos]::GetFocus()
+    [Void][w32]::AttachThreadInput($thisPrc, $target, $false)
     $focus
 }
 

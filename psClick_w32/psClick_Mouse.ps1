@@ -260,12 +260,17 @@ function Set-MouseSpeed
 function Get-CursorPosition
 {
     #.COMPONENT
-    #1
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
+        [IntPtr]$Handle
     )
-    [Windows.Forms.Cursor]::Position
+    $Position = [Windows.Forms.Cursor]::Position
+    if($Handle){
+        [Void][w32Windos]::MapWindowPoints([IntPtr]::Zero, $Handle, [ref]$Position, 1)
+    }
+    $Position
 }
 
 function Drag-WithMouse

@@ -37,9 +37,10 @@ function Get-FocusWindow
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
     )
+    $lpdw = 0
     $thisPrc = [w32]::GetCurrentThreadId()
     $target  = [w32Windos]::GetWindowThreadProcessId(
-        (Get-ForegroundWindow), [IntPtr]::Zero
+        (Get-ForegroundWindow), [ref]$lpdw
     )
     [Void][w32]::AttachThreadInput($thisPrc, $target, $true)
     $focus = [w32Windos]::GetFocus()

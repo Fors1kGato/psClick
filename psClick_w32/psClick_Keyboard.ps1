@@ -9,7 +9,7 @@
     )
     $lpdw = 0
     $idThread =  [w32Windos]::GetWindowThreadProcessId($Handle, [ref]$lpdw) 
-    $lang = [w32KeyBoard]::GetKeyboardLayout($idThread)
+    $lang = [int][w32KeyBoard]::GetKeyboardLayout($idThread)
     [Windows.Forms.InputLanguage]::FromCulture(
         [Globalization.CultureInfo]::GetCultureInfo($lang -shr 16)
     )

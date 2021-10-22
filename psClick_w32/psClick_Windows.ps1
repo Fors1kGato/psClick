@@ -137,13 +137,13 @@ function Set-WindowText
         ,
         [Switch]$ToControl
     )
-    if($ToField){
-        Invoke-WinApi -re Void SendMessage(
+    if($ToControl){
+        Invoke-WinApi -Override -Re Void SendMessage(
             $Handle,
             0x000C,
             0,
             $Text
-        ) -Override
+        )
     }
     else{
         [Void][w32Windos]::SetWindowText($Handle, $Text)

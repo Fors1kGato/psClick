@@ -29,16 +29,17 @@ function Get-KeyboardLayouts
 function Set-KeyboardLayout
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [Parameter(Mandatory, ValueFromPipeline, ParameterSetName = 'Layout')]
+        [Parameter(Mandatory, Position=0, ValueFromPipeline, ParameterSetName = 'Layout')]
         [Windows.Forms.InputLanguage]$Layout
         ,
-        [Parameter(Mandatory, ValueFromPipeline, ParameterSetName = 'Id')]
+        [Parameter(Mandatory, Position=0, ValueFromPipeline, ParameterSetName = 'Id')]
         [Int]$Id
         ,
+        [Parameter(Position=1)]
         [IntPtr]$Handle = (Get-ForegroundWindow)
     )
     if(!$Id){$Id = $Layout.Handle}

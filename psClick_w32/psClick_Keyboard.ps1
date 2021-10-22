@@ -100,7 +100,7 @@ function Send-Text
 function Set-Text
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -110,6 +110,7 @@ function Set-Text
         [IntPtr]$Handle = (Get-FocusWindow)
     )
     Set-WindowText $Text -ToControl -Handle $Handle
+    Send-Key -Key End -Handle $Handle
 }
 
 function Type-Text

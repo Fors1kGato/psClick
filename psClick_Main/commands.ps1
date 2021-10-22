@@ -73,21 +73,21 @@ function Pausable
 function Pause-Script
 {
     #.COMPONENT
-    #2
+    #2.1
     #.SYNOPSIS
     #Author: Cirus, Fors1k ; Link: https://psClick.ru
     Param(
         [parameter(Mandatory, Position=0)]
-        [UInt64[]]$Timeout
+        [UInt32[]]$Timeout
     )
     if($Timeout.Count -gt 1){ 
-        [int]$Timeout = Get-Random -Minimum $Timeout[0] -Maximum $Timeout[1] 
+        [Int64]$Timeout = Get-Random -Minimum $Timeout[0] -Maximum $Timeout[1] 
     }
-    $time = (Get-DAte).AddMilliseconds(($Timeout[0]-5))
-
-    while((Get-Date) -lt $time){ 
+    $timer = [Diagnostics.Stopwatch]::StartNew()
+    while($timer.ElapsedMilliseconds -lt $Timeout[0]-5){ 
         Start-Sleep -m 2
     }
+    $timer.Stop()
 }
 
 function Stop-Script{
@@ -98,6 +98,17 @@ function Stop-Script{
     Param(
     )
     Break "ThisScript!"
+}
+
+function Start-TimeWatcher
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+    )
+    [Diagnostics.Stopwatch]::StartNew()
 }
 
 function Get-Bytes{

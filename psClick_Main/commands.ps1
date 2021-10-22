@@ -70,16 +70,21 @@ function Pausable
     $timer.Start()
 }
 
-function Pause-Script{
+function Pause-Script
+{
     #.COMPONENT
-    #1.1
+    #2
     #.SYNOPSIS
     #Author: Cirus, Fors1k ; Link: https://psClick.ru
     Param(
-        [parameter(Mandatory)]
-        [UInt64]$Timeout
+        [parameter(Mandatory, Position=0)]
+        [UInt64[]]$Timeout
     )
-    $time = (Get-DAte).AddMilliseconds($timeout)
+    if($Timeout.Count -gt 1){ 
+        [int]$Timeout = Get-Random -Minimum $Timeout[0] -Maximum $Timeout[1] 
+    }
+    $time = (Get-DAte).AddMilliseconds(($Timeout[0]-5))
+
     while((Get-Date) -lt $time){ 
         Start-Sleep -m 2
     }

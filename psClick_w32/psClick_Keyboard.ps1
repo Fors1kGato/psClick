@@ -116,7 +116,7 @@ function Set-Text
 function Type-Text
 {
     #.COMPONENT
-    #1.3
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -131,7 +131,7 @@ function Type-Text
         ,
         [UInt16]$Wait = 5000
     )
-
+    $Layout = Get-KeyboardLayout
     $text = $text-replace"(`r`n|`r)","`n"
     $chars = $Text.ToCharArray()
     $ruCh = 192..255+168+184
@@ -187,4 +187,5 @@ function Type-Text
         Sleep -m $Delay
     }
     if($Hardware){[Void][arduino]::Close($arduino)}
+    Set-KeyboardLayout $Layout
 }

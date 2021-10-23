@@ -1,17 +1,19 @@
 ﻿function Get-KeyboardLayout
 {
     #.COMPONENT
-    #1.1
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
         [IntPtr]$Handle = (Get-ForegroundWindow)
     )
+    $diff = -join(Get-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name UserPreferencesMask).UserPreferencesMask
+    if($diff -eq "15830712818000"){$Handle = Get-ForegroundWindow}
     $lpdw = 0
-    $idThread =  [w32Windos]::GetWindowThreadProcessId($Handle, [ref]$lpdw) 
-    $lang = [Int][w32KeyBoard]::GetKeyboardLayout($idThread)
+    $idThread = [w32Windos]::GetWindowThreadProcessId($Handle, [ref]$lpdw) 
+    $lang = [Int64][w32KeyBoard]::GetKeyboardLayout($idThread)
     [Windows.Forms.InputLanguage]::FromCulture(
-        [Globalization.CultureInfo]::GetCultureInfo($lang -shr 16)
+        [Globalization.CultureInfo]::GetCultureInfo([Int]($lang -shr 16))
     )
 }
 
@@ -29,7 +31,7 @@ function Get-KeyboardLayouts
 function Set-KeyboardLayout
 {
     #.COMPONENT
-    #1.1
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -42,6 +44,8 @@ function Set-KeyboardLayout
         [Parameter(Position=1)]
         [IntPtr]$Handle = (Get-ForegroundWindow)
     )
+    $diff = -join(Get-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name UserPreferencesMask).UserPreferencesMask
+    if($diff -eq "15830712818000"){$Handle = Get-ForegroundWindow}
     if(!$Id){$Id = $Layout.Handle}
     [Void][w32]::PostMessage($Handle, 0x0050, 0x0001, $Id)
 }

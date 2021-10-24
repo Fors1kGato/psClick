@@ -263,7 +263,7 @@ function Get-Image
 function Show-Hint
 {
     #.COMPONENT
-    #3.2
+    #4
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     param(
@@ -272,7 +272,7 @@ function Show-Hint
         [Parameter(Mandatory)]
         [String]$Name
         ,
-        $Position = [Drawing.Point]::Empty
+        $Position
         ,
         [ValidateRange(0, [Int32]::MaxValue)]
         [Int32]$Duration = 3000
@@ -282,12 +282,22 @@ function Show-Hint
         [Switch]$Vision
         ,
         [ValidateRange(0, 100)]
-        [UInt16]$Transparency = 82
+        $Transparency
         ,
         $TextColor = [Drawing.Color]::Cyan
         ,
         $BgColor = [Drawing.Color]::FromArgb(255, 1, 36, 86)
     )
+    if($null -eq $Position){
+        $Position = [Drawing.Point]::Empty
+        $NewPosition = $false
+    }
+    else{$NewPosition = $true}
+    if($null -eq $Transparency){
+        $Transparency = 82
+        $NewTransparency = $false
+    }
+    else{$NewTransparency = $true}
     if($Duration -eq 0){
         $Duration = [Int32]::MaxValue
     }
@@ -320,16 +330,19 @@ function Show-Hint
             [bool]$Ghost,
             $Name,
             $BgColor,
-            $Transparency
+            $Transparency,
+            [bool]$NewPosition,
+            [bool]$NewTransparency
         )
         $w = (Find-Window -Title "psClickHint_$name" -Option EQ).handle
         if(!$w){$new = $true}else{$w = $w[0]}
         if($New -and $Ghost){
-            $f = [System.Windows.Forms.Form]::new()
+            $f = [FormNA]::new()
             $f.ShowInTaskbar = $false
             $f.FormBorderStyle = "none"
             $f.TransparencyKey = $f.BackColor
-            $f.TopMost = $true
+            $f.TopLevel = $true
+            #$f.TopMost = $true
             $f.Size = [System.Drawing.Size]::Empty
             $f.AutoSize = $true
             $f.StartPosition = 0
@@ -357,39 +370,49 @@ function Show-Hint
                 Parent = $f
             }
 
+            $tb2 = [Windows.Forms.TextBox]@{
+                Location = [Drawing.point]::Empty
+                Size = [Drawing.Size]::Empty
+                Text = $f.Opacity
+                Parent = $f
+            }
+
             $timer = [Windows.Forms.Timer]::new()
             $timer.Interval = $Duration
             $timer.add_tick({ $f.Close() })
             $timer.Start()
 
+            $tb2.Add_TextChanged({$f.Opacity = $tb2.Text})
+
             $tb.Add_TextChanged({
                 $lb.Text = $tb.Text
-                $f.TopMost = $true
+                #$f.TopMost = $true
                 $timer.Stop()
                 $timer.Start()
             })
-            $f.Add_Shown({ $f.TopMost = $true })
+            #$f.Add_Shown({ $f.TopMost = $true })
+            $f.Add_Shown({Start-ThreadJob -ScriptBlock {Show-Window $args[0] -State TopMost} -ArgumentList $f.Handle -StreamingHost $host})
             $f.Add_Closed({ $timer.Stop() })
 
-            #$f.Visible = $false
             $WS_EX_TRANSPARENT = 0x00000020
             $WS_EX_LAYERED = 0x00080000
             $GWL_EXSTYLE   = -20
 
-            Invoke-WinApi SetWindowLongPtr(
+            [Void][psClickColor]::SetWindowLongPtr(
                 $f.Handle, 
                 $GWL_EXSTYLE, 
                 ($WS_EX_LAYERED -bor $WS_EX_TRANSPARENT)
-            ) -Override
+            )
 
             $f.ShowDialog()|out-null
         }
         elseif($New -and !$Ghost){
-            $f = [System.Windows.Forms.Form]::new()
+            $f = [FormNA]::new()
             $f.ShowInTaskbar = $false
             $f.FormBorderStyle = "none"
             $f.TransparencyKey = $f.BackColor
-            $f.TopMost = $true
+            $f.TopLevel = $true
+            #$f.TopMost = $true
             $f.Size = [System.Drawing.Size]::Empty
             $f.AutoSize = $true
             $f.StartPosition = 0
@@ -415,10 +438,17 @@ function Show-Hint
                 Parent = $f
             }
 
+            $tb2 = [Windows.Forms.TextBox]@{
+                Location = [Drawing.point]::Empty
+                Size = [Drawing.Size]::Empty
+                Text = $f.Opacity
+                Parent = $f
+            }
+
             $tb = [Windows.Forms.TextBox]::new()
             $tb.Location = [Drawing.point]::Empty
             $tb.Size = [Drawing.Size]::Empty
-            $tb.BackColor = [Drawing.Color]::FromArgb(255,1, 36, 86)
+            $tb.BackColor = $BgColor
             $tb.BorderStyle = [System.Windows.Forms.BorderStyle]::Fixed3D
             $tb.ForeColor = $fColor
             $tb.Multiline = $true
@@ -436,35 +466,58 @@ function Show-Hint
             $timer.add_tick({ $f.Close() })
             $timer.Start()
 
+            $tb2.Add_TextChanged({$f.Opacity = $tb2.Text})
+
             $tb1.Add_TextChanged({
                 $tb.Text = $tb1.Text
                 $lb.Text = $tb.Text
                 $tb.Size = $lb.Size
-                $f.TopMost = $true
+                #$f.TopMost = $true
                 $timer.Stop()
                 $timer.Start()
             })
-            $f.Add_Shown({ $f.TopMost = $true;$tb.Size = $lb.Size })
+            #$f.Add_Shown({ $f.TopMost = $true;$tb.Size = $lb.Size })
+            $f.Add_Shown({$tb.Size = $lb.Size;Start-ThreadJob -ScriptBlock {Show-Window $args[0] -State TopMost} -ArgumentList $f.Handle -StreamingHost $host})
             $f.Add_Closed({ $timer.Stop() })
-
-            #$f.Visible = $false
+             
             $f.ShowDialog()|out-null
         }
         else{
-            $h = @(Get-ChildWindows -Handle $w|where wClass -match "EDIT")[0]
-            $send = Invoke-WinApi SendMessage(
-                $h.wHandle,
+            $h = @(Get-ChildWindows -Handle $w|where wClass -match "EDIT")
+            $ptr = [Runtime.InteropServices.Marshal]::StringToHGlobalAuto($text)
+            $send = [psClickColor]::SendMessage(
+                $h[0].wHandle,
                 0x000C,
                 0,
-                $text
+                $ptr
             )
+            [Runtime.InteropServices.Marshal]::FreeHGlobal($ptr)
+            #Write-Host $Transparency
+            #Write-Host $Position
+            #Write-Host $w
+            if($NewPosition){
+                #Write-Host "NewPosition"
+                Move-Window $Position $w
+            }
+            if($NewTransparency){
+                #Write-Host "NewTransparency"
+                $ptr = [Runtime.InteropServices.Marshal]::StringToHGlobalAuto("$Transparency")
+                $send = [psClickColor]::SendMessage(
+                    $h[1].wHandle,
+                    0x000C,
+                    0,
+                    $ptr
+                )
+                [Runtime.InteropServices.Marshal]::FreeHGlobal($ptr)
+            }
         }
     }
     Start-ThreadJob $hint -Name psclickhint -StreamingHost $host -ArgumentList @(
         $Text,$Duration,$TextColor,
         $Position,$Size,$fPath,
         $Vision,$Name,$BgColor,
-        $Transparency
+        $Transparency,$NewPosition,
+        $NewTransparency
     )|out-null
 }
 

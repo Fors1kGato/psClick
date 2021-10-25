@@ -1,17 +1,13 @@
 ﻿function Get-KeyboardLayout
 {
     #.COMPONENT
-    #2
+    #3
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
         [IntPtr]$Handle = (Get-ForegroundWindow)
     )
-    $diff = -join(Get-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name UserPreferencesMask).UserPreferencesMask
-    if($diff -eq "15830712818000"){$Handle = Get-ForegroundWindow}
-    $lpdw = 0
-    $idThread = [w32Windos]::GetWindowThreadProcessId($Handle, [ref]$lpdw) 
-    $lang = [Int64][w32KeyBoard]::GetKeyboardLayout($idThread)
+    $lang = [w32KeyBoard]::GetKeyboardLayout($Handle)
     [Windows.Forms.InputLanguage]::FromCulture(
         [Globalization.CultureInfo]::GetCultureInfo([Int]($lang -shr 16))
     )

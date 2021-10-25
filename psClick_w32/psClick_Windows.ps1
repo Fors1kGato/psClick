@@ -126,7 +126,7 @@ function Get-ChildWindows
 function Set-WindowText
 {
     #.COMPONENT
-    #2.1
+    #2.2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -138,16 +138,13 @@ function Set-WindowText
         [Switch]$ToControl
     )
     if($ToControl){
-        Invoke-WinApi -Override -Re Void SendMessage(
-            $Handle,
-            0x000C,
-            0,
-            $Text
-        )
+        $ptr = [Runtime.InteropServices.Marshal]::StringToHGlobalAuto($text)
+        [Void][w32]::SendMessage($Handle, 0x000C, 0, $ptr)
+        [Runtime.InteropServices.Marshal]::FreeHGlobal($ptr)
     }
     else{
         [Void][w32Windos]::SetWindowText($Handle, $Text)
-        Invoke-WinApi InvalidateRect($Handle, 0, 1)|Out-Null
+        [Void][w32Windos]::InvalidateRect($Handle, [IntPtr]::Zero, $true)
     }
 }
 
@@ -216,12 +213,12 @@ function Show-Window
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory, Position = 0)]
         [IntPtr]$Handle
         ,
-        [parameter(Mandatory = $true)]
+        [parameter(Position = 1)]
         [ValidateSet('ShowMaximized', 'Hide', 'ShowNoActivate', 'ShowDefault', 'ShowMinNoActivate', 'ShowNA', 'Show', 'Minimize', 'Restore', 'ShowMinimized', 'ShowNormal', 'Maximize', 'ForceMinimize', 'TopMost', 'Bottom', 'Top', 'NoTopMost')]
-        [String]$State
+        [String]$State = 'ShowNormal'
     ) 
        
     $ShowWindow = @{
@@ -324,18 +321,18 @@ function Show-MessageBox
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [Parameter(Mandatory = $true  , Position = 0)]
+        [Parameter(Mandatory = $true , Position = 0)]
         [ValidateNotNullOrEmpty()]
         [String]$Text
         ,
-        [Parameter(Mandatory = $false , Position = 1)]
+        [Parameter(Mandatory = $false, Position = 1)]
         [String]$Title='psClick'
         ,
-        [Parameter(Mandatory = $false , Position = 2)]
+        [Parameter(Mandatory = $false, Position = 2)]
         [ValidateSet('OK','OKCancel','AbortRetryIgnore','YesNoCancel','YesNo','RetryCancel')]
         [String]$Buttons='OK'
         ,
-        [Parameter(Mandatory = $false , Position = 3)]
+        [Parameter(Mandatory = $false, Position = 3)]
         [ValidateSet('None','Hand','Error','Stop','Question','Exclamation','Warning','Asterisk','Information')]
         [String]$Icon='None'
         ,
@@ -353,25 +350,34 @@ function Show-MessageBox
 function Close-Window
 {
     #.COMPONENT
-    #2
+    #3
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [parameter(Mandatory,Position=1)]
+        [parameter(Mandatory,Position=0)]
         [IntPtr]$Handle
         ,
+        [Parameter(ParameterSetName = 'Force')]
         [Switch]$Force
         ,
+        [Parameter(ParameterSetName = 'Wait')]
         [Switch]$Wait
+        ,
+        [Parameter(ParameterSetName = 'SuperForce')]
+        [Switch]$SuperForce
     )
-    $WM_CLOSE = 0x0010
     $WM_DESTR = 0x0002
+    $WM_CLOSE = 0x0010
+    $re = [IntPtr]::Zero
     if($Force){
         [Void][w32]::PostMessage($Handle, $WM_DESTR, 0, 0)
-        [Void][w32]::SendMessage($Handle, $WM_CLOSE, 0, 0)
+        [Void][w32]::SendMessageTimeout($Handle, $WM_CLOSE, 0, 0, 0x0002, 0x8, [ref]$re)
     }
     elseif($Wait){
         [Void][w32]::SendMessage($Handle, $WM_CLOSE, 0, 0)
+    }
+    elseif($SuperForce){
+        [Void][w32Windos]::EndTask($Handle, $false, $true)
     }
     else{
         [Void][w32]::PostMessage($Handle, $WM_CLOSE, 0, 0)

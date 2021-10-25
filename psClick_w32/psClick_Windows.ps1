@@ -1,4 +1,27 @@
-﻿function Get-WindowRectangle
+﻿Function Get-WindowState
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Cirus, Fors1k ; Link: https://psClick.ru
+    Param(
+        [Parameter(Mandatory)]
+        [IntPtr]$Handle
+    )
+
+    $GWL_EXSTYLE = -20
+    $WS_EX_TOPMOST = 0x00000008
+
+    [PSCustomObject]@{
+        isForeground = [w32Windos]::GetForegroundWindow() -eq $Handle
+        isVisible    = [w32Windos]::IsWindowVisible($Handle)
+        isMinimized  = [w32Windos]::IsIconic($Handle)
+        isMaximized  = [w32Windos]::IsZoomed($Handle)
+        isTopMost    = [bool]([Int64][w32Windos]::GetWindowLongPtr($Handle, $GWL_EXSTYLE) -band $WS_EX_TOPMOST)
+    }
+}
+
+function Get-WindowRectangle
 {
     #.COMPONENT
     #1

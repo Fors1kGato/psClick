@@ -1,6 +1,6 @@
 &{
     #.COMPONENT
-    #1
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -22,11 +22,11 @@
         #sleep 50
     }
 
-    $files|%{
-        $check = $tr.sha.Contains($_.sha)
-        if($_.path -eq 'psClick_Main/psClick_Updater.ps1'){continue}
+    ForEach($f in $files){
+        $check = $tr.sha.Contains($f.sha)
+        if($f.path -eq 'psClick_Main/psClick_Updater.ps1'){continue}
         if(!$check){
-            $Path = (Join-path $psClickPath $_.path)
+            $Path = (Join-path $psClickPath $f.path)
             try{$p = Ni -ea Stop $Path -Force}
             catch{
                 Write-Warning (
@@ -35,7 +35,7 @@
                 )
                 $er = $true
             }
-            Irm -useb "github.com/Fors1kGato/psClick/raw/main/$($_.path)" -OutFile $p|out-null
+            Irm -useb "github.com/Fors1kGato/psClick/raw/main/$($f.path)" -OutFile $p|out-null
         }
     }
 

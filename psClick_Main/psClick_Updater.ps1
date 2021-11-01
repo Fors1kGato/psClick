@@ -1,6 +1,6 @@
 &{
     #.COMPONENT
-    #2
+    #1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -22,11 +22,11 @@
         #sleep 50
     }
 
-    ForEach($f in $files){
-        $check = $tr.sha.Contains($f.sha)
-        if($f.path -eq 'psClick_Main/psClick_Updater.ps1'){continue}
+    $files|%{
+        $check = $tr.sha.Contains($_.sha)
+        if($_.path -eq 'psClick_Main/psClick_Updater.ps1'){continue}
         if(!$check){
-            $Path = (Join-path $psClickPath $f.path)
+            $Path = (Join-path $psClickPath $_.path)
             try{$p = Ni -ea Stop $Path -Force}
             catch{
                 Write-Warning (
@@ -35,10 +35,15 @@
                 )
                 $er = $true
             }
-            Irm -useb "github.com/Fors1kGato/psClick/raw/main/$($f.path)" -OutFile $p|out-null
+            Irm -useb "github.com/Fors1kGato/psClick/raw/main/$($_.path)" -OutFile $p|out-null
         }
     }
-
+    $HDA = @{
+        Path  = "HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers"
+        Name  = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell_ise.exe"
+        Value = "~ HIGHDPIAWARE"
+    }
+    New-ItemProperty @HDA|Out-Null
     (gci -Recurse $psClickPath -ex "token.ps1" ).FullName.replace("$psClickPath\","").replace("\","/")|
     ?{$tree.path -notcontains $_}|%{
         ri (Join-Path $psClickPath $_) -Recurse -ea 0

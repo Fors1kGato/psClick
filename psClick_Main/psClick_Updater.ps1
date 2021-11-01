@@ -1,4 +1,4 @@
-﻿&{
+&{
     #.COMPONENT
     #1
     #.SYNOPSIS
@@ -24,6 +24,7 @@
 
     $files|%{
         $check = $tr.sha.Contains($_.sha)
+        if($_.path -eq 'psClick_Main/psClick_Updater.ps1'){continue}
         if(!$check){
             $Path = (Join-path $psClickPath $_.path)
             try{$p = Ni -ea Stop $Path -Force}

@@ -43,7 +43,7 @@
         Name  = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell_ise.exe"
         Value = "~ HIGHDPIAWARE"
     }
-    New-ItemProperty @HDA|Out-Null
+    New-ItemProperty @HDA -Force|Out-Null
     (gci -Recurse $psClickPath -ex "token.ps1" ).FullName.replace("$psClickPath\","").replace("\","/")|
     ?{$tree.path -notcontains $_}|%{
         ri (Join-Path $psClickPath $_) -Recurse -ea 0

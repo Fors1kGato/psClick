@@ -1,4 +1,21 @@
-﻿Function Get-WindowState
+﻿function Get-ScreenSize
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        [Switch]$All
+    )
+    if($All){
+        [Windows.Forms.Screen]::AllScreens.Bounds
+    }
+    else{
+        [Windows.Forms.Screen]::PrimaryScreen.Bounds
+    }
+}
+
+Function Get-WindowState
 {
     #.COMPONENT
     #1

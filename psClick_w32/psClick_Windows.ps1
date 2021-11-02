@@ -1,4 +1,4 @@
-﻿function Get-ScreenSize
+﻿function Get-ScreenInfo
 {
     #.COMPONENT
     #1

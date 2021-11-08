@@ -48,9 +48,9 @@
       </asmv3:application>
     </assembly>'|Out-File "C:\Windows\System32\WindowsPowerShell\v1.0\powershell$_.exe.manifest" -Encoding UTF8}
 
-
+    $profile = ""
     $pPath = "C:\Windows\System32\WindowsPowerShell\v1.0\profile.ps1"
-    [String]$profile = gc $pPath -raw -ea 0
+    $profile = gc $pPath -raw -ea 0
     if(!$profile.Contains("Contains('ISE')")){
     "if(`$Host.Name.Contains('ISE')){
         [Void]`$psISE.CurrentPowerShellTab.AddOnsMenu.SubMenus.Add(

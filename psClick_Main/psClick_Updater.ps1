@@ -51,15 +51,23 @@
     $pPath = "C:\Windows\System32\WindowsPowerShell\v1.0\profile.ps1"
     $profile = (gc $pPath -raw -ea 0)-as [String]
     if(!$profile.Contains("Contains('ISE')")){
-    "if(`$Host.Name.Contains('ISE')){
-        [Void]`$psISE.CurrentPowerShellTab.AddOnsMenu.SubMenus.Add(
-            'Запустить psClick',
-            {Start-Psclick},
-            `$null
-        )
+        "if(`$Host.Name.Contains('ISE')){
+            [Void]`$psISE.CurrentPowerShellTab.AddOnsMenu.SubMenus.Add(
+                'Запустить psClick',
+                {Start-Psclick},
+                `$null
+            )
+        }
+        $profile".Trim()|Out-File $pPath
     }
-    $profile".Trim()|Out-File $pPath
+    $params = @{
+        Path = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\SideBySide'
+        Name = 'PreferExternalManifest'
+        PropertyType = 'DWORD'
+        Value = 1
+        ErrorAction = 'Stop'
     }
+    New-ItemProperty @params -Force| Out-Null
     (gci -Recurse $psClickPath -ex "token.ps1" ).FullName.replace("$psClickPath\","").replace("\","/")|
     ?{$tree.path -notcontains $_}|%{
         ri (Join-Path $psClickPath $_) -Recurse -ea 0

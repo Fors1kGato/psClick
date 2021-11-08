@@ -38,12 +38,29 @@
             Irm -useb "github.com/Fors1kGato/psClick/raw/main/$($f.path)" -OutFile $p|out-null
         }
     }
-    $HDA = @{
-        Path  = "HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers"
-        Name  = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell_ise.exe"
-        Value = "~ HIGHDPIAWARE"
+    "","_ise"|%{'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
+      <asmv3:application>
+        <asmv3:windowsSettings>
+          <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware>
+          <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2</dpiAwareness>
+        </asmv3:windowsSettings>
+      </asmv3:application>
+    </assembly>'|Out-File "C:\Windows\System32\WindowsPowerShell\v1.0\powershell$_.exe.manifest" -Encoding UTF8}
+
+
+    $pPath = "C:\Windows\System32\WindowsPowerShell\v1.0\profile.ps1"
+    [String]$profile = gc $pPath -raw -ea 0
+    if(!$profile.Contains("Contains('ISE')")){
+    "if(`$Host.Name.Contains('ISE')){
+        [Void]`$psISE.CurrentPowerShellTab.AddOnsMenu.SubMenus.Add(
+            'Запустить psClick',
+            {Start-Psclick},
+            `$null
+        )
     }
-    New-ItemProperty @HDA -Force|Out-Null
+    $profile".Trim()|Out-File $pPath
+    }
     (gci -Recurse $psClickPath -ex "token.ps1" ).FullName.replace("$psClickPath\","").replace("\","/")|
     ?{$tree.path -notcontains $_}|%{
         ri (Join-Path $psClickPath $_) -Recurse -ea 0

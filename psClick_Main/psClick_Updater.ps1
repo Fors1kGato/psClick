@@ -1,4 +1,3 @@
-
 cls
 $Host.UI.RawUI.WindowTitle="psClick© Updater"
 $bufSize = $host.ui.RawUI.BufferSize

@@ -1,4 +1,4 @@
-﻿function Get-ScreenInfo
+﻿function Get-ScreenRectangle
 {
     #.COMPONENT
     #1

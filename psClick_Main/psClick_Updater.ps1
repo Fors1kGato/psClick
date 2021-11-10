@@ -9,8 +9,8 @@
     $bufSize = $host.ui.RawUI.BufferSize
     $winSize = $host.ui.RawUI.WindowSize
     $bufSize.Height = 3000
-    $bufSize.Width = 120
-    $winSize.Width = 120
+    $bufSize.Width  = 120
+    $winSize.Width  = 120
     $winSize.Height = 30
     $host.ui.RawUI.BufferSize = $bufSize
     $host.ui.RawUI.WindowSize = $winSize

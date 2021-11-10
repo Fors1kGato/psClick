@@ -5,6 +5,26 @@
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
     )
+    cls
+    $bufSize = $host.ui.RawUI.BufferSize
+    $winSize = $host.ui.RawUI.WindowSize
+    $bufSize.Height = 3000
+    $bufSize.Width = 120
+    $winSize.Width = 120
+    $winSize.Height = 30
+    $host.ui.RawUI.BufferSize = $bufSize
+    $host.ui.RawUI.WindowSize = $winSize
+    $Host.UI.RawUI.WindowTitle="psClick© Updater"
+    write-host "
+                                             ###############################
+                                             ##          psClick          ##
+                                             ##            by             ##
+                                             ##          Fors1k           ##
+                                             ##           ****            ##
+                                             ##     https://psClick.ru    ##
+                                             ###############################
+                                                     Идет обновление     
+    ' -ForegroundColor cyan;
     $url   = "api.github.com/repos/Fors1kGato/psClick/git/trees/main?recursive=1"
     $psClickPath = [Environment]::GetFolderPath("MyDocuments") + "\psClick"
     $tree  = (Irm $url -useb).tree
@@ -72,7 +92,7 @@
     ?{$tree.path -notcontains $_}|%{
         ri (Join-Path $psClickPath $_) -Recurse -ea 0
     }
-    (Get-Command -Module psClick*).Module|ForEach{Remove-Module $_}
+    #(Get-Command -Module psClick*).Module|ForEach{Remove-Module $_}
     sal ngen (Join-Path ([Runtime.InteropServices.RuntimeEnvironment]::GetRuntimeDirectory()) ngen.exe)
     $psClickPath = [Environment]::GetFolderPath("MyDocuments") + "\psClick"
     (gci $psClickPath -rec *.dll).FullName|%{

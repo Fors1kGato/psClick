@@ -15,7 +15,7 @@
     $host.ui.RawUI.BufferSize = $bufSize
     $host.ui.RawUI.WindowSize = $winSize
     $Host.UI.RawUI.WindowTitle="psClick© Updater"
-    write-host "
+    write-host '
                                              ###############################
                                              ##          psClick          ##
                                              ##            by             ##

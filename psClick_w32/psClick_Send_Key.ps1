@@ -1,7 +1,7 @@
 ﻿function Send-Key
 {
     #.COMPONENT
-    #2.3
+    #3
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = '__AllParameterSets')]
@@ -47,7 +47,7 @@
         $collection.Add($attribute)
 
         if($Hardware){
-            $validationSet = [String[]]('D0','D1','D2','D3','D4','D5','D6','D7','D8','D9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','Alt','Capital','CapsLock','Delete','Down','End','Enter','Escape','F1','F10','F11','F12','F13','F14','F15','F16','F17','F18','F19','F2','F20','F21','F22','F23','F24','F3','F4','F5','F6','F7','F8','F9','Home','Insert','LControlKey','Left','LShiftKey','LWin','PageDown','PageUp','RControlKey','Return','Right','RShiftKey','RWin','Tab','Up')
+            $validationSet = [String[]]('D0','D1','D2','D3','D4','D5','D6','D7','D8','D9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','Alt','Capital','CapsLock','Delete','Down','End','Enter','Escape','F1','F10','F11','F12','F13','F14','F15','F16','F17','F18','F19','F2','F20','F21','F22','F23','F24','F3','F4','F5','F6','F7','F8','F9','Home','Insert','LControlKey','Left','LShiftKey','LWin','PageDown','PageUp','RControlKey','Return','Right','RShiftKey','RWin','Tab','Up','NumPad0','NumPad1','NumPad2','NumPad3','NumPad4','NumPad5','NumPad6','NumPad7','NumPad8','NumPad9','Multiply','Subtract','Decimal','Add','Divide')
         }
         else{
             $validationSet = [String[]]('None','LButton','RButton','Cancel','MButton','XButton1','XButton2','Back','Tab','LineFeed','Clear','Enter','Return','ShiftKey','ControlKey','Menu','Pause','CapsLock','Capital','HangulMode','HanguelMode','KanaMode','JunjaMode','FinalMode','KanjiMode','HanjaMode','Escape','IMEConvert','IMENonconvert','IMEAccept','IMEAceept','IMEModeChange','Space','Prior','PageUp','PageDown','Next','End','Home','Left','Up','Right','Down','Select','Print','Execute','Snapshot','PrintScreen','Insert','Delete','Help','D0','D1','D2','D3','D4','D5','D6','D7','D8','D9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','LWin','RWin','Apps','Sleep','NumPad0','NumPad1','NumPad2','NumPad3','NumPad4','NumPad5','NumPad6','NumPad7','NumPad8','NumPad9','Multiply','Add','Separator','Subtract','Decimal','Divide','F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12','F13','F14','F15','F16','F17','F18','F19','F20','F21','F22','F23','F24','NumLock','Scroll','LShiftKey','RShiftKey','LControlKey','RControlKey','LMenu','RMenu','BrowserBack','BrowserForward','BrowserRefresh','BrowserStop','BrowserSearch','BrowserFavorites','BrowserHome','VolumeMute','VolumeDown','VolumeUp','MediaNextTrack','MediaPreviousTrack','MediaStop','MediaPlayPause','LaunchMail','SelectMedia','LaunchApplication1','LaunchApplication2','OemSemicolon','Oem1','Oemplus','Oemcomma','OemMinus','OemPeriod','Oem2','OemQuestion','Oem3','Oemtilde','Oem4','OemOpenBrackets','OemPipe','Oem5','OemCloseBrackets','Oem6','OemQuotes','Oem7','Oem8','Oem102','OemBackslash','ProcessKey','Packet','Attn','Crsel','Exsel','EraseEof','Play','Zoom','NoName','Pa1','OemClear','KeyCode','Shift','Control','Alt','Modifiers')
@@ -80,53 +80,68 @@
                 }
                 else{
                     $hKey = @{
-                        LControlKey = 0x80
-                        LShiftKey   = 0x81
-                        Alt         = 0x82
-                        LWin        = 0x83
-                        RControlKey = 0x84
-                        RShiftKey   = 0x85
-                        RWin        = 0x87
-                        Up          = 0xDA
-                        Down        = 0xD9
-                        Left        = 0xD8
-                        Right       = 0xD7
-                        Tab         = 0xB3
-                        Enter       = 0xB0
-                        Return      = 0xB0
-                        Escape      = 0xB1
-                        Insert      = 0xD1
-                        Delete      = 0xD4
-                        PageUp      = 0xD3
-                        PageDown    = 0xD6
-                        Home        = 0xD2
-                        End         = 0xD5
-                        CapsLock    = 0xC1
-                        Capital     = 0xC1
-                        F1          = 0xC2
-                        F2          = 0xC3
-                        F3          = 0xC4
-                        F4          = 0xC5
-                        F5          = 0xC6
-                        F6          = 0xC7
-                        F7          = 0xC8
-                        F8          = 0xC9
-                        F9          = 0xCA
-                        F10         = 0xCB
-                        F11         = 0xCC
-                        F12         = 0xCD
-                        F13         = 0xF0
-                        F14         = 0xF1
-                        F15         = 0xF2
-                        F16         = 0xF3
-                        F17         = 0xF4
-                        F18         = 0xF5
-                        F19         = 0xF6
-                        F20         = 0xF7
-                        F21         = 0xF8
-                        F22         = 0xF9
-                        F23         = 0xFA
-                        F24         = 0xFB
+                        LControlKey    = 0x80
+                        LShiftKey      = 0x81
+                        Alt            = 0x82
+                        LWin           = 0x83
+                        RControlKey    = 0x84
+                        RShiftKey      = 0x85
+                        RWin           = 0x87
+                        Up             = 0xDA
+                        Down           = 0xD9
+                        Left           = 0xD8
+                        Right          = 0xD7
+                        Tab            = 0xB3
+                        Enter          = 0xB0
+                        Return         = 0xB0
+                        Escape         = 0xB1
+                        Insert         = 0xD1
+                        Delete         = 0xD4
+                        PageUp         = 0xD3
+                        PageDown       = 0xD6
+                        Home           = 0xD2
+                        End            = 0xD5
+                        CapsLock       = 0xC1
+                        Capital        = 0xC1
+                        F1             = 0xC2
+                        F2             = 0xC3
+                        F3             = 0xC4
+                        F4             = 0xC5
+                        F5             = 0xC6
+                        F6             = 0xC7
+                        F7             = 0xC8
+                        F8             = 0xC9
+                        F9             = 0xCA
+                        F10            = 0xCB
+                        F11            = 0xCC
+                        F12            = 0xCD
+                        F13            = 0xF0
+                        F14            = 0xF1
+                        F15            = 0xF2
+                        F16            = 0xF3
+                        F17            = 0xF4
+                        F18            = 0xF5
+                        F19            = 0xF6
+                        F20            = 0xF7
+                        F21            = 0xF8
+                        F22            = 0xF9
+                        F23            = 0xFA
+                        F24            = 0xFB
+                        NumPad0        = 234 
+                        NumPad1        = 225 
+                        NumPad2        = 226 
+                        NumPad3        = 227 
+                        NumPad4        = 228 
+                        NumPad5        = 229 
+                        NumPad6        = 230 
+                        NumPad7        = 231 
+                        NumPad8        = 232 
+                        NumPad9        = 233 
+                        Multiply       = 221 
+                        Subtract       = 222 
+                        Decimal        = 235 
+                        Add            = 223 
+                        Divide         = 220
                     }.$key
                 }
 

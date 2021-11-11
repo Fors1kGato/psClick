@@ -1,4 +1,16 @@
-﻿Function Get-LevenshteinDistance 
+﻿function Test-AdminRole
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+    )
+    ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).
+    IsInRole([System.Security.Principal.WindowsBuiltInRole]"Administrator")
+}
+
+Function Get-LevenshteinDistance 
 {
     #.COMPONENT
     #1

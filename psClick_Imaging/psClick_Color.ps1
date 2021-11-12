@@ -625,7 +625,7 @@ Function Compare-Color
 function Draw-Rectangle
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Cirus, Fors1k ; Link: https://psClick.ru
     param(
@@ -646,11 +646,17 @@ function Draw-Rectangle
     $Color = [Drawing.Color]::Red
     if($Location -isnot [Drawing.Point]){
         try{
-            $Location = $Location|ForEach{
-                if($_ -isnot [Drawing.Point]){
-                    [Drawing.Point]::new.Invoke($_)
+            if($Location.Count -eq 2){
+                $Location = [Drawing.Point]::new.Invoke($Location)
+            }
+            else{
+                $Location = $Location|ForEach{
+                    if($_ -isnot [Drawing.Point]){
+                    
+                        [Drawing.Point]::new.Invoke($_)
+                    }
+                    else{$_}
                 }
-                else{$_}
             }
         }catch{throw $_}
     }

@@ -680,7 +680,7 @@ function Draw-Rectangle
     $Color = [Drawing.Color]::Red
     if($Location -isnot [Drawing.Point]){
         try{
-            if($Location.Count -eq 2){
+            if($Location.Count -eq 2 -and $Location[0]-is[int]){
                 $Location = [Drawing.Point]::new.Invoke($Location)
             }
             else{

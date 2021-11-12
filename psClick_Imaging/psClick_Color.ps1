@@ -1,4 +1,38 @@
-﻿class Color : System.IEquatable[Object] {
+﻿function Get-CursorImage
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Cirus, Fors1k ; Link: https://psClick.ru
+    param(   
+    )
+    [Drawing.Icon]::FromHandle((Get-CursorHandle)).ToBitmap()
+}
+
+function Compare-Cursor
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Cirus ; Link: https://psClick.ru
+    param(    
+        [Parameter(Mandatory)]
+        [Drawing.Bitmap]$ImageCursor
+    )
+    $cursor = [System.Drawing.Icon]::FromHandle((Get-CursorHandle))
+    $bitmap = $cursor.ToBitmap()
+ 
+    $result = $false
+    if((Find-Image $ImageCursor -Picture $bitmap)){
+        $result = $true    
+    }     
+    $cursor.Dispose()
+    $bitmap.Dispose()
+    
+    return $result
+}
+
+class Color : System.IEquatable[Object] {
     [Byte[]]$RGB
     [String]$HEX
 

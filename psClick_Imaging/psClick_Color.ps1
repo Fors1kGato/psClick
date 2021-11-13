@@ -677,7 +677,6 @@ function Draw-Rectangle
     )
     if($Size -isnot [Drawing.Size]){try{$Size=[Drawing.Size]::new.Invoke($Size)}catch{throw $_}}
     if($Color -isnot [Drawing.Color]){$Color = New-Color $Color -Raw}
-    $Color = [Drawing.Color]::Red
     if($Location -isnot [Drawing.Point]){
         try{
             if($Location.Count -eq 2 -and $Location[0]-is[int]){

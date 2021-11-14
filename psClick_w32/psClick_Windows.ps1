@@ -1,4 +1,16 @@
-﻿function Get-ScreenRectangle
+﻿function Set-WindowTopMostNoActivate
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        [IntPtr]$Handle
+    )
+    [w32Windos]::SetWindowTopMostNoActivate($Handle)
+}
+
+function Get-ScreenRectangle
 {
     #.COMPONENT
     #1

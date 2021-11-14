@@ -383,6 +383,7 @@ function Show-Hint
             $f.Text = "psClickHint_$Name"
             $f.Location = $Position
             $f.Opacity = $Transparency
+            Set-WindowTopMostNoActivate $f.Handle
 
             $fc = [System.Drawing.Text.PrivateFontCollection]::new()
             $fc.AddFontFile($fPath)
@@ -425,7 +426,7 @@ function Show-Hint
                 $timer.Start()
             })
             #$f.Add_Shown({ $f.TopMost = $true })
-            $f.Add_Shown({Start-ThreadJob -ScriptBlock {Show-Window $args[0] -State TopMost} -ArgumentList $f.Handle -StreamingHost $host})
+            #$f.Add_Shown({Start-ThreadJob -ScriptBlock {Show-Window $args[0] -State TopMost} -ArgumentList $f.Handle -StreamingHost $host})
             $f.Add_Closed({ $timer.Stop() })
 
             $WS_EX_TRANSPARENT = 0x00000020
@@ -453,6 +454,7 @@ function Show-Hint
             $f.Text = "psClickHint_$Name"
             $f.Location = $Position
             $f.Opacity = $Transparency
+            Set-WindowTopMostNoActivate $f.Handle
 
             $fc = [System.Drawing.Text.PrivateFontCollection]::new()
             $fc.AddFontFile($fPath)
@@ -511,7 +513,10 @@ function Show-Hint
                 $timer.Start()
             })
             #$f.Add_Shown({ $f.TopMost = $true;$tb.Size = $lb.Size })
-            $f.Add_Shown({$tb.Size = $lb.Size;Start-ThreadJob -ScriptBlock {Show-Window $args[0] -State TopMost} -ArgumentList $f.Handle -StreamingHost $host})
+            $f.Add_Shown({
+                $tb.Size = $lb.Size
+                #Start-ThreadJob -ScriptBlock {Show-Window $args[0] -State TopMost} -ArgumentList $f.Handle -StreamingHost $host
+            })
             $f.Add_Closed({ $timer.Stop() })
              
             $f.ShowDialog()|out-null
@@ -706,6 +711,7 @@ function Draw-Rectangle
         $f.StartPosition = 0
         $f.Text = "target"
         $f.Size = [Windows.Forms.Screen]::PrimaryScreen.bounds.size
+        Set-WindowTopMostNoActivate $f.Handle
 
 
         $timer = [Windows.Forms.Timer]::new()
@@ -715,7 +721,8 @@ function Draw-Rectangle
 
 
         $pen = [Drawing.Pen]::new($Color, $Width)
-        $f.Add_Shown({Start-ThreadJob -ScriptBlock {Show-Window $args[0] -State TopMost} -ArgumentList $f.Handle -StreamingHost $host})
+        #$f.Add_Shown({Start-ThreadJob -ScriptBlock {Show-Window $args[0] -State TopMost} -ArgumentList $f.Handle -StreamingHost $host})
+        #$f.Add_Shown({Set-WindowTopMostNoActivate $f.Handle})
         $f.Add_Paint({ForEach($l in $location){$_.Graphics.DrawRectangle($pen, [System.Drawing.Rectangle]::new($l,$sz))}})
         $f.Add_Closed({ $timer.Stop() })
 

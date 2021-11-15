@@ -664,7 +664,7 @@ Function Compare-Color
 function Draw-Rectangle
 {
     #.COMPONENT
-    #1.1
+    #2
     #.SYNOPSIS
     #Author: Cirus, Fors1k ; Link: https://psClick.ru
     param(
@@ -698,43 +698,39 @@ function Draw-Rectangle
             }
         }catch{throw $_}
     }
+    $f = [FormNA]::new()
+    $f.ShowInTaskbar = $false
+    $f.FormBorderStyle = "none"
+    $f.TransparencyKey = $f.BackColor
+    $f.StartPosition = 0
+    $f.Text = "psClick_DrawRectangle"
+    $f.Size = [Windows.Forms.Screen]::PrimaryScreen.bounds.size
+    Show-Window $f.Handle -State TopMost
+
     $DrawRectangle = {
         param($Location,$Size,$Color,$width)
+        $f = $using:f
         $Location.Offset(-$Width+1,-$Width+1)
         $sz = [Drawing.Size]::new($size.Width+$Width,$size.Height+$Width)
-
-        $f = [FormNA]::new()
-        $f.ShowInTaskbar = $false
-        $f.FormBorderStyle = "none"
-        $f.TransparencyKey = $f.BackColor
-        $f.TopLevel = $true
-        $f.StartPosition = 0
-        $f.Text = "target"
-        $f.Size = [Windows.Forms.Screen]::PrimaryScreen.bounds.size
-        Set-WindowTopMostNoActivate $f.Handle
-
+        $WS_EX_TRANSPARENT = 0x00000020
+        $WS_EX_LAYERED     = 0x00080000
+        $GWL_EXSTYLE       = -20
 
         $timer = [Windows.Forms.Timer]::new()
         $timer.Interval = 3000
         $timer.add_tick({ $f.Close() })
         $timer.Start()
 
-
-        $pen = [Drawing.Pen]::new($Color, $Width)
-        #$f.Add_Shown({Start-ThreadJob -ScriptBlock {Show-Window $args[0] -State TopMost} -ArgumentList $f.Handle -StreamingHost $host})
-        #$f.Add_Shown({Set-WindowTopMostNoActivate $f.Handle})
-        $f.Add_Paint({ForEach($l in $location){$_.Graphics.DrawRectangle($pen, [System.Drawing.Rectangle]::new($l,$sz))}})
-        $f.Add_Closed({ $timer.Stop() })
-
-        $WS_EX_TRANSPARENT = 0x00000020
-        $WS_EX_LAYERED = 0x00080000
-        $GWL_EXSTYLE   = -20
-
         [Void][psClickColor]::SetWindowLongPtr(
             $f.Handle, 
             $GWL_EXSTYLE, 
             ($WS_EX_LAYERED -bor $WS_EX_TRANSPARENT)
         ) 
+        $pen = [Drawing.Pen]::new($Color, $Width)
+
+        $f.Add_Paint({ForEach($l in $location){$_.Graphics.DrawRectangle($pen, [System.Drawing.Rectangle]::new($l,$sz))}})
+        $f.Add_Closed({ $timer.Stop() })
+
         $f.ShowDialog()|Out-Null
         $timer.Stop()
     }
@@ -743,4 +739,5 @@ function Draw-Rectangle
     Start-ThreadJob $DrawRectangle -Name psclickDrawRectangle -StreamingHost $host -ArgumentList @(
         $Location,$Size,$Color,$width
     )|Out-Null
+    
 }

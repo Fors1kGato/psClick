@@ -405,6 +405,7 @@ function Close-Window
     #3
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
+    [CmdletBinding(DefaultParameterSetName = '__AllParameterSets')]
     Param(
         [parameter(Mandatory,Position=0)]
         [IntPtr]$Handle

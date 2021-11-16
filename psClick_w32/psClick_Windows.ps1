@@ -298,7 +298,7 @@ function Show-Window
     if($State -in $ShowWindow.Keys)
     {[Void][w32Windos]::ShowWindow($Handle, $ShowWindow.$State)}
     else
-    {[Void][w32Windos]::SetWindowPos($Handle, $SetWindowPos.$State, 0,0,0,0, (0x0001 -bor 0x0002))}
+    {[Void][w32Windos]::SetWindowPos($Handle, $SetWindowPos.$State, 0,0,0,0, (0x0001 -bor 0x0002 -bor 0x0010))}
 }
 
 function Find-Window

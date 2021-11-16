@@ -297,7 +297,7 @@ function Get-Image
 function Show-Hint
 {
     #.COMPONENT
-    #4
+    #5
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     param(
@@ -371,7 +371,7 @@ function Show-Hint
         $w = (Find-Window -Title "psClickHint_$name" -Option EQ).handle
         if(!$w){$new = $true}else{$w = $w[0]}
         if($New -and $Ghost){
-            $f = [FormNA]::new()
+            $f = [System.Windows.Forms.Form]::new()
             $f.ShowInTaskbar = $false
             $f.FormBorderStyle = "none"
             $f.TransparencyKey = $f.BackColor
@@ -383,7 +383,6 @@ function Show-Hint
             $f.Text = "psClickHint_$Name"
             $f.Location = $Position
             $f.Opacity = $Transparency
-            Set-WindowTopMostNoActivate $f.Handle
 
             $fc = [System.Drawing.Text.PrivateFontCollection]::new()
             $fc.AddFontFile($fPath)
@@ -439,10 +438,19 @@ function Show-Hint
                 ($WS_EX_LAYERED -bor $WS_EX_TRANSPARENT)
             )
 
-            $f.ShowDialog()|out-null
+            .{
+                Show-Window $f.Handle -State ShowNA
+                Show-Window $f.Handle -State TopMost
+                $f.Show()
+                while($f.Visible){
+                    [Windows.Forms.Application]::DoEvents()
+                    Sleep -m 64
+                } 
+                $f.Dispose()
+            }
         }
         elseif($New -and !$Ghost){
-            $f = [FormNA]::new()
+            $f = [System.Windows.Forms.Form]::new()
             $f.ShowInTaskbar = $false
             $f.FormBorderStyle = "none"
             $f.TransparencyKey = $f.BackColor
@@ -454,7 +462,6 @@ function Show-Hint
             $f.Text = "psClickHint_$Name"
             $f.Location = $Position
             $f.Opacity = $Transparency
-            Set-WindowTopMostNoActivate $f.Handle
 
             $fc = [System.Drawing.Text.PrivateFontCollection]::new()
             $fc.AddFontFile($fPath)
@@ -519,7 +526,17 @@ function Show-Hint
             })
             $f.Add_Closed({ $timer.Stop() })
              
-            $f.ShowDialog()|out-null
+
+            .{
+                Show-Window $f.Handle -State ShowNA
+                Show-Window $f.Handle -State TopMost
+                $f.Show()
+                while($f.Visible){
+                    [Windows.Forms.Application]::DoEvents()
+                    Sleep -m 64
+                } 
+                $f.Dispose()
+            }
         }
         else{
             $h = @(Get-ChildWindows -Handle $w|where wClass -match "EDIT")
@@ -664,7 +681,7 @@ Function Compare-Color
 function Draw-Rectangle
 {
     #.COMPONENT
-    #2
+    #3
     #.SYNOPSIS
     #Author: Cirus, Fors1k ; Link: https://psClick.ru
     param(
@@ -698,23 +715,24 @@ function Draw-Rectangle
             }
         }catch{throw $_}
     }
-    $f = [FormNA]::new()
-    $f.ShowInTaskbar = $false
-    $f.FormBorderStyle = "none"
-    $f.TransparencyKey = $f.BackColor
-    $f.StartPosition = 0
-    $f.Text = "psClick_DrawRectangle"
-    $f.Size = [Windows.Forms.Screen]::PrimaryScreen.bounds.size
-    Show-Window $f.Handle -State TopMost
+    
 
     $DrawRectangle = {
         param($Location,$Size,$Color,$width)
-        $f = $using:f
+        #$f = $using:f
         $Location.Offset(-$Width+1,-$Width+1)
         $sz = [Drawing.Size]::new($size.Width+$Width,$size.Height+$Width)
         $WS_EX_TRANSPARENT = 0x00000020
         $WS_EX_LAYERED     = 0x00080000
         $GWL_EXSTYLE       = -20
+
+        $f = [System.Windows.Forms.Form]::new()
+        $f.ShowInTaskbar = $false
+        $f.FormBorderStyle = "none"
+        $f.TransparencyKey = $f.BackColor
+        $f.StartPosition = 0
+        $f.Text = "psClick_DrawRectangle"
+        $f.Size = [Windows.Forms.Screen]::PrimaryScreen.bounds.size
 
         $timer = [Windows.Forms.Timer]::new()
         $timer.Interval = 3000
@@ -731,8 +749,16 @@ function Draw-Rectangle
         $f.Add_Paint({ForEach($l in $location){$_.Graphics.DrawRectangle($pen, [System.Drawing.Rectangle]::new($l,$sz))}})
         $f.Add_Closed({ $timer.Stop() })
 
-        $f.ShowDialog()|Out-Null
-        $timer.Stop()
+        .{
+            Show-Window $f.Handle -State ShowNA
+            Show-Window $f.Handle -State TopMost
+            $f.Show()
+            while($f.Visible){
+                [Windows.Forms.Application]::DoEvents()
+                Sleep -m 64
+            } 
+            $f.Dispose()
+        }
     }
 
     Remove-Job -Name psclickDrawRectangle -Force -ea 0

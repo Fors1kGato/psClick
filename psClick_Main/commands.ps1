@@ -1,4 +1,41 @@
-﻿function Test-AdminRole
+﻿function Start-PlaySound
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Cirus, Fors1k ; Link: https://psClick.ru
+    Param(
+        [Parameter(Mandatory, Position=0)]
+        [ValidateScript({Test-Path $_})]
+        [String]$Path
+        ,
+        [ValidateRange(0.0, 1.0)]
+        [Double]$Volume = 0.5
+        ,
+        [Switch]$WaitEnd
+    )
+
+    $mediaPlayer = [Windows.Media.MediaPlayer]::new()
+    $mediaPlayer.Volume = $Volume 
+    $mediaPlayer.open($Path)
+
+    # ожидание когда файл загрузится
+    while(!($mediaPlayer.NaturalDuration.TimeSpan)){
+        sleep -m 10
+    }
+    $Duration = [Math]::Round($mediaPlayer.NaturalDuration.TimeSpan.TotalMilliseconds)
+
+    if($WaitEnd){  # ждать когда воспроизведение завершится
+        $mediaPlayer.Play()
+        Sleep -m $Duration
+        $mediaPlayer.Close()
+    }
+    else{
+        $mediaPlayer.Play()
+    }
+}
+
+function Test-AdminRole
 {
     #.COMPONENT
     #1

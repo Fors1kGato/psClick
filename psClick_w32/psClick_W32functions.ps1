@@ -1,4 +1,4 @@
-﻿function Get-PointsDistance1
+﻿function Get-PointsDistance
 {
     #.COMPONENT
     #2

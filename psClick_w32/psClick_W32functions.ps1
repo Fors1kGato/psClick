@@ -1,7 +1,7 @@
-﻿function Get-PointsDistance
+﻿function Get-PointsDistance1
 {
     #.COMPONENT
-    #1
+    #2
     #.SYNOPSIS
     #Author: Cirus, Fors1k ; Link: https://psClick.ru
     Param(
@@ -13,23 +13,21 @@
         ,
         [Switch]$Round
     )
-    if($point1 -isnot [Drawing.Point]){
-        try{$point1 = [Drawing.Point]::new.Invoke($point1)}catch{throw $_}
+    if($point1 -isnot [Drawing.Point] -or $point1 -isnot [Drawing.PointF]){
+        try{$point1 = [Drawing.PointF]::new.Invoke($point1)}catch{throw $_}
     }
-    if($point2 -isnot [Drawing.Point]){
-        try{$point2 = [Drawing.Point]::new.Invoke($point2)}catch{throw $_}
+    if($point2 -isnot [Drawing.Point] -or $point2 -isnot [Drawing.PointF]){
+        try{$point2 = [Drawing.PointF]::new.Invoke($point2)}catch{throw $_}
     }
-    if(!$Round){
-        [math]::Sqrt(
-            [math]::Pow($point1.X - $point2.X, 2) + 
-            [math]::Pow($point1.Y - $point2.Y, 2)
-        )
+    $distance = [Math]::Sqrt(
+        [Math]::Pow($point1.X - $point2.X, 2) + 
+        [Math]::Pow($point1.Y - $point2.Y, 2)
+    )
+    if($Round){
+        [Math]::Round($distance)
     }
     else{
-        [math]::Round([math]::Sqrt(
-            [math]::Pow($point1.X - $point2.X, 2) + 
-            [math]::Pow($point1.Y - $point2.Y, 2)
-        ))
+        $distance
     }
 }
 

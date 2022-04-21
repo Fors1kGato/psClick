@@ -27,13 +27,17 @@ function Send-TelegramFile
 function Send-TelegramImage
 {
     #.COMPONENT
-    #1.1
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [Drawing.Bitmap]$Image
+        ,
+        [Parameter(Mandatory = $false)]
+        [String]$Name
     )
-    $Image.Save("$env:TEMP\picture.png", [System.Drawing.Imaging.ImageFormat]::Png)
-    ."$psscriptroot\psClick_bot.exe" -id="$mee" -content="$env:TEMP\picture.png"|out-null
+    if(!$Name){$Name = "picture"}
+    $Image.Save("$env:TEMP\$Name.png", [Drawing.Imaging.ImageFormat]::Png)
+    ."$psscriptroot\psClick_bot.exe" -id="$mee" -content="$env:TEMP\$Name.png"|out-null
 }

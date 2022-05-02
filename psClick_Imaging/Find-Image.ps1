@@ -1,9 +1,9 @@
 ﻿function Find-Image
 {
     #.COMPONENT
-    #3.1
+    #4
     #.SYNOPSIS
-    #Author: Fors1k ; Link: https://psClick.ru
+    #Author: Fors1k, Cirus ; Link: https://psClick.ru
     [Alias('Find-Color')][CmdletBinding(DefaultParameterSetName = 'Screen_FullSize')]
     Param
     (
@@ -76,6 +76,8 @@
         ,
         [ValidateRange(0, 100)]
         [Int]$Accuracy = 100
+        ,
+        [Switch]$v2
     )
 
     if($Image -isnot [Drawing.Bitmap]){
@@ -161,8 +163,12 @@
             }
         }
     }
-
-    $res = [ImgSearcher]::searchBitmap($smallBmp, $bigBmp, $deviation, $accuracy, $count)
+    if($v2){
+        $res = [Find]::FindImage($smallBmp, $bigBmp, $Count, $Accuracy, ($Deviation*255), 10, -1)
+    }
+    else{
+        $res = [ImgSearcher]::searchBitmap($smallBmp, $bigBmp, $Deviation, $Accuracy, $Count)
+    }
     if($PSCmdlet.ParameterSetName -notmatch "FullSize" -and $res.Count){
         0..($res.Count-1)|%{$res[$_].location.X+=$rect.x;$res[$_].location.Y+=$rect.Y}
         if($Image -is [Drawing.Bitmap]){

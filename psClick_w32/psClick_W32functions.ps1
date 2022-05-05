@@ -31,6 +31,17 @@
     }
 }
 
+function Get-TrayInfo
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+    )
+    ,[Tray]::GetTrayInfo()
+}
+
 function Write-ProcessMemory
 {
     #.COMPONENT

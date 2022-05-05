@@ -39,7 +39,7 @@ function Get-TrayInfo
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
     )
-    ,[Tray]::GetTrayInfo()
+    [Tray]::GetTrayInfo()
 }
 
 function Write-ProcessMemory

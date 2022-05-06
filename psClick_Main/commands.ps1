@@ -1,4 +1,31 @@
-﻿function Start-PlaySound
+﻿function Get-ClipboardHistory{
+    if(!('System.WindowsRuntimeSystemExtensions' -as [Type])){
+        [Void][Reflection.Assembly]::LoadWithPartialName("System.Runtime.WindowsRuntime")
+    }
+    if(!('Windows.ApplicationModel.DataTransfer.Clipboard' -as [Type])){
+        [Void][Windows.ApplicationModel.DataTransfer.Clipboard,Windows.ApplicationModel.DataTransfer,ContentType=WindowsRuntime]
+    }
+    Function Await($WinRtTask, $ResultType){
+        ([WindowsRuntimeSystemExtensions].GetMethods()|Where{ 
+            $_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 -and 
+            $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation`1'
+        })[0].MakeGenericMethod($ResultType).Invoke($null, @($WinRtTask))|SV netTask
+        $netTask.Wait(-1) | Out-Null
+        $netTask.Result
+    }
+
+    $cbHistory  = [Collections.Generic.List[String]]::new()
+    $asyncTask  = [Windows.ApplicationModel.DataTransfer.Clipboard]::GetHistoryItemsAsync()
+    $resultType = [Windows.ApplicationModel.DataTransfer.ClipboardHistoryItemsResult]
+    $res = Await $asyncTask $resultType
+
+    ForEach($item in $res.Items){
+        $cbHistory.Add((Await $item.Content.GetTextAsync() ([String])))
+    }
+    return ,$cbHistory
+}
+
+function Start-PlaySound
 {
     #.COMPONENT
     #1

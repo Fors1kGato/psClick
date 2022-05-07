@@ -20,7 +20,9 @@
     $res = Await $asyncTask $resultType
 
     ForEach($item in $res.Items){
-        $cbHistory.Add((Await $item.Content.GetTextAsync() ([String])))
+        if($item.Content.AvailableFormats -contains "text"){
+            $cbHistory.Add((Await $item.Content.GetTextAsync() ([String])))
+        }
     }
     return ,$cbHistory
 }

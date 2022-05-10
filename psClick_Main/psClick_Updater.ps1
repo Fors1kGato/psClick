@@ -73,7 +73,7 @@ if($psISE){
     )
     [Void]$psISE.CurrentPowerShellTab.AddOnsMenu.SubMenus.Add(
         'Запустить psClick — ImageReader',
-        {Start-psClick_ImageReader},
+        {Start-psClickImageReader},
         $null
     )
 }

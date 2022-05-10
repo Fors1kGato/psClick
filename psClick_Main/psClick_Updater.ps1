@@ -62,18 +62,30 @@ ForEach($f in $files){
     </asmv3:application>
 </assembly>'|Out-File "C:\Windows\System32\WindowsPowerShell\v1.0\powershell$_.exe.manifest" -Encoding UTF8}
 
-$pPath = "C:\Windows\System32\WindowsPowerShell\v1.0\profile.ps1"
-$profile = (gc $pPath -raw -ea 0)-as [String]
-if(!$profile.Contains("Contains('ISE')")){
-    "if(`$Host.Name.Contains('ISE')){
-        [Void]`$psISE.CurrentPowerShellTab.AddOnsMenu.SubMenus.Add(
-            'Запустить psClick',
-            {Start-Psclick},
-            `$null
-        )
-    }
-    $profile".Trim()|Out-File $pPath
+$toProfile = @'
+#region psClick
+#
+if($psISE){
+    [Void]$psISE.CurrentPowerShellTab.AddOnsMenu.SubMenus.Add(
+        'Запустить psClick',
+        {Start-Psclick},
+        $null
+    )
+    [Void]$psISE.CurrentPowerShellTab.AddOnsMenu.SubMenus.Add(
+        'Запустить psClick — ImageReader',
+        {Start-psClick_ImageReader},
+        $null
+    )
 }
+#
+#endregion
+
+'@
+
+$pPath = "C:\Windows\System32\WindowsPowerShell\v1.0\profile.ps1"
+$pfile = (gc $pPath -raw -ea 0) -as [String]
+$pfile -replace "(\#region\ psClick[\s\S]+?\#endregion`r?`n|^)", $toProfile|Out-File $pPath
+
 $params = @{
     Path = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\SideBySide'
     Name = 'PreferExternalManifest'

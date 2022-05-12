@@ -307,6 +307,7 @@ function Find-Window
     #1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
+    [CmdletBinding(DefaultParameterSetName = 'Title')]
     Param(
         [Parameter(Mandatory=$true,Position=0,ParameterSetName = 'Title')]
         [String]$Title
@@ -332,7 +333,7 @@ function Find-Window
         $match = [ScriptBlock]::Create("`$name -$option `$Title")
 
         while ($hwnd -ne 0){
-            if([w32Windos]::GetWindowText($hwnd, $text, [Int16]::MaxValue)){
+            if([psClick.User32]::GetWindowText($hwnd, $text, [Int16]::MaxValue)){
                 $name = $text.ToString()
                 if(&$match){
                     $res.Add([PSCustomObject]@{Handle = $hwnd;Title = $name})

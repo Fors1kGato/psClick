@@ -7,7 +7,7 @@
     Param(
         [IntPtr]$Handle
     )
-    [w32Windos]::SetWindowTopMostNoActivate($Handle)
+    [psClick.Windows]::SetWindowTopMostNoActivate($Handle)
 }
 
 function Get-ScreenRectangle
@@ -42,11 +42,11 @@ Function Get-WindowState
     $WS_EX_TOPMOST = 0x00000008
 
     [PSCustomObject]@{
-        isForeground = [w32Windos]::GetForegroundWindow() -eq $Handle
-        isVisible    = [w32Windos]::IsWindowVisible($Handle)
-        isMinimized  = [w32Windos]::IsIconic($Handle)
-        isMaximized  = [w32Windos]::IsZoomed($Handle)
-        isTopMost    = [bool]([Int64][w32Windos]::GetWindowLongPtr($Handle, $GWL_EXSTYLE) -band $WS_EX_TOPMOST)
+        isForeground = [psClick.User32]::GetForegroundWindow() -eq $Handle
+        isVisible    = [psClick.User32]::IsWindowVisible($Handle)
+        isMinimized  = [psClick.User32]::IsIconic($Handle)
+        isMaximized  = [psClick.User32]::IsZoomed($Handle)
+        isTopMost    = [Bool]([Int64][psClick.User32]::GetWindowLongPtr($Handle, $GWL_EXSTYLE) -band $WS_EX_TOPMOST)
     }
 }
 
@@ -62,7 +62,7 @@ function Get-WindowRectangle
         ,
         [Switch]$Withborder
     )
-    $wInfo = [w32Windos]::GetWindowInformation($Handle)
+    $wInfo = [psClick.Windows]::GetWindowInformation($Handle)
     if(!$Withborder){
         [Drawing.Rectangle]::new(
             $wInfo.rcClient.Left,
@@ -90,13 +90,13 @@ function Get-FocusWindow
     Param(
     )
     $lpdw = 0
-    $thisPrc = [w32]::GetCurrentThreadId()
-    $target  = [w32Windos]::GetWindowThreadProcessId(
+    $thisPrc = [psClick.Kernel32]::GetCurrentThreadId()
+    $target  = [psClick.User32]::GetWindowThreadProcessId(
         (Get-ForegroundWindow), [ref]$lpdw
     )
-    [Void][w32]::AttachThreadInput($thisPrc, $target, $true)
-    $focus = [w32Windos]::GetFocus()
-    [Void][w32]::AttachThreadInput($thisPrc, $target, $false)
+    [Void][psClick.User32]::AttachThreadInput($thisPrc, $target, $true)
+    $focus = [psClick.User32]::GetFocus()
+    [Void][psClick.User32]::AttachThreadInput($thisPrc, $target, $false)
     $focus
 }
 
@@ -117,9 +117,9 @@ function Set-WindowTransparency
     $GWL_EXSTYLE = -20
     $WS_EX_LAYERED = 0x80000
 
-    $WindowStyle = [w32Windos]::GetWindowLongPtr($handle, $GWL_EXSTYLE)
-    [Void][w32Windos]::SetWindowLongPtr($handle, $GWL_EXSTYLE, ($WindowStyle -bor $WS_EX_LAYERED))
-    [Void][w32Windos]::SetLayeredWindowAttributes($handle, [IntPtr]::Zero, $transparency, $LWA_ALPHA)
+    $WindowStyle = [psClick.User32]::GetWindowLongPtr($handle, $GWL_EXSTYLE)
+    [Void][psClick.User32]::SetWindowLongPtr($handle, $GWL_EXSTYLE, ($WindowStyle -bor $WS_EX_LAYERED))
+    [Void][psClick.User32]::SetLayeredWindowAttributes($handle, [IntPtr]::Zero, $transparency, $LWA_ALPHA)
 }
 
 function Move-Window
@@ -138,7 +138,7 @@ function Move-Window
     if($Position -isnot [Drawing.Point]){
         try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
     }
-    [Void][w32Windos]::SetWindowPos($Handle, [IntPtr]::Zero, $Position.X, $Position.Y, 0, 0, (0x0001 -bor 0x0004))
+    [Void][psClick.User32]::SetWindowPos($Handle, [IntPtr]::Zero, $Position.X, $Position.Y, 0, 0, (0x0001 -bor 0x0004))
 }
 
 function Resize-Window
@@ -159,7 +159,7 @@ function Resize-Window
     if($Size -isnot [Drawing.Size]){
         try{$Size = [Drawing.Size]::new.Invoke($Size)}catch{throw $_}
     }
-    [Void][w32Windos]::SetWindowPos($Handle, [IntPtr]::Zero, 0, 0, $Size.Width, $Size.Height, ($SWP_NOZORDER -bor $SWP_NOMOVE))
+    [Void][psClick.User32]::SetWindowPos($Handle, [IntPtr]::Zero, 0, 0, $Size.Width, $Size.Height, ($SWP_NOZORDER -bor $SWP_NOMOVE))
 }
 
 function Get-ChildWindows
@@ -172,7 +172,7 @@ function Get-ChildWindows
         [parameter(Mandatory=$true)]
         [IntPtr]$Handle
     )
-    [w32Windos]::GetChildWindows($Handle)
+    [psClick.Windows]::GetChildWindows($Handle)
 }
 
 function Set-WindowText
@@ -191,12 +191,12 @@ function Set-WindowText
     )
     if($ToControl){
         $ptr = [Runtime.InteropServices.Marshal]::StringToHGlobalAuto($text)
-        [Void][w32]::SendMessage($Handle, 0x000C, 0, $ptr)
+        [Void][psClick.User32]::SendMessage($Handle, 0x000C, 0, $ptr)
         [Runtime.InteropServices.Marshal]::FreeHGlobal($ptr)
     }
     else{
-        [Void][w32Windos]::SetWindowText($Handle, $Text)
-        [Void][w32Windos]::InvalidateRect($Handle, [IntPtr]::Zero, $true)
+        [Void][psClick.User32]::SetWindowText($Handle, $Text)
+        [Void][psClick.User32]::InvalidateRect($Handle, [IntPtr]::Zero, $true)
     }
 }
 
@@ -211,9 +211,9 @@ function Get-WindowText
         [IntPtr]$Handle
         ,
         [parameter(Mandatory=$false)]
-        [Text.StringBuilder]$Text = [Text.StringBuilder]::new([int16]::MaxValue)
+        [Text.StringBuilder]$Text = [Text.StringBuilder]::new([Int16]::MaxValue)
     )
-    [Void][w32Windos]::GetWindowText($Handle, $Text, [Int16]::MaxValue)
+    [Void][psClick.User32]::GetWindowText($Handle, $Text, [Int16]::MaxValue)
     $Text.ToString()
 }
 
@@ -228,9 +228,9 @@ function Get-WindowClassName
         [IntPtr]$Handle
         ,
         [parameter(Mandatory=$false)]
-        [Text.StringBuilder]$Text = [Text.StringBuilder]::new([int16]::MaxValue)
+        [Text.StringBuilder]$Text = [Text.StringBuilder]::new([Int16]::MaxValue)
     )
-    [Void][w32Windos]::GetClassName($handle, $text, [int16]::MaxValue)
+    [Void][psClick.User32]::GetClassName($handle, $text, [Int16]::MaxValue)
     $Text.ToString()
 }
 
@@ -242,7 +242,7 @@ function Get-ForegroundWindow
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
     )
-    [w32Windos]::GetForegroundWindow()
+    [psClick.User32]::GetForegroundWindow()
 }
 
 function Set-ForegroundWindow
@@ -255,7 +255,7 @@ function Set-ForegroundWindow
         [parameter(Mandatory=$true)]
         [IntPtr]$Handle
     )
-    [Void][w32Windos]::SetForegroundWindow($Handle)
+    [Void][psClick.User32]::SetForegroundWindow($Handle)
 }
 
 function Show-Window
@@ -296,9 +296,9 @@ function Show-Window
     }
 
     if($State -in $ShowWindow.Keys)
-    {[Void][w32Windos]::ShowWindow($Handle, $ShowWindow.$State)}
+    {[Void][psClick.User32]::ShowWindow($Handle, $ShowWindow.$State)}
     else
-    {[Void][w32Windos]::SetWindowPos($Handle, $SetWindowPos.$State, 0,0,0,0, (0x0001 -bor 0x0002 -bor 0x0010))}
+    {[Void][psClick.User32]::SetWindowPos($Handle, $SetWindowPos.$State, 0,0,0,0, (0x0001 -bor 0x0002 -bor 0x0010))}
 }
 
 function Find-Window
@@ -308,60 +308,60 @@ function Find-Window
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [Parameter(Mandatory=$true,ParameterSetName = 'Title')]
+        [Parameter(Mandatory=$true,Position=0,ParameterSetName = 'Title')]
         [String]$Title
         ,
-        [Parameter(Mandatory=$true,ParameterSetName = 'Class')]
+        [Parameter(Mandatory=$true,Position=0,ParameterSetName = 'Class')]
         [String]$Class 
         ,
-        [Parameter(Mandatory,ParameterSetName = 'ProcessName')]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'ProcessName')]
         [String]$ProcessName
         ,
-        [Parameter(Mandatory=$true,ParameterSetName =  'wPid')]
+        [Parameter(Mandatory=$true,Position=0,ParameterSetName =  'wPid')]
         [Int]$wPid
         ,
-        [Parameter(Mandatory=$false,ParameterSetName ='Title')]
-        [Parameter(ParameterSetName = 'ProcessName')]
+        [Parameter(Mandatory=$false,Position=1,ParameterSetName ='Title')]
+        [Parameter(Position=1,ParameterSetName = 'ProcessName')]
         [ValidateSet('EQ','match','cEQ','cMatch')]
         [String]$Option = "match"
     )
     $res  = [Collections.Generic.List[PSCustomObject]]::new()
     if($Title){
-        $hwnd = [w32Windos]::FindWindowEx(0, 0, [NullString]::Value, [NullString]::Value)
-        $text = [Text.StringBuilder]::new([int16]::MaxValue)
-        $match = [scriptblock]::Create("`$name -$option `$Title")
+        $hwnd = [psClick.User32]::FindWindowEx(0, 0, [NullString]::Value, [NullString]::Value)
+        $text = [Text.StringBuilder]::new([Int16]::MaxValue)
+        $match = [ScriptBlock]::Create("`$name -$option `$Title")
 
         while ($hwnd -ne 0){
-            if([w32Windos]::GetWindowText($hwnd, $text, [int16]::MaxValue)){
+            if([w32Windos]::GetWindowText($hwnd, $text, [Int16]::MaxValue)){
                 $name = $text.ToString()
                 if(&$match){
-                    $res.Add([PSCustomObject]@{handle = $hwnd;title = $name})
+                    $res.Add([PSCustomObject]@{Handle = $hwnd;Title = $name})
                 }
             }
-            $hwnd = [w32Windos]::FindWindowEx(0, $hwnd, [NullString]::Value, [NullString]::Value)
+            $hwnd = [psClick.User32]::FindWindowEx(0, $hwnd, [NullString]::Value, [NullString]::Value)
         }
         return ,$res
     }
     if($Class){
-        $hwnd = [w32Windos]::FindWindowEx(0, 0, $Class, [NullString]::Value)
-        $text = [Text.StringBuilder]::new([int16]::MaxValue)
+        $hwnd = [psClick.User32]::FindWindowEx(0, 0, $Class, [NullString]::Value)
+        $text = [Text.StringBuilder]::new([Int16]::MaxValue)
 
         while ($hwnd -ne 0){
-            [Void][w32Windos]::GetWindowText($hwnd, $text, [int16]::MaxValue)
+            [Void][psClick.User32]::GetWindowText($hwnd, $text, [Int16]::MaxValue)
             $name = $text.ToString()
-            $res.Add([PSCustomObject]@{handle = $hwnd;title = $name})
-            $hwnd = [w32Windos]::FindWindowEx(0, $hwnd, $Class, [NullString]::Value)
+            $res.Add([PSCustomObject]@{Handle = $hwnd;Title = $name})
+            $hwnd = [psClick.User32]::FindWindowEx(0, $hwnd, $Class, [NullString]::Value)
         }
         return ,$res
     }
     if($ProcessName){
-        Get-Process|where([scriptblock]::Create("`$_.ProcessName -$option `$ProcessName"))|
-        ForEach{$res.Add([PSCustomObject]@{handle = $_.MainWindowHandle;title = $_.MainWindowTitle})}
+        Get-Process|Where([ScriptBlock]::Create("`$_.ProcessName -$option `$ProcessName"))|
+        ForEach{$res.Add([PSCustomObject]@{Handle = $_.MainWindowHandle;Title = $_.MainWindowTitle})}
         return ,$res
     }
     if($wPid){
         Get-Process -id $wPid|
-        ForEach{$res.Add([PSCustomObject]@{handle = $_.MainWindowHandle;title = $_.MainWindowTitle})}
+        ForEach{$res.Add([PSCustomObject]@{Handle = $_.MainWindowHandle;Title = $_.MainWindowTitle})}
         return ,$res
     }
 }
@@ -423,16 +423,16 @@ function Close-Window
     $WM_CLOSE = 0x0010
     $re = [IntPtr]::Zero
     if($Force){
-        [Void][w32]::PostMessage($Handle, $WM_DESTR, 0, 0)
-        [Void][w32]::SendMessageTimeout($Handle, $WM_CLOSE, 0, 0, 0x0002, 0x8, [ref]$re)
+        [Void][psClick.User32]::PostMessage($Handle, $WM_DESTR, 0, 0)
+        [Void][psClick.User32]::SendMessageTimeout($Handle, $WM_CLOSE, 0, 0, 0x0002, 0x8, [ref]$re)
     }
     elseif($Wait){
-        [Void][w32]::SendMessage($Handle, $WM_CLOSE, 0, 0)
+        [Void][psClick.User32]::SendMessage($Handle, $WM_CLOSE, 0, 0)
     }
     elseif($SuperForce){
-        [Void][w32Windos]::EndTask($Handle, $false, $true)
+        [Void][psClick.User32]::EndTask($Handle, $false, $true)
     }
     else{
-        [Void][w32]::PostMessage($Handle, $WM_CLOSE, 0, 0)
+        [Void][psClick.User32]::PostMessage($Handle, $WM_CLOSE, 0, 0)
     }
 }

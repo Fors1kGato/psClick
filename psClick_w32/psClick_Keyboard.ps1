@@ -7,7 +7,7 @@
     Param(
         [IntPtr]$Handle = (Get-ForegroundWindow)
     )
-    $lang = [w32KeyBoard]::GetKeyboardLayout($Handle)
+    $lang = [psClick.KeyBoard]::GetKeyboardLayout($Handle)
     [Windows.Forms.InputLanguage]::FromCulture(
         [Globalization.CultureInfo]::GetCultureInfo([Int]($lang -shr 16))
     )
@@ -43,7 +43,7 @@ function Set-KeyboardLayout
     $diff = -join(Get-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name UserPreferencesMask).UserPreferencesMask
     if($diff -eq "15830712818000"){$Handle = Get-ForegroundWindow}
     if(!$Id){$Id = $Layout.Handle}
-    [Void][w32]::PostMessage($Handle, 0x0050, 0x0001, $Id)
+    [Void][psClick.User32]::PostMessage($Handle, 0x0050, 0x0001, $Id)
 }
 
 function Get-KeyState
@@ -61,17 +61,17 @@ function Get-KeyState
         [Switch]$Toggle
     )
     if($MyInvocation.InvocationName -match 'Clear'){
-        [Void][w32KeyBoard]::GetAsyncKeyState([Windows.Forms.Keys]::$key);return
+        [Void][psClick.User32]::GetAsyncKeyState([Windows.Forms.Keys]::$Key);return
     }
     if($Toggle){
         if($Key-notin("Scroll","NumLock","CapsLock")){
             $err = "Укажите одну из следующих клавиш: [Scroll]  [NumLock]  [CapsLock]"
             throw $err
         }
-        [w32KeyBoard]::GetKeyState([Windows.Forms.Keys]::$key)
+        [psClick.User32]::GetKeyState([Windows.Forms.Keys]::$Key)
     }
     else{
-        $res = [w32KeyBoard]::GetAsyncKeyState([Windows.Forms.Keys]::$key)
+        $res = [psClick.User32]::GetAsyncKeyState([Windows.Forms.Keys]::$Key)
         if($res -notin (0,1)){return 2}else{$res}
     }
 }
@@ -92,7 +92,7 @@ function Send-Text
     )
     $chars = $Text.ToCharArray()
     ForEach($c in $chars){
-        [void][w32]::PostMessage($handle ,0x0102, $c, 0)
+        [void][psClick.User32]::PostMessage($handle ,0x0102, $c, 0)
         Sleep -m $delay
     }
 }
@@ -142,23 +142,23 @@ function Type-Text
     if($Hardware){
         $portName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.
                     Properties|where{$_.name -like  '*USB*'}).value)[0].replace("COM","")
-        $arduino = [arduino]::Open($PortName)
+        $arduino = [psClick.Arduino]::Open($PortName)
         $error = "Не удалось открыть порт. Err code: $arduino"
-        if([int]$arduino -le 0){throw $error}
+        if([Int]$arduino -le 0){throw $error}
     }
 
     ForEach($char in $chars){
         $byte = [Text.Encoding]::Default.GetBytes($char)[0]
         if($byte -in $ruCh){
-            [Void][w32]::PostMessage($window, 0x0050, 0x0001, $rus)
-            $vk = [w32KeyBoard]::VkKeyScanEx($char, $rus)
+            [Void][psClick.User32]::PostMessage($window, 0x0050, 0x0001, $rus)
+            $vk = [psClick.User32]::VkKeyScanEx($char, $rus)
             $cr = $vk
             if(!($vk -band 256)){$cr+=32}
             if($char-ceq"ё"){$cr=96}elseif($char-ceq"Ё"){$cr=126}
         }
         else{
             [Void][w32]::PostMessage($window, 0x0050, 0x0001, $eng)
-            $vk = [w32KeyBoard]::VkKeyScanEx($char, $eng)
+            $vk = [psClick.User32]::VkKeyScanEx($char, $eng)
             if($Hardware){$cr = $byte}
         }
 
@@ -174,18 +174,18 @@ function Type-Text
         }
         else{
             if($vk -band 256 -or ($ShiftEOL -and $vk -eq 525)){
-                [w32KeyBoard]::keybd_event(0xA0, 0, 0x0000, 0)
-                [w32KeyBoard]::keybd_event($vk , 0, 0x0000, 0)
-                [w32KeyBoard]::keybd_event($vk , 0, 0x0002, 0)
-                [w32KeyBoard]::keybd_event(0xA0, 0, 0x0002, 0)
+                [psClick.User32]::keybd_event(0xA0, 0, 0x0000, 0)
+                [psClick.User32]::keybd_event($vk , 0, 0x0000, 0)
+                [psClick.User32]::keybd_event($vk , 0, 0x0002, 0)
+                [psClick.User32]::keybd_event(0xA0, 0, 0x0002, 0)
             }
             else{
-                [w32KeyBoard]::keybd_event($vk , 0, 0x0000, 0)
-                [w32KeyBoard]::keybd_event($vk , 0, 0x0002, 0)
+                [psClick.User32]::keybd_event($vk , 0, 0x0000, 0)
+                [psClick.User32]::keybd_event($vk , 0, 0x0002, 0)
             }
         }
         Sleep -m $Delay
     }
-    if($Hardware){[Void][arduino]::Close($arduino)}
+    if($Hardware){[Void][psClick.Arduino]::Close($arduino)}
     Set-KeyboardLayout $Layout
 }

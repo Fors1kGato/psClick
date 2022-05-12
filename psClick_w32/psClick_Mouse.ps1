@@ -26,9 +26,9 @@
     )
     $portName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.
                 Properties|where{$_.name -like  '*USB*'}).value)[0].replace("COM","")
-    $arduino = [arduino]::Open($PortName)
+    $arduino = [psClick.Arduino]::Open($PortName)
     $error = "Не удалось открыть порт. Err code: $arduino"
-    if([int]$arduino -le 0){throw $error}
+    if([Int]$arduino -le 0){throw $error}
 
     if($Default){
         Send-ArduinoCommand $arduino "0120"
@@ -53,7 +53,7 @@
         Send-ArduinoCommand $arduino "05$MouseRandomDelay"
     }
 
-    [Void][arduino]::Close($arduino)
+    [Void][psClick.Arduino]::Close($arduino)
 }
 
 function Send-ArduinoCommand
@@ -72,8 +72,8 @@ function Send-ArduinoCommand
         [Parameter(Position=2)]
         [UInt16]$Wait = 5000
     )
-    if(![arduino]::SendCommand($Arduino, $Command, $Wait)){
-        [void][arduino]::Close($Arduino)
+    if(![psClick.Arduino]::SendCommand($Arduino, $Command, $Wait)){
+        [void][psClick.Arduino]::Close($Arduino)
         $error = "Arduino write / read exception"
         throw $error 
     }
@@ -99,7 +99,7 @@ function Scroll-Mouse
         [IntPtr]$Handle
         ,
         [Parameter(Position=1)]
-        [int]$Steps = 1
+        [Int]$Steps = 1
         ,
         [Parameter(ParameterSetName = "HandleDown")]
         [Parameter(ParameterSetName = "HandleUP")]
@@ -130,25 +130,25 @@ function Scroll-Mouse
     if($Down){$Steps = -$Steps}
 
     if($Handle){
-        if($Abs){[Void][w32Windos]::MapWindowPoints($handle, [IntPtr]::Zero, [ref]$Position, 1)}
-        [Void][w32]::SendMessage($handle, $WM_MOUSEWHEEL, (120 * $Steps -shl 16), ($Position.x + ($Position.y -shl 16)))
+        if($Abs){[Void][psClick.User32]::MapWindowPoints($handle, [IntPtr]::Zero, [ref]$Position, 1)}
+        [Void][psClick.User32]::SendMessage($handle, $WM_MOUSEWHEEL, (120 * $Steps -shl 16), ($Position.x + ($Position.y -shl 16)))
     }
     else{
         if($Hardware){
             Move-Cursor $Position -Hardware
             $portName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.
-                        Properties|where{$_.name -like  '*USB*'}).value)[0].replace("COM","")
-            $arduino = [arduino]::Open($PortName)
+                        Properties|where{$_.Name -like  '*USB*'}).Value)[0].Replace("COM","")
+            $arduino = [psClick.Arduino]::Open($PortName)
             $error = "Не удалось открыть порт. Err code: $arduino"
-            if([int]$arduino -le 0){throw $error}
+            if([Int]$arduino -le 0){throw $error}
 
             Send-ArduinoCommand $arduino "9$Steps" $Wait
 
-            [Void][arduino]::Close($arduino)
+            [Void][psClick.Arduino]::Close($arduino)
         }
         else{
             Move-Cursor $Position
-            [w32Mouse]::mouse_event([w32Mouse+MouseEventFlags]::MOUSEEVENTF_WHEEL, 0, 0, (120 * $Steps), 0)
+            [psClick.User32]::mouse_event([psClick.User32+MouseEventFlags]::MOUSEEVENTF_WHEEL, 0, 0, (120 * $Steps), 0)
         }
     }
 }
@@ -161,9 +161,9 @@ function Get-CursorHandle
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
     )
-    $cursorinfo = [w32Mouse+CURSORINFO]::new()
-    $cursorinfo.cbSize = [Runtime.InteropServices.Marshal]::SizeOf([type][w32Mouse+CURSORINFO])
-    [void][w32Mouse]::GetCursorInfo([ref]$cursorinfo)
+    $cursorinfo = [psClick.User32+CURSORINFO]::new()
+    $cursorinfo.cbSize = [Runtime.InteropServices.Marshal]::SizeOf([type][psClick.User32+CURSORINFO])
+    [void][psClick.User32]::GetCursorInfo([ref]$cursorinfo)
     $cursorinfo.hCursor
 }
 
@@ -201,32 +201,32 @@ function Move-Cursor
     }
 
     if($Event){
-        if(![w32]::PostMessage($handle, 0x0200, 0, ($Position.X + 0x10000 * $Position.Y))){
-            [w32]::SendMessage($handle, 0x0200, 0, ($Position.X + 0x10000 * $Position.Y))|Out-Null 
+        if(![w3psClick.User322]::PostMessage($handle, 0x0200, 0, ($Position.X + 0x10000 * $Position.Y))){
+            [w3psClick.User322]::SendMessage($handle, 0x0200, 0, ($Position.X + 0x10000 * $Position.Y))|Out-Null 
         }
     }
     else{
         if($handle){
-            [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$Position, 1)
+            [Void][psClick.User32]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$Position, 1)
         }
 
         if($Hardware){
             $portName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.
                         Properties|where{$_.name -like  '*USB*'}).value)[0].replace("COM","")
-            $arduino = [arduino]::Open($PortName)
+            $arduino = [psClick.Arduino]::Open($PortName)
             $error = "Не удалось открыть порт. Err code: $arduino"
-            if([int]$arduino -le 0){throw $error}
+            if([Int]$arduino -le 0){throw $error}
 
             $offset = $Position - [System.Windows.Forms.Cursor]::Position
 
             $param  = "5{0}{1}{2}" -f (
                 $(if($offset.x -ge 0){"+"}else{"-"}), 
                 $(if($offset.y -ge 0){"+"}else{"-"}),
-                $([math]::Abs($offset.x) * 0xFFFF + [math]::Abs($offset.y))
+                $([Math]::Abs($offset.x) * 0xFFFF + [Math]::Abs($offset.y))
             )
 
             Send-ArduinoCommand $arduino $param $Wait
-            if($Hardware){[void][arduino]::Close($arduino)}
+            if($Hardware){[void][psClick.Arduino]::Close($arduino)}
         }
         else{
             [Windows.Forms.Cursor]::Position = $Position
@@ -242,7 +242,7 @@ function Get-MouseSpeed
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
     )
-    [w32Mouse]::getMSpeed()
+    [psClick.Mouse]::getMSpeed()
 }
 
 function Set-MouseSpeed
@@ -254,7 +254,7 @@ function Set-MouseSpeed
     Param(
         $speed
     )
-    [w32Mouse]::setMSpeed($speed)
+    [psClick.Mouse]::setMSpeed($speed)
 }
 
 function Get-CursorPosition
@@ -268,7 +268,7 @@ function Get-CursorPosition
     )
     $Position = [Windows.Forms.Cursor]::Position
     if($Handle){
-        [Void][w32Windos]::MapWindowPoints([IntPtr]::Zero, $Handle, [ref]$Position, 1)
+        [Void][psClick.User32]::MapWindowPoints([IntPtr]::Zero, $Handle, [ref]$Position, 1)
     }
     $Position
 }
@@ -310,25 +310,25 @@ function Drag-WithMouse
     }
     if(!$event){
         if($Handle){
-            [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$from, 1)
-            [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$to  , 1)
+            [Void][psClick.User32]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$from, 1)
+            [Void][psClick.User32]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$to  , 1)
         }
         Click-Mouse $from -Hardware:$Hardware -Down 
         Sleep -m $Delay
         Click-Mouse $to -Hardware:$Hardware -Up
     }
     else{   
-        if ([w32]::PostMessage($handle, 0x0201, $wParams, ($From.X + 0x10000 * $From.Y))){
+        if ([psClick.User32]::PostMessage($handle, 0x0201, $wParams, ($From.X + 0x10000 * $From.Y))){
             Sleep -m $Delay
-            [w32]::PostMessage($handle, 0x0200, $wParams, ($to.X   + 0x10000 * $to.Y  ))|Out-Null
+            [psClick.User32]::PostMessage($handle, 0x0200, $wParams, ($to.X   + 0x10000 * $to.Y  ))|Out-Null
             
-            [w32]::PostMessage($handle, 0x0202, $wParams, ($to.X   + 0x10000 * $to.Y  ))|Out-Null 
+            [psClick.User32]::PostMessage($handle, 0x0202, $wParams, ($to.X   + 0x10000 * $to.Y  ))|Out-Null 
         }
         else{
-            [w32]::SendMessage($handle, 0x0201, $wParams, ($From.X + 0x10000 * $From.Y))|Out-Null
+            [psClick.User32]::SendMessage($handle, 0x0201, $wParams, ($From.X + 0x10000 * $From.Y))|Out-Null
             Sleep -m $Delay
-            [w32]::SendMessage($handle, 0x0200, $wParams, ($to.X   + 0x10000 * $to.Y  ))|Out-Null
-            [w32]::SendMessage($handle, 0x0202, $wParams, ($to.X   + 0x10000 * $to.Y  ))|Out-Null
+            [psClick.User32]::SendMessage($handle, 0x0200, $wParams, ($to.X   + 0x10000 * $to.Y  ))|Out-Null
+            [psClick.User32]::SendMessage($handle, 0x0202, $wParams, ($to.X   + 0x10000 * $to.Y  ))|Out-Null
         }
     }
 }

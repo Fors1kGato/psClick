@@ -68,9 +68,9 @@
             if($Hardware){
                 $portName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.
                             Properties|where{$_.name -like  '*USB*'}).value)[0].replace("COM","")
-                $arduino = [arduino]::Open($PortName)
+                $arduino = [psClick.Arduino]::Open($PortName)
                 $error = "Не удалось открыть порт. Err code: $arduino"
-                if([int]$arduino -le 0){throw $error}
+                if([Int]$arduino -le 0){throw $error}
 
                 if($key -match "^\p{L}$"){
                     $hKey = [Windows.Forms.Keys]::$key.value__+32
@@ -148,18 +148,18 @@
                 if($down){Send-ArduinoCommand $arduino "3$hKey" $Wait}
                 elseif($up){Send-ArduinoCommand $arduino "4$hKey" $Wait}
                 else{Send-ArduinoCommand $arduino "1$hKey" $Wait}
-                if($Hardware){[arduino]::Close($arduino)}
+                if($Hardware){[psClick.Arduino]::Close($arduino)}
             }
             else{
                 if($down){
                     if($key -match "(alt|Control|Shift|win)"){
-                        [w32KeyBoard]::keybd_event([Windows.Forms.Keys]::$key, 0, 0x0000, 0)
+                        [psClick.User32]::keybd_event([Windows.Forms.Keys]::$key, 0, 0x0000, 0)
                     }
                     else{
                         Start-ThreadJob -Name "$key`_Down" {
                             while($true){
-                                [w32KeyBoard]::keybd_event([Windows.Forms.Keys]::[string]$args[1], 0, 0x0000, 0)
-                                [w32KeyBoard]::keybd_event([Windows.Forms.Keys]::[string]$args[1], 0, 0x0002, 0)
+                                [psClick.User32]::keybd_event([Windows.Forms.Keys]::[String]$args[1], 0, 0x0000, 0)
+                                [psClick.User32]::keybd_event([Windows.Forms.Keys]::[String]$args[1], 0, 0x0002, 0)
                                 sleep -m $args[0]
                             }
                         } -ArgumentList $delay, $key|Out-Null
@@ -167,15 +167,15 @@
                 }
                 elseif($up){
                     if($key -match "(alt|Control|Shift|win)"){
-                        [w32KeyBoard]::keybd_event([Windows.Forms.Keys]::$key, 0, 0x0002, 0)
+                        [psClick.User32]::keybd_event([Windows.Forms.Keys]::$key, 0, 0x0002, 0)
                     }
                     else{
                         Remove-Job -Name "$key`_Down" -Force
                     }
                 }
                 else{
-                    [w32KeyBoard]::keybd_event([Windows.Forms.Keys]::$key, 0, 0x0000, 0)
-                    [w32KeyBoard]::keybd_event([Windows.Forms.Keys]::$key, 0, 0x0002, 0)
+                    [psClick.User32]::keybd_event([Windows.Forms.Keys]::$key, 0, 0x0000, 0)
+                    [psClick.User32]::keybd_event([Windows.Forms.Keys]::$key, 0, 0x0002, 0)
                 }
             }
         }
@@ -185,12 +185,12 @@
             if($Down){
                 Start-ThreadJob -Name "$key`_Down_Event" {
                     while($true){
-                        if ([w32]::PostMessage([IntPtr]$args[2] ,0x0100, [Windows.Forms.Keys]::[string]$args[1], 0)){
-                            #[w32]::PostMessage($handle ,0x0101, [Windows.Forms.Keys]::[string]$args[1], 0)|Out-Null 
+                        if ([psClick.User32]::PostMessage([IntPtr]$args[2] ,0x0100, [Windows.Forms.Keys]::[String]$args[1], 0)){
+                            #[psClick.User32]::PostMessage($handle ,0x0101, [Windows.Forms.Keys]::[string]$args[1], 0)|Out-Null 
                         }
                         else{
-                            [w32]::SendMessage([IntPtr]$args[2] ,0x0100, [Windows.Forms.Keys]::[string]$args[1], 0)|Out-Null
-                            #[w32]::SendMessage($handle ,0x0101, [Windows.Forms.Keys]::[string]$args[1], 0)|Out-Null
+                            [psClick.User32]::SendMessage([IntPtr]$args[2] ,0x0100, [Windows.Forms.Keys]::[string]$args[1], 0)|Out-Null
+                            #[psClick.User32]::SendMessage($handle ,0x0101, [Windows.Forms.Keys]::[string]$args[1], 0)|Out-Null
                         }
                         sleep -m $args[0]
                     }
@@ -200,12 +200,12 @@
                 Remove-Job -Name "$key`_Down_Event" -Force
             }
             else{  
-                if ([w32]::PostMessage($handle ,0x0100, [Windows.Forms.Keys]::$key, 0)){
-                    #[w32]::PostMessage($handle ,0x0101, [Windows.Forms.Keys]::$key, 0)|Out-Null 
+                if ([psClick.User32]::PostMessage($handle ,0x0100, [Windows.Forms.Keys]::$key, 0)){
+                    #[psClick.User32]::PostMessage($handle ,0x0101, [Windows.Forms.Keys]::$key, 0)|Out-Null 
                 }
                 else{
-                    [w32]::SendMessage($handle ,0x0100, [Windows.Forms.Keys]::$key, 0)|Out-Null
-                    #[w32]::SendMessage($handle ,0x0101, [Windows.Forms.Keys]::$key, 0)|Out-Null
+                    [psClick.User32]::SendMessage($handle ,0x0100, [Windows.Forms.Keys]::$key, 0)|Out-Null
+                    #[psClick.User32]::SendMessage($handle ,0x0101, [Windows.Forms.Keys]::$key, 0)|Out-Null
                 }
             }
         }

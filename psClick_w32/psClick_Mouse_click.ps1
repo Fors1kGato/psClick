@@ -27,7 +27,7 @@
         [Switch]$Hardware
         ,
         [ValidateSet('Shift','Control')]
-        [String[]]$With = [string[]]::new(0)
+        [String[]]$With = [String[]]::new(0)
         ,
         [UInt16]$Wait = 5000
         ,
@@ -59,7 +59,7 @@
     #region Kleft 
     if(!$event){
         if($Handle){
-            [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$Position, 1)
+            [Void][psClick.User32]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$Position, 1)
         }
         if($Hardware){
             Move-Cursor $Position -Hardware
@@ -67,9 +67,9 @@
 
             $portName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.
                         Properties|where{$_.name -like  '*USB*'}).value)[0].replace("COM","")
-            $arduino = [arduino]::Open($PortName)
+            $arduino = [psClick.Arduino]::Open($PortName)
             $error = "Не удалось открыть порт. Err code: $arduino"
-            if([int]$arduino -le 0){throw $error}
+            if([Int]$arduino -le 0){throw $error}
             
             $button = 1
             if($Right ){$button = 2}
@@ -83,7 +83,7 @@
 
             $with|%{Send-ArduinoCommand $arduino "4$($w.$_)" $Wait}
 
-            if($Hardware){[void][arduino]::Close($arduino)}
+            if($Hardware){[void][psClick.Arduino]::Close($arduino)}
         }
         else{
             $button = "left"
@@ -92,15 +92,15 @@
             
             $w = @{'Shift' = 0x10;'Control' = 0x11}
             Move-Cursor $Position
-            $with|%{[w32KeyBoard]::keybd_event($w.$_, 0, 0x0000, 0)}
+            $with|%{[psClick.User32]::keybd_event($w.$_, 0, 0x0000, 0)}
 
-            if($Down){$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN"}
-            elseif($Up){Sleep -m $DelayUP;$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP"}
-            else{$dwFlags = [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN" -bor [w32Mouse+MouseEventFlags]::"MOUSEEVENTF_$button`UP"}
+            if($Down){$dwFlags = [psClick.User32+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN"}
+            elseif($Up){Sleep -m $DelayUP;$dwFlags = [psClick.User32+MouseEventFlags]::"MOUSEEVENTF_$button`UP"}
+            else{$dwFlags = [psClick.User32+MouseEventFlags]::"MOUSEEVENTF_$button`DOWN" -bor [psClick.User32+MouseEventFlags]::"MOUSEEVENTF_$button`UP"}
         
-            1..$count|%{[w32Mouse]::mouse_event($dwFlags,0,0,0,0)}
+            1..$count|%{[psClick.User32]::mouse_event($dwFlags,0,0,0,0)}
 
-            $with|%{[w32KeyBoard]::keybd_event($w.$_, 0, 0x0002, 0)}
+            $with|%{[psClick.User32]::keybd_event($w.$_, 0, 0x0002, 0)}
         }
     }
     #endregion
@@ -113,23 +113,23 @@
         $w = @{'Shift'=0x0004;'Control'=0x0008}
         $with|%{$wParams+=$w.$_}
         if($Down){
-            if(![w32]::PostMessage($handle, $button,   $wParams, ($Position.x + 0x10000 * $Position.y))){
-                [w32]::SendMessage($handle, $button,   $wParams, ($Position.x + 0x10000 * $Position.y))|Out-Null 
+            if(![psClick.User32]::PostMessage($handle, $button,   $wParams, ($Position.x + 0x10000 * $Position.y))){
+                [psClick.User32]::SendMessage($handle, $button,   $wParams, ($Position.x + 0x10000 * $Position.y))|Out-Null 
             }
         }
         elseif($Up){
-            if(![w32]::PostMessage($handle, $button+1, $wParams, ($Position.x + 0x10000 * $Position.y))){ 
-                [w32]::SendMessage($handle, $button+1, $wParams, ($Position.x + 0x10000 * $Position.y))|Out-Null
+            if(![psClick.User32]::PostMessage($handle, $button+1, $wParams, ($Position.x + 0x10000 * $Position.y))){ 
+                [psClick.User32]::SendMessage($handle, $button+1, $wParams, ($Position.x + 0x10000 * $Position.y))|Out-Null
             }
         }
         else{
             1..$count|%{    
-                if ([w32]::PostMessage($handle, $button,   $wParams, ($Position.x + 0x10000 * $Position.y))){
-                    [w32]::PostMessage($handle, $button+1, $wParams, ($Position.x + 0x10000 * $Position.y))|Out-Null 
+                if ([psClick.User32]::PostMessage($handle, $button,   $wParams, ($Position.x + 0x10000 * $Position.y))){
+                    [psClick.User32]::PostMessage($handle, $button+1, $wParams, ($Position.x + 0x10000 * $Position.y))|Out-Null 
                 }
                 else{
-                    [w32]::SendMessage($handle, $button,   $wParams, ($Position.x + 0x10000 * $Position.y))|Out-Null
-                    [w32]::SendMessage($handle, $button+1, $wParams, ($Position.x + 0x10000 * $Position.y))|Out-Null
+                    [psClick.User32]::SendMessage($handle, $button,   $wParams, ($Position.x + 0x10000 * $Position.y))|Out-Null
+                    [psClick.User32]::SendMessage($handle, $button+1, $wParams, ($Position.x + 0x10000 * $Position.y))|Out-Null
                 }
             }
         }

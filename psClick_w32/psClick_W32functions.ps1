@@ -39,7 +39,7 @@ function Get-TrayInfo
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
     )
-    [Tray]::GetTrayInfo()
+    [psClick.Tray]::GetTrayInfo()
 }
 
 function Write-ProcessMemory
@@ -60,10 +60,10 @@ function Write-ProcessMemory
         $Data
         ,
         [Parameter(Mandatory,ParameterSetName = 'Unicode')]
-        [switch]$Unicode
+        [Switch]$Unicode
         ,
         [Parameter(Mandatory,ParameterSetName = 'Ansi')]
-        [switch]$Ansi
+        [Switch]$Ansi
     )
     if($Data -isnot [String] -and ($Unicode -or $Ansi)){throw "Переданные данные не являются строкой"}
 
@@ -72,13 +72,13 @@ function Write-ProcessMemory
     }
     elseif ($Data -is [String]){
         if ($Unicode){$Data = [Text.Encoding]::Unicode.GetBytes("$Data`0`0")}
-        elseif($Ansi){$Data = [Text.Encoding]::GetEncoding('windows-1251').GetBytes("$Data`0")}
+        elseif($Ansi){$Data = [Text.Encoding]::GetEncoding(1251).GetBytes("$Data`0")}
         else{throw "Укажите кодировку"}
     }
     if($Data -isnot [Byte[]]){throw "Incorrect data type"}
     [UInt32]$BytesWritten = 0
 
-    $writeResult = [w32Memory]::WriteProcessMemory(
+    $writeResult = [psClick.Kernel32]::WriteProcessMemory(
         $Process.Handle,
         $Address,
         $Data,
@@ -124,10 +124,10 @@ function Read-ProcessMemory
     }
 
     if($Read -notin ('ANSI', 'Unicode')){
-        if($size){$Data = [byte[]]::new($size)}
-        else{$Data = [byte[]]::new([Runtime.InteropServices.Marshal]::SizeOf([type]$Read))}
+        if($size){$Data = [Byte[]]::new($size)}
+        else{$Data = [Byte[]]::new([Runtime.InteropServices.Marshal]::SizeOf([Type]$Read))}
 
-        $CallResult = [w32Memory]::ReadProcessMemory(
+        $CallResult = [psClick.Kernel32]::ReadProcessMemory(
             $Process.Handle,
             $Address,
             $Data,
@@ -139,9 +139,9 @@ function Read-ProcessMemory
         if(!$size){[BitConverter]::"To$Read"($Data,0)}else{,$Data}
     }
     else{
-        $memInfo = [w32Memory+MEMORY_BASIC_INFORMATION]::new()
+        $memInfo = [psClick.Kernel32+MEMORY_BASIC_INFORMATION]::new()
 
-        $queryResult = [w32Memory]::VirtualQueryEx(
+        $queryResult = [psClick.Kernel32]::VirtualQueryEx(
             $Process.Handle,
             $Address,
             [ref]$memInfo,
@@ -153,7 +153,7 @@ function Read-ProcessMemory
         [int]$size = $memInfo.RegionSize - ([int64]$Address - [int64]$memInfo.BaseAddress)
         $string = [System.Text.StringBuilder]::new($size)
 
-        $readResult = [w32Memory]::"ReadProcessMemory$read"(
+        $readResult = [psClick.Kernel32]::"ReadProcessMemory$read"(
             $Process.Handle,
             $Address,
             $string,
@@ -180,17 +180,17 @@ function Get-ProcessModules
     $TH32CS_SNAPMODULE   = 0x00000008
     $TH32CS_SNAPMODULE32 = 0x00000010
 
-    $me32 = [w32Memory+MODULEENTRY32]::new()
+    $me32 = [psClick.Kernel32+MODULEENTRY32]::new()
     $me32.dwSize = [Runtime.InteropServices.Marshal]::SizeOf($me32)
 
-    $hModuleSnap = [w32Memory]::CreateToolhelp32Snapshot(
+    $hModuleSnap = [psClick.Kernel32]::CreateToolhelp32Snapshot(
         ($TH32CS_SNAPMODULE -bor $TH32CS_SNAPMODULE32), 
         $Process.Id
     )
     $err = [Runtime.InteropServices.Marshal]::GetLastWin32Error()
     if(!$hModuleSnap){throw "Create Tool help 32 Snapshot error: $err"}
 
-    $CallResult = [w32Memory]::Module32First($hModuleSnap, [ref]$me32) 
+    $CallResult = [psClick.Kernel32]::Module32First($hModuleSnap, [ref]$me32) 
     $err = [Runtime.InteropServices.Marshal]::GetLastWin32Error()
     if(!$CallResult){throw "Get Module 32 First error: $err"}
 
@@ -198,10 +198,10 @@ function Get-ProcessModules
 
     $modules.Add([PSCustomObject]@{Name = [string]$me32.szModule;Address = [IntPtr]$me32.modBaseAddr;Path = [string]$me32.szExePath})
 
-    while([w32Memory]::Module32Next($hModuleSnap, [ref]$me32)){
+    while([psClick.Kernel32]::Module32Next($hModuleSnap, [ref]$me32)){
         $modules.Add([PSCustomObject]@{Name = [string]$me32.szModule;Address = [IntPtr]$me32.modBaseAddr;Path = [string]$me32.szExePath})    
     }   
                
-    [Void][w32]::CloseHandle($hModuleSnap)
+    [Void][psClick.Kernel32]::CloseHandle($hModuleSnap)
     ,$modules
 }

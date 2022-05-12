@@ -129,10 +129,10 @@
             }
             else{
                 if($rect){
-                    $bigBmp = Cut-Image ([psClickColor]::GetImage($handle)) -Rect $rect
+                    $bigBmp = Cut-Image ([psClick.Imaging]::GetImage($handle)) -Rect $rect
                 }
                 else{
-                    $bigBmp = [psClickColor]::GetImage($handle)
+                    $bigBmp = [psClick.Imaging]::GetImage($handle)
                 }
             }
         }
@@ -164,10 +164,10 @@
         }
     }
     if($v2){
-        $res = [Find]::FindImage($smallBmp, $bigBmp, $Count, $Accuracy, ($Deviation*255), 10, -1)
+        $res = [psClick.FindImage]::FindBitmap($smallBmp, $bigBmp, $Count, $Accuracy, ($Deviation*255), 10, -1)
     }
     else{
-        $res = [ImgSearcher]::searchBitmap($smallBmp, $bigBmp, $Deviation, $Accuracy, $Count)
+        $res = [psClick.FindImage]::SearchBitmap($smallBmp, $bigBmp, $Deviation, $Accuracy, $Count)
     }
     if($PSCmdlet.ParameterSetName -notmatch "FullSize" -and $res.Count){
         0..($res.Count-1)|%{$res[$_].location.X+=$rect.x;$res[$_].location.Y+=$rect.Y}

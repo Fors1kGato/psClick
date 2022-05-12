@@ -115,7 +115,7 @@ function Get-Color
             [Void][w32Windos]::MapWindowPoints($Handle, [IntPtr]::Zero, [ref]$Position, 1)
             $Handle = [IntPtr]::Zero
         }
-        $color = [psClickColor]::GetColor($Position.x, $Position.y, $handle)
+        $color = [psClick.Imaging]::GetColor($Position.x, $Position.y, $handle)
     }
     if($raw){
         $color
@@ -266,10 +266,10 @@ function Get-Image
             }
             else{
                 if( $rect ){
-                    return Cut-Image ([psClickColor]::GetImage($handle)) -Rect $rect
+                    return Cut-Image ([psClick.Imaging]::GetImage($handle)) -Rect $rect
                 }
                 else{
-                    return [psClickColor]::GetImage($handle)
+                    return [psClick.Imaging]::GetImage($handle)
                 }
             }
         }
@@ -739,7 +739,7 @@ function Draw-Rectangle
         $timer.add_tick({ $f.Close() })
         $timer.Start()
 
-        [Void][psClickColor]::SetWindowLongPtr(
+        [Void][psClick.User32]::setSetWindowLongPtr(
             $f.Handle, 
             $GWL_EXSTYLE, 
             ($WS_EX_LAYERED -bor $WS_EX_TRANSPARENT)

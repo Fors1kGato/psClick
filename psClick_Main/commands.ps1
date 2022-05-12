@@ -20,9 +20,7 @@
     $res = Await $asyncTask $resultType
 
     ForEach($item in $res.Items){
-        if($item.Content.AvailableFormats -contains "text"){
-            $cbHistory.Add((Await $item.Content.GetTextAsync() ([String])))
-        }
+        $cbHistory.Add((Await $item.Content.GetTextAsync() ([String])))
     }
     return ,$cbHistory
 }
@@ -73,7 +71,7 @@ function Test-AdminRole
     Param(
     )
     ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).
-    IsInRole([System.Security.Principal.WindowsBuiltInRole]"Administrator")
+    IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
 Function Get-LevenshteinDistance 
@@ -103,9 +101,9 @@ Function Get-LevenshteinDistance
     }
     
     if($string1.Length -ge $string2.Length){
-        return [math]::Round(1 - ($m[$string1.Length, $string2.Length] / $string1.Length), 6)
+        return [Math]::Round(1 - ($m[$string1.Length, $string2.Length] / $string1.Length), 6)
     }
-    return [math]::Round(1 - ($m[$string1.Length, $string2.Length] / $string2.Length), 6)
+    return [Math]::Round(1 - ($m[$string1.Length, $string2.Length] / $string2.Length), 6)
 }
 
 function Send-Message
@@ -118,14 +116,15 @@ function Send-Message
         [IntPtr]$hWnd,
         $Msg,
         $wParam = 0,
-        $lParam = 0
+        $lParam = 0,
+        $rType
     )
-    Invoke-WinApi SendMessage(
+    Invoke-WinApi -Return $rType -Override SendMessage(
         $hWnd,
         $Msg,
         $wParam,
         $lParam
-    ) -Override
+    )
 }
 
 function Post-Message
@@ -138,14 +137,15 @@ function Post-Message
         [IntPtr]$hWnd,
         $Msg,
         $wParam = 0,
-        $lParam = 0
+        $lParam = 0,
+        $rType
     )
-    Invoke-WinApi PostMessage(
+    Invoke-WinApi -Return $rType -Override PostMessage(
         $hWnd,
         $Msg,
         $wParam,
         $lParam
-    ) -Override
+    )
 }
 
 function Pausable
@@ -235,7 +235,7 @@ function Get-Bytes{
         [String]$Encoding = "UTF8"
     )
     $codaPage = [System.Text.Encoding]::$Encoding
-    if($Encoding-eq"ANSI"){$codaPage = [System.Text.Encoding]::GetEncoding('windows-1251')}
+    if($Encoding-eq"ANSI"){$codaPage = [System.Text.Encoding]::GetEncoding(1251)}
     ,$codaPage.GetBytes($text)
 }
 
@@ -252,7 +252,7 @@ function Get-String{
         [String]$Encoding = "UTF8"
     )
     $codaPage = [System.Text.Encoding]::$Encoding
-    if($Encoding-eq"ANSI"){$codaPage = [System.Text.Encoding]::GetEncoding('windows-1251')}
+    if($Encoding-eq"ANSI"){$codaPage = [System.Text.Encoding]::GetEncoding(1251)}
     $codaPage.GetString($Bytes)
 }
 
@@ -262,10 +262,10 @@ function Change-Location{
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [alias("cl")]Param(
-        $path
+        $Path
     )
-    cd $path
-    [Environment]::CurrentDirectory = $path
+    Set-Location $Path
+    [Environment]::CurrentDirectory = $Path
 }
 
 function Uninstall-Psclick{
@@ -360,15 +360,15 @@ function Invoke-Ternary{
     #1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
-    [alias('??')]PARAM(
+    [Alias('??')]PARAM(
     [parameter(ValueFromPipeline, Mandatory)]
-    [Boolean]$bool,
+    [Boolean]$Bool,
     [parameter(Position = 0,Mandatory=$true)]
-    $trueV,
+    $TrueV,
     [parameter(Position = 1,Mandatory=$true)]
-    [ValidatePattern(":")]$s,
+    [ValidatePattern(":")]$S,
     [parameter(Position = 2,Mandatory=$true)]
-    $falseV
-    )if($bool){$val=$trueV}else{$val=$falseV}
-    if($val-is[scriptblock]){&$val}else{$val}
+    $FalseV
+    )if($Bool){$val=$TrueV}else{$val=$FalseV}
+    if($val-is[ScriptBlock]){&$val}else{$val}
 }

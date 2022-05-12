@@ -12,21 +12,21 @@
         [UInt64]$Interval
         ,
         [Parameter(Mandatory, Position = 2)]
-        [Scriptblock]$Action
+        [ScriptBlock]$Action
     )
     if($Global:timers.$name){
         $err = "Таймер с таким именем уже запущен"
         throw $err
     }
     if(!(gv timers -Scope global -ea 0)){@{}|nv timers -Option Constant -Scope global}
-    $removeTimer = [scriptblock]::Create("`$Global:timers.Remove('$name');Unregister-Event -SourceIdentifier $name")
-    $Action = [scriptblock]::Create("if(`$Global:timers.$name.timer.Enabled){`$Global:timers.$name.event=`$event;`n$Action}")
-    $Global:timers.$name = @{timer = [System.Timers.Timer]::new($Interval)}
+    $removeTimer = [ScriptBlock]::Create("`$Global:timers.Remove('$name');Unregister-Event -SourceIdentifier $name")
+    $Action = [ScriptBlock]::Create("if(`$Global:timers.$name.timer.Enabled){`$Global:timers.$name.event=`$event;`n$Action}")
+    $Global:timers.$name = @{Timer = [System.Timers.Timer]::new($Interval)}
 
     Unregister-Event -SourceIdentifier "kill$name" -ea 0
-    Register-ObjectEvent -SourceIdentifier $name -InputObject $Global:timers.$name.timer -EventName Elapsed  -Action $Action|Out-Null
-    Register-ObjectEvent -SourceIdentifier "kill$name" -InputObject $Global:timers.$name.timer -EventName Disposed -Action $removeTimer|Out-Null
-    $Global:timers.$name.timer.Start()
+    Register-ObjectEvent -SourceIdentifier $name -InputObject $Global:timers.$name.Timer -EventName Elapsed  -Action $Action|Out-Null
+    Register-ObjectEvent -SourceIdentifier "kill$name" -InputObject $Global:timers.$name.Timer -EventName Disposed -Action $removeTimer|Out-Null
+    $Global:timers.$name.Timer.Start()
 }
 
 function Delete-Timer
@@ -44,8 +44,8 @@ function Delete-Timer
     if(!$Global:timers.ContainsKey($name)){
         return
     }
-    $Global:timers.$name.timer.Dispose()
-    $Global:timers.$name.Remove('timer')
+    $Global:timers.$name.Timer.Dispose()
+    $Global:timers.$name.Remove('Timer')
     if($Force){
         $Global:timers.$name.event.messagedata.foo.Enabled = $false
     }
@@ -65,7 +65,7 @@ function Get-Timer
         [Switch]$All
     )
     if($Name){
-        [bool]$Global:timers.$name.timer
+        [bool]$Global:timers.$name.Timer
     }
     else{
         $Global:timers.Keys

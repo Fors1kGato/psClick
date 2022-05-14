@@ -94,7 +94,7 @@ $params = @{
     ErrorAction = 'Stop'
 }
 New-ItemProperty @params -Force| Out-Null
-(gci -Recurse $psClickPath -ex "token.ps1" ).FullName.replace("$psClickPath\","").replace("\","/")|
+(gci -Recurse $psClickPath|Where{!$_.FullName.Contains("psClick_UserData")}).FullName.Replace("$psClickPath\","").replace("\","/")|
 ?{$tree.path -notcontains $_}|%{
     ri (Join-Path $psClickPath $_) -Recurse -ea 0
 }

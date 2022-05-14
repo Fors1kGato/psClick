@@ -51,9 +51,9 @@ function Recognize-Text
             $img.Dispose()
         }
         [PSCustomObject]@{
-            Symbols = $result
-            Text    = [psClick.Readtext]::SymbolsToString($result, $cfg.SpaceSize)
-            ImageR  = [psClick.Readtext]::Output
+            Symbols     = $result
+            Text        = [psClick.Readtext]::SymbolsToString($result, $cfg.SpaceSize)
+            ImageOutput = [psClick.Readtext]::Output
         }
     }
 }

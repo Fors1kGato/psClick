@@ -37,7 +37,7 @@ function Recognize-Text
         try{
             $Base = $PSBoundParameters.Base
             $BaseSymbol = [psClick.Readtext]::LoadSymbolBase("$PSScriptRoot\ImageReader_Data\$Base.pssb")
-            $cfg = Get-Content "$PSScriptRoot\ImageReader_Data\$Base.cnfg"|ConvertFrom-Json
+            $cfg = Get-Content "$PSScriptRoot\ImageReader_Data\$Base.cfg"|ConvertFrom-Json
         }
         catch{
             throw $_

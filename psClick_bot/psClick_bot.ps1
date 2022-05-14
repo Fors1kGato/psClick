@@ -39,7 +39,7 @@
         $stream = [IO.MemoryStream]::new()
         $File.Save($stream, [Drawing.Imaging.ImageFormat]::Png)
         $stream.Position = 0
-        if(!$FileName){$FileName = Get-Date -Format "dd-MM-yyyy_HH-mm-ss.png"}
+        if(!$FileName){$FileName = Get-Date -Format "dd-MM-yyyy_HH-mm-ss.pn\g"}
     }
     else{
         $stream = [IO.File]::OpenRead($File)

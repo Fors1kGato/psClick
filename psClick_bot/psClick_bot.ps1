@@ -1,7 +1,7 @@
 ﻿function Send-TelegramDocument
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [Alias(
@@ -30,11 +30,12 @@
     $body.Add("chat_id", $me)
     if($MyInvocation.InvocationName.EndsWith("Document"))
     {$body.Add("disable_content_type_detection",$true)}
+    $cmdType = $MyInvocation.InvocationName.Replace("Send-Telegram","")
     ForEach($k in $MyInvocation.BoundParameters.Keys){
         if($k -eq 'File'){continue}
         $body.Add($k.ToLower(), $MyInvocation.BoundParameters.$k)
     }
-    if($MyInvocation.InvocationName.EndsWith("Photo") -and $File -is [Drawing.Bitmap]){
+    if($cmdType -in ("Photo","Document") -and $File -is [Drawing.Image]){
         $stream = [IO.MemoryStream]::new()
         $File.Save($stream, [Drawing.Imaging.ImageFormat]::Png)
         $stream.Position = 0
@@ -49,7 +50,7 @@
         $body,
         $stream,
         $FileName,
-        [psClick.Telegram+FileType]::($MyInvocation.InvocationName.Replace("Send-Telegram",""))
+        [psClick.Telegram+FileType]::$cmdType
     )
     if($result.Result){$result = $result.Result|ConvertFrom-Json}
     }

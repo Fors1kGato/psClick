@@ -539,10 +539,10 @@ function Show-Hint
             }
         }
         else{
-            $h = @(Get-ChildWindows -Handle $w|where wClass -match "EDIT")
+            $h = @(Get-ChildWindows -Handle $w|where Class -match "EDIT")
             $ptr = [Runtime.InteropServices.Marshal]::StringToHGlobalAuto($text)
-            $send = [psClickColor]::SendMessage(
-                $h[0].wHandle,
+            $send = [psClick.User32]::SendMessage(
+                $h[0].Handle,
                 0x000C,
                 0,
                 $ptr
@@ -558,8 +558,8 @@ function Show-Hint
             if($NewTransparency){
                 #Write-Host "NewTransparency"
                 $ptr = [Runtime.InteropServices.Marshal]::StringToHGlobalAuto("$Transparency")
-                $send = [psClickColor]::SendMessage(
-                    $h[1].wHandle,
+                $send = [psClick.User32]::SendMessage(
+                    $h[1].Handle,
                     0x000C,
                     0,
                     $ptr

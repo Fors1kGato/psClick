@@ -432,7 +432,7 @@ function Show-Hint
             $WS_EX_LAYERED = 0x00080000
             $GWL_EXSTYLE   = -20
 
-            [Void][psClickColor]::SetWindowLongPtr(
+            [Void][psClick.User32]::SetWindowLongPtr(
                 $f.Handle, 
                 $GWL_EXSTYLE, 
                 ($WS_EX_LAYERED -bor $WS_EX_TRANSPARENT)

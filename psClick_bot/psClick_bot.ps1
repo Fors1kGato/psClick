@@ -46,20 +46,20 @@
         if(!$FileName){$FileName = Split-Path $File -Leaf}
     }
     try{
-    $result = [psClick.Telegram]::SendFile(
-        $body,
-        $stream,
-        $FileName,
-        [psClick.Telegram+FileType]::$cmdType
-    )
-    if($result.Result){$result = $result.Result|ConvertFrom-Json}
+        $result = [psClick.Telegram]::SendFile(
+            $body,
+            $stream,
+            $FileName,
+            [psClick.Telegram+FileType]::$cmdType
+        )
+        if($result.Result){$result = $result.Result|ConvertFrom-Json}
+        $stream.Close()
+        return $result
     }
     catch{
         $stream.Close()
         throw $_
     }
-    $stream.Close()
-    return $result
 }
 
 function Send-TelegramMessage

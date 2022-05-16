@@ -1,4 +1,39 @@
-﻿function Get-ClipboardHistory{
+﻿function Publish-Image
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        [Parameter(Mandatory,Position=0)]
+        $Image
+    )
+    $formats = ".png",".jpg",".jpeg",".gif",".jfif",".pjpeg",".pjp"
+    if($Image -isnot [Drawing.Image] -and !(Test-Path $Image))
+    {throw "Укажите путь существующего файла"}
+    if((Get-Item $Image).Extension -notin $formats)
+    {throw "Выберите файл допустимого разрешения: `n$formats"}
+    if($Image -is [Drawing.Image]){
+        $stream = [IO.MemoryStream]::new()
+        $Image.Save($stream, [Drawing.Imaging.ImageFormat]::Png)
+        $stream.Position = 0
+    }
+    else{
+        $stream = [IO.File]::OpenRead($Image)
+    }
+    try{
+        $result = [psClick.Net]::UploadMedia($stream)
+        if($result.Result){$result = $result.Result}
+        $stream.Close()
+        return $result
+    }
+    catch{
+        $stream.Close()
+        throw $_
+    }
+}
+
+function Get-ClipboardHistory{
     if(!('System.WindowsRuntimeSystemExtensions' -as [Type])){
         [Void][Reflection.Assembly]::LoadWithPartialName("System.Runtime.WindowsRuntime")
     }

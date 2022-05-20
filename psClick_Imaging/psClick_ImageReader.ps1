@@ -49,7 +49,7 @@ function Get-SymbolsBase
 function Recognize-Text 
 {
     #.COMPONENT
-    #1.1
+    #1.2
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     [CmdletBinding()]
@@ -59,12 +59,24 @@ function Recognize-Text
         [Parameter(Mandatory,Position=1)]
         $Base
     )
-    if($Path -is [System.Drawing.Image]){
-        $result = [psClick.Readtext]::Recognize($Path, $Base.Config.Settings, $Base.Config.txtColors, $Base.Config.bgColors, $Base.Base)
+    if($Path -is [Drawing.Image]){
+        $result = [psClick.Readtext]::Recognize(
+            $Path, 
+            $Base.Config.Settings, 
+            $Base.Config.txtColors.ForEach({"0x$_"}), 
+            $Base.Config.bgColors.ForEach({"0x$_"}), 
+            $Base.Base
+        )
     }
     else{
         $img = Get-Image -Path $path
-        $result = [psClick.Readtext]::Recognize($img, $Base.Config.Settings, $Base.Config.txtColors, $Base.Config.bgColors, $Base.Base)
+        $result = [psClick.Readtext]::Recognize(
+            $img, 
+            $Base.Config.Settings, 
+            $Base.Config.txtColors.ForEach({"0x$_"}), 
+            $Base.Config.bgColors.ForEach({"0x$_"}), 
+            $Base.Base
+        )
         $img.Dispose()
     }
     [PSCustomObject]@{

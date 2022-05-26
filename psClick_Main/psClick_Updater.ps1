@@ -17,7 +17,7 @@ write-host '
                                              ##           ****            ##
                                              ##     https://psClick.ru    ##
                                              ###############################
-                                                     Идет обновление     
+                                                 Выполняется  обновление     
 ' -ForegroundColor cyan;
 if(!$env:psClick){
     [Environment]::SetEnvironmentVariable("psClick", 

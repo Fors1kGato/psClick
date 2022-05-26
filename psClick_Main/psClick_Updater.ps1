@@ -71,11 +71,6 @@ if($psISE){
         {Start-Psclick},
         $null
     )
-    [Void]$psISE.CurrentPowerShellTab.AddOnsMenu.SubMenus.Add(
-        'Запустить psClick — ImageReader',
-        {Start-psClickImageReader},
-        $null
-    )
 }
 #
 #endregion

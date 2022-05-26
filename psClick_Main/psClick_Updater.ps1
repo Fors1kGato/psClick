@@ -100,4 +100,21 @@ New-ItemProperty @params -Force| Out-Null
 (Get-Command -Module psClick*).Module|ForEach{Remove-Module $_}
 sal ngen (Join-Path ([Runtime.InteropServices.RuntimeEnvironment]::GetRuntimeDirectory()) ngen.exe)
 (gci $env:psClick -rec *.dll).FullName|%{ngen install $_ |Out-Null}
-if(!$er){Write-Host "Обновление завершено!" -Fore green}
+if(!$er){
+    cls;write-host "
+
+
+
+
+
+
+                                             ###############################
+                                             ##          psClick          ##
+                                             ##            by             ##
+                                             ##          Fors1k           ##
+                                             ##           ****            ##
+                                             ##     https://psClick.ru    ##
+                                             ###############################
+                                                         Готово!
+    " -ForegroundColor Green
+}

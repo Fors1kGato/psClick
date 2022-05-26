@@ -19,18 +19,22 @@ write-host '
                                              ###############################
                                                      Идет обновление     
 ' -ForegroundColor cyan;
+if(!$env:psClick){
+    [Environment]::SetEnvironmentVariable("psClick", 
+    [Environment]::GetFolderPath("MyDocuments") + 
+    "\psClick", [EnvironmentVariableTarget]::User)
+}
 $url   = "api.github.com/repos/Fors1kGato/psClick/git/trees/main?recursive=1"
-$psClickPath = [Environment]::GetFolderPath("MyDocuments") + "\psClick"
 $tree  = (Irm $url -useb).tree
 $files = $tree|?{$_.type -ne "tree"}
-$tr    = (gci -file -Recurse $psClickPath).FullName|ForEach{
+$tr    = (gci -file -Recurse $env:psClick).FullName|ForEach{
     $bytes =  [IO.File]::ReadAllBytes($_)
     $blob  = [Text.Encoding]::UTF8.GetBytes("blob $($bytes.Count)`0") + $bytes
     $sha1  = [Security.Cryptography.SHA1Managed]::Create()
     $hash  = $sha1.ComputeHash($blob)
     $hashString = [BitConverter]::ToString($hash).Replace('-','').ToLower()
     [PSCustomObject]@{
-        Path = $_.replace("$psClickPath\","").replace("\","/")
+        Path = $_.replace("$env:psClick\","").replace("\","/")
         sha = $hashString
     }
     #sleep 50
@@ -40,7 +44,7 @@ ForEach($f in $files){
     $check = $tr.sha.Contains($f.sha)
     if($f.path -eq 'psClick_Main/psClick_Updater.ps1'){continue}
     if(!$check){
-        $Path = (Join-path $psClickPath $f.path)
+        $Path = (Join-path $env:psClick $f.path)
         try{$p = Ni -ea Stop $Path -Force}
         catch{
             Write-Warning (
@@ -89,15 +93,11 @@ $params = @{
     ErrorAction = 'Stop'
 }
 New-ItemProperty @params -Force| Out-Null
-(gci -Recurse $psClickPath|Where{!$_.FullName.Contains("psClick_UserData")}).FullName.Replace("$psClickPath\","").replace("\","/")|
+(gci -Recurse $env:psClick|Where{!$_.FullName.Contains("psClick_UserData")}).FullName.Replace("$env:psClick\","").replace("\","/")|
 ?{$tree.path -notcontains $_}|%{
-    ri (Join-Path $psClickPath $_) -Recurse -ea 0
+    ri (Join-Path $env:psClick $_) -Recurse -ea 0
 }
-#(Get-Command -Module psClick*).Module|ForEach{Remove-Module $_}
+(Get-Command -Module psClick*).Module|ForEach{Remove-Module $_}
 sal ngen (Join-Path ([Runtime.InteropServices.RuntimeEnvironment]::GetRuntimeDirectory()) ngen.exe)
-$psClickPath = [Environment]::GetFolderPath("MyDocuments") + "\psClick"
-(gci $psClickPath -rec *.dll).FullName|%{
-    #ngen uninstall $_|Out-Null
-    ngen install $_ |Out-Null
-}
+(gci $env:psClick -rec *.dll).FullName|%{ngen install $_ |Out-Null}
 if(!$er){Write-Host "Обновление завершено!" -Fore green}

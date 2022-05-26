@@ -9,7 +9,13 @@ $winSize.Height = 30
 $host.ui.RawUI.BufferSize = $bufSize
 $host.ui.RawUI.WindowSize = $winSize
     
-write-host '
+write-host "
+
+
+
+
+
+
                                              ###############################
                                              ##          psClick          ##
                                              ##            by             ##
@@ -17,8 +23,8 @@ write-host '
                                              ##           ****            ##
                                              ##     https://psClick.ru    ##
                                              ###############################
-                                                 Выполняется  обновление     
-' -ForegroundColor cyan;
+                                                 Выполняется  обновление
+    " -ForegroundColor cyan;
 if(!$env:psClick){
     [Environment]::SetEnvironmentVariable("psClick", 
     [Environment]::GetFolderPath("MyDocuments") + 

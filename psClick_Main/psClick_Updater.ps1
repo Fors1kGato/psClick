@@ -29,6 +29,8 @@ if(!$env:psClick){
     [Environment]::SetEnvironmentVariable("psClick", 
     [Environment]::GetFolderPath("MyDocuments") + 
     "\psClick", [EnvironmentVariableTarget]::User)
+    $Env:psClick = [Environment]::GetFolderPath("MyDocuments") + 
+    "\psClick"
 }
 $url   = "api.github.com/repos/Fors1kGato/psClick/git/trees/main?recursive=1"
 $tree  = (Irm $url -useb).tree

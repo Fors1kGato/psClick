@@ -31,7 +31,7 @@
     $cmdType = $MyInvocation.InvocationName.Replace("Send-Telegram","")
     if($cmdType-eq"Document"){$body.Add("disable_content_type_detection",$true)}
     ForEach($k in $MyInvocation.BoundParameters.Keys){
-        if($k -eq 'File'){continue}
+        if($k -in ('File','FileName')){continue}
         $body.Add($k.ToLower(), $MyInvocation.BoundParameters.$k)
     }
     if($cmdType -in ("Photo","Document") -and $File -is [Drawing.Image]){
@@ -51,7 +51,7 @@
             $FileName,
             [psClick.Telegram+FileType]::$cmdType
         )
-        if($result.Result){$result = $result.Result|ConvertFrom-Json}
+        if($result){$result = $result|ConvertFrom-Json}
         $stream.Close()
         return $result
     }
@@ -64,7 +64,7 @@
 function Send-TelegramMessage
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -83,6 +83,6 @@ function Send-TelegramMessage
         $body.Add($k.ToLower(), $MyInvocation.BoundParameters.$k)
     }
     $result = [psClick.Telegram]::SendMessage($body)
-    if($result.Result){$result = $result.Result|ConvertFrom-Json}
+    if($result){$result = $result|ConvertFrom-Json}
     return $result
 }

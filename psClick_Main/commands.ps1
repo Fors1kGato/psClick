@@ -393,21 +393,21 @@ function Show-FolderDialog
 function Start-Psclick
 { 
     #.COMPONENT
-    #2
+    #2.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
     )
-    if(Test-AdminRole){
-        if((Get-ScheduledTask|?{$_.TaskName -eq 'Start_psClick'}) -eq $null){
-            $Action = New-ScheduledTaskAction -Execute "$psscriptroot\psCLick.exe" -WorkingDirectory $psscriptroot
-            $Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries
-            Register-ScheduledTask -TaskName "Start_psClick" -Action $Action -Settings $Settings|Out-Null
-        }
-        Start-ScheduledTask "Start_psClick"|Out-Null
+    try{
+        Start-ScheduledTask "Start_psClick" -ErrorAction Stop
     }
-    else{
-        Start "$psscriptroot\psCLick.exe" -WorkingDirectory $psscriptroot
+    catch{
+        $Action = New-ScheduledTaskAction -Execute "$psscriptroot\psCLick.exe" -WorkingDirectory $psscriptroot
+        $Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries
+        Register-ScheduledTask -TaskName "Start_psClick" -Action $Action -Settings $Settings|Out-Null
+    }
+    finally{
+        Start-ScheduledTask "Start_psClick"
     }
 }
 

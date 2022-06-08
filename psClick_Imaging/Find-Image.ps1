@@ -1,7 +1,7 @@
 ﻿function Find-Image
 {
     #.COMPONENT
-    #5
+    #5.1
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     [Alias('Find-Color')][CmdletBinding(DefaultParameterSetName = 'Screen_FullSize')]
@@ -193,6 +193,14 @@
             }
         }
     }
+
+    if($V2 -and $smallBmp.PixelFormat -ne [Drawing.Imaging.PixelFormat]::Format32bppArgb){
+        $smallBmp = $smallBmp.Clone(
+            [Drawing.Rectangle]::new(0, 0, $smallBmp.Width, $smallBmp.Height), 
+            [Drawing.Imaging.PixelFormat]::Format32bppArgb
+        )
+    }
+
     if($v2){
         $res = [psClick.FindImage]::FindBitmap(
             $smallBmp, 

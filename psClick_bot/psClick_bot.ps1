@@ -69,7 +69,7 @@ function Send-TelegramMessage
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
         [Parameter(Mandatory,ValueFromPipeline,Position=0)]
-        $Text,
+        [String]$Text,
         [Parameter(Position=1)]
         [ValidateSet('MarkdownV2', 'HTML', 'Markdown')]
         [String]$Parse_mode,

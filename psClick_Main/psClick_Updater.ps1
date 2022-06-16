@@ -32,12 +32,13 @@ if(!$env:psClick){
     $Env:psClick = [Environment]::GetFolderPath("MyDocuments") + 
     "\psClick"
 }
-if(![Environment]::GetEnvironmentVariable("Path", "User").Contains("$env:psClick\psClick_Main\x32")){
+$vc = Test-Path "$env:windir\System32\vcruntime140d.dll"
+if(!$vc -and ![Environment]::GetEnvironmentVariable("Path", "User").Contains("$env:psClick\psClick_Main\x32")){
     [Environment]::SetEnvironmentVariable("Path",
     [Environment]::GetEnvironmentVariable("Path","User")+
     [IO.Path]::PathSeparator+"$env:psClick\psClick_Main\x32","User")
 }
-if(![Environment]::GetEnvironmentVariable("Path", "User").Contains("$env:psClick\psClick_Main\x64")){
+if(!$vc -and ![Environment]::GetEnvironmentVariable("Path", "User").Contains("$env:psClick\psClick_Main\x64")){
     [Environment]::SetEnvironmentVariable("Path",
     [Environment]::GetEnvironmentVariable("Path","User")+
     [IO.Path]::PathSeparator+"$env:psClick\psClick_Main\x64","User")
@@ -62,6 +63,7 @@ $tr    = (gci -file -Recurse $env:psClick).FullName|ForEach{
 ForEach($f in $files){
     $check = $tr.sha.Contains($f.sha)
     if($f.path -eq 'psClick_Main/psClick_Updater.ps1'){continue}
+    if($vc -and $f.path -like "psClick_Main/x*/*d.dll"){continue}
     if(!$check){
         $Path = (Join-path $env:psClick $f.path)
         try{$p = Ni -ea Stop $Path -Force}
@@ -116,7 +118,7 @@ New-ItemProperty @params -Force| Out-Null
 ?{$tree.path -notcontains $_}|%{
     ri (Join-Path $env:psClick $_) -Recurse -ea 0
 }
-(Get-Command -Module psClick*).Module|ForEach{Remove-Module $_}
+Remove-Module -Name psClick*
 sal ngen (Join-Path ([Runtime.InteropServices.RuntimeEnvironment]::GetRuntimeDirectory()) ngen.exe)
 (gci $env:psClick -rec *.dll).FullName|%{ngen install $_ |Out-Null}
 if(!$er){

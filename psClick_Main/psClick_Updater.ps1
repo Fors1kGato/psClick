@@ -32,6 +32,16 @@ if(!$env:psClick){
     $Env:psClick = [Environment]::GetFolderPath("MyDocuments") + 
     "\psClick"
 }
+if(![Environment]::GetEnvironmentVariable("Path", "User").Contains("$env:psClick\psClick_Main\x32")){
+    [Environment]::SetEnvironmentVariable("Path",
+    [Environment]::GetEnvironmentVariable("Path","User")+
+    [IO.Path]::PathSeparator+"$env:psClick\psClick_Main\x32","User")
+}
+if(![Environment]::GetEnvironmentVariable("Path", "User").Contains("$env:psClick\psClick_Main\x64")){
+    [Environment]::SetEnvironmentVariable("Path",
+    [Environment]::GetEnvironmentVariable("Path","User")+
+    [IO.Path]::PathSeparator+"$env:psClick\psClick_Main\x64","User")
+}
 [Net.ServicePointManager]::SecurityProtocol='SSL3,TLS,TLS11,TLS12'
 $url   = "api.github.com/repos/Fors1kGato/psClick/git/trees/main?recursive=1"
 $tree  = (Irm $url -useb).tree

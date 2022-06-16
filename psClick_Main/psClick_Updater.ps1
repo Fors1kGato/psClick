@@ -32,6 +32,7 @@ if(!$env:psClick){
     $Env:psClick = [Environment]::GetFolderPath("MyDocuments") + 
     "\psClick"
 }
+[Net.ServicePointManager]::SecurityProtocol='SSL3,TLS,TLS11,TLS12'
 $url   = "api.github.com/repos/Fors1kGato/psClick/git/trees/main?recursive=1"
 $tree  = (Irm $url -useb).tree
 $files = $tree|?{$_.type -ne "tree"}

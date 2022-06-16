@@ -60,10 +60,8 @@ function Update-Psclick
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
     )
-    [Net.ServicePointManager]::
-    SecurityProtocol='SSL3,TLS,TLS11,TLS12'
     [System.Diagnostics.Process]::Start(@{
         FileName  = "powershell";Verb = "runas"
-        Arguments = "irm 'github.com/Fors1kGato/psClick/raw/main/psClick_Main/psClick_Updater.ps1'|iex;pause"
+        Arguments = "[Net.ServicePointManager]::SecurityProtocol='SSL3,TLS,TLS11,TLS12';irm 'github.com/Fors1kGato/psClick/raw/main/psClick_Main/psClick_Updater.ps1'|iex;pause"
     }).WaitForExit();Get-Module psClick*|ForEach-Object{Remove-Module $_}
 }

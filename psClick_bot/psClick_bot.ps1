@@ -1,7 +1,7 @@
 ﻿function Send-TelegramDocument
 {
     #.COMPONENT
-    #1.1
+    #1.2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [Alias(
@@ -10,7 +10,7 @@
         'Send-TelegramPhoto'
     )]
     Param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory,ValueFromPipeline,Position=0)]
         [Alias("Photo", "Video","Audio")]
         $File,
         [Parameter(Position=1)]
@@ -64,12 +64,12 @@
 function Send-TelegramMessage
 {
     #.COMPONENT
-    #1.1
+    #1.2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [Parameter(Mandatory,Position=0)]
-        [String]$Text,
+        [Parameter(Mandatory,ValueFromPipeline,Position=0)]
+        $Text,
         [Parameter(Position=1)]
         [ValidateSet('MarkdownV2', 'HTML', 'Markdown')]
         [String]$Parse_mode,

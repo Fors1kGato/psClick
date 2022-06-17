@@ -43,13 +43,13 @@ if(!$vc -and ![Environment]::GetEnvironmentVariable("Path", "User").Contains("$e
     [Environment]::GetEnvironmentVariable("Path","User")+
     [IO.Path]::PathSeparator+"$env:psClick\psClick_Main\x64","User")
 }
-(gci -Recurse $env:psClick|Where{!$_.FullName.Contains("psClick_UserData")}).FullName.Replace("$env:psClick\","").
-Replace("\","/")|Where{$tree.path -notcontains $_}|%{Remove-Item (Join-Path $env:psClick $_) -Recurse -ea 0}
-[Net.ServicePointManager]::SecurityProtocol='SSL3,TLS,TLS11,TLS12'
 $url   = "api.github.com/repos/Fors1kGato/psClick/git/trees/main?recursive=1"
 $tree  = (Irm $url -useb).tree
 $files = $tree|?{$_.type -ne "tree"}
-$tr    = (gci -file -Recurse $env:psClick).FullName|ForEach{
+(gci -Recurse $env:psClick|Where{!$_.FullName.Contains("psClick_UserData")}).FullName.Replace("$env:psClick\","").
+Replace("\","/")|Where{$tree.path -notcontains $_}|%{Remove-Item (Join-Path $env:psClick $_) -Recurse -ea 0}
+[Net.ServicePointManager]::SecurityProtocol='SSL3,TLS,TLS11,TLS12'
+$tr = (gci -file -Recurse $env:psClick).FullName|ForEach{
     $bytes =  [IO.File]::ReadAllBytes($_)
     $blob  = [Text.Encoding]::UTF8.GetBytes("blob $($bytes.Count)`0") + $bytes
     $sha1  = [Security.Cryptography.SHA1Managed]::Create()

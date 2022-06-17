@@ -43,6 +43,8 @@ if(!$vc -and ![Environment]::GetEnvironmentVariable("Path", "User").Contains("$e
     [Environment]::GetEnvironmentVariable("Path","User")+
     [IO.Path]::PathSeparator+"$env:psClick\psClick_Main\x64","User")
 }
+(gci -Recurse $env:psClick|Where{!$_.FullName.Contains("psClick_UserData")}).FullName.Replace("$env:psClick\","").
+Replace("\","/")|Where{$tree.path -notcontains $_}|%{Remove-Item (Join-Path $env:psClick $_) -Recurse -ea 0}
 [Net.ServicePointManager]::SecurityProtocol='SSL3,TLS,TLS11,TLS12'
 $url   = "api.github.com/repos/Fors1kGato/psClick/git/trees/main?recursive=1"
 $tree  = (Irm $url -useb).tree
@@ -114,10 +116,6 @@ $params = @{
     ErrorAction = 'Stop'
 }
 New-ItemProperty @params -Force| Out-Null
-(gci -Recurse $env:psClick|Where{!$_.FullName.Contains("psClick_UserData")}).FullName.Replace("$env:psClick\","").replace("\","/")|
-?{$tree.path -notcontains $_}|%{
-    ri (Join-Path $env:psClick $_) -Recurse -ea 0
-}
 Remove-Module -Name psClick*
 sal ngen (Join-Path ([Runtime.InteropServices.RuntimeEnvironment]::GetRuntimeDirectory()) ngen.exe)
 (gci $env:psClick -rec *.dll).FullName|%{ngen install $_ |Out-Null}

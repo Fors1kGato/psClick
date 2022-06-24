@@ -304,7 +304,7 @@ function Show-Window
 function Find-Window
 {
     #.COMPONENT
-    #1
+    #2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = 'Title')]
@@ -321,7 +321,8 @@ function Find-Window
         [Parameter(Mandatory=$true,Position=0,ParameterSetName =  'wPid')]
         [Int]$wPid
         ,
-        [Parameter(Mandatory=$false,Position=1,ParameterSetName ='Title')]
+        [Parameter(Position=1,ParameterSetName ='Title')]
+        [Parameter(Position=1,ParameterSetName ='Class')]
         [Parameter(Position=1,ParameterSetName = 'ProcessName')]
         [ValidateSet('EQ','match','cEQ','cMatch')]
         [String]$Option = "match"
@@ -344,14 +345,20 @@ function Find-Window
         return ,$res
     }
     if($Class){
-        $hwnd = [psClick.User32]::FindWindowEx(0, 0, $Class, [NullString]::Value)
+        $hwnd = [psClick.User32]::FindWindowEx(0, 0, [NullString]::Value, [NullString]::Value)
+        $match = [ScriptBlock]::Create("`$fullClassName.ToString() -$option `$Class")
+        $fullClassName = [Text.StringBuilder]::new([Int16]::MaxValue)
         $text = [Text.StringBuilder]::new([Int16]::MaxValue)
-
+        
         while ($hwnd -ne 0){
-            [Void][psClick.User32]::GetWindowText($hwnd, $text, [Int16]::MaxValue)
-            $name = $text.ToString()
-            $res.Add([PSCustomObject]@{Handle = $hwnd;Title = $name})
-            $hwnd = [psClick.User32]::FindWindowEx(0, $hwnd, $Class, [NullString]::Value)
+            [Void][psClick.User32]::GetClassName($hwnd, $fullClassName, [Int16]::MaxValue)
+
+            if(&$match){
+                [Void][psClick.User32]::GetWindowText($hwnd, $text, [Int16]::MaxValue)
+                $name = $text.ToString()
+                $res.Add([PSCustomObject]@{Handle = $hwnd;Title = $name})
+            }
+            $hwnd = [psClick.User32]::FindWindowEx(0, $hwnd, [NullString]::Value, [NullString]::Value)
         }
         return ,$res
     }

@@ -74,7 +74,7 @@ function Send-ArduinoCommand
     )
     if(![psClick.Arduino]::SendCommand($Arduino, $Command, $Wait)){
         [void][psClick.Arduino]::Close($Arduino)
-        $error = "Arduino write / read exception"
+        $error = "Arduino write/read error"
         throw $error 
     }
 }
@@ -201,8 +201,8 @@ function Move-Cursor
     }
 
     if($Event){
-        if(![w3psClick.User322]::PostMessage($handle, 0x0200, 0, ($Position.X + 0x10000 * $Position.Y))){
-            [w3psClick.User322]::SendMessage($handle, 0x0200, 0, ($Position.X + 0x10000 * $Position.Y))|Out-Null 
+        if(![psClick.User32]::PostMessage($handle, 0x0200, 0, ($Position.X + 0x10000 * $Position.Y))){
+            [psClick.User32]::SendMessage($handle, 0x0200, 0, ($Position.X + 0x10000 * $Position.Y))|Out-Null 
         }
     }
     else{

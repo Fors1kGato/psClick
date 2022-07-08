@@ -135,9 +135,9 @@ function Type-Text
     $text = $text-replace"(`r`n|`r)","`n"
     $chars = $Text.ToCharArray()
     $ruCh = 192..255+168+184
-    $rus = [w32KeyBoard]::LoadKeyboardLayout("00000419", 0)
-    $eng = [w32KeyBoard]::LoadKeyboardLayout("00000409", 0)
-    $window = [w32Windos]::GetForegroundWindow()
+    $rus = [psClick.User32]::LoadKeyboardLayout("00000419", 0)
+    $eng = [psClick.User32]::LoadKeyboardLayout("00000409", 0)
+    $window = [psClick.User32]::GetForegroundWindow()
     
     if($Hardware){
         $portName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.
@@ -157,7 +157,7 @@ function Type-Text
             if($char-ceq"ё"){$cr=96}elseif($char-ceq"Ё"){$cr=126}
         }
         else{
-            [Void][w32]::PostMessage($window, 0x0050, 0x0001, $eng)
+            [Void][psClick.User32]::PostMessage($window, 0x0050, 0x0001, $eng)
             $vk = [psClick.User32]::VkKeyScanEx($char, $eng)
             if($Hardware){$cr = $byte}
         }

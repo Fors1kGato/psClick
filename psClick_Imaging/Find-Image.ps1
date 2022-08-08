@@ -1,7 +1,7 @@
 ﻿function Find-Image
 {
     #.COMPONENT
-    #5.1
+    #6
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     [Alias('Find-Color')][CmdletBinding(DefaultParameterSetName = 'Screen_FullSize')]
@@ -95,7 +95,7 @@
         #[Parameter(Mandatory,ParameterSetName = 'Second_Way')]
         [Switch]$V2
     )
-    if(!$V2 -and ($MyInvocation.BoundParameters.Keys.Contains("Attempts") -or $MyInvocation.BoundParameters.Keys.Contains("BgColor"))){
+    if(!$V2 -and ($MyInvocation.BoundParameters.Keys.Contains("Attempts"))){
         throw "Для использования параметров -Attempts и -BgColor требуется указывать параметр -v2"
     }
     if($Image -isnot [Drawing.Bitmap]){
@@ -118,7 +118,7 @@
         $smallBmp = $Image
     }
     #
-    if($BgColor -ne -1){
+    if($V2 -and -1 -ne $BgColor){
         if($BgColor -isnot [Color]){
             try{
                 $BgColor = New-Color $BgColor
@@ -128,6 +128,12 @@
             }
         }
         $BgColor = [Drawing.ColorTranslator]::ToWin32([Drawing.Color]::FromArgb.Invoke([Object[]]$BgColor.RGB))
+    }
+    elseif($BgColor -is [Color]){
+        $BgColor = New-Color $BgColor -raw
+    }
+    else{
+        $BgColor = $null
     }
     
     Switch -Wildcard ($PSCmdlet.ParameterSetName)
@@ -200,6 +206,12 @@
             [Drawing.Imaging.PixelFormat]::Format32bppArgb
         )
     }
+    if($V2 -and $bigBmp.PixelFormat -ne [Drawing.Imaging.PixelFormat]::Format32bppArgb){
+        $bigBmp = $bigBmp.Clone(
+            [Drawing.Rectangle]::new(0, 0, $bigBmp.Width, $bigBmp.Height), 
+            [Drawing.Imaging.PixelFormat]::Format32bppArgb
+        )
+    }
 
     if($v2){
         $res = [psClick.FindImage]::FindBitmap(
@@ -218,7 +230,8 @@
             $bigBmp, 
             $Deviation, 
             $Accuracy, 
-            $Count
+            $Count,
+            $BgColor
         )
     }
     if($PSCmdlet.ParameterSetName -notmatch "FullSize" -and $res.Count){

@@ -619,7 +619,7 @@ Function Get-Hint
 Function Compare-Color
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Cirus ; Link: https://psClick.ru
     Param(
@@ -651,12 +651,12 @@ Function Compare-Color
     
     if ($Deviation) {
         if ($Percent) {
-            $Rmin = 255 * $Deviation 
-            $Gmin = 255 * $Deviation 
-            $Bmin = 255 * $Deviation 
-            $Rmax = 255 * $Deviation 
-            $Gmax = 255 * $Deviation  
-            $Bmax = 255 * $Deviation 
+            $Rmin = 2.55 * $Deviation 
+            $Gmin = 2.55 * $Deviation 
+            $Bmin = 2.55 * $Deviation 
+            $Rmax = 2.55 * $Deviation 
+            $Gmax = 2.55 * $Deviation  
+            $Bmax = 2.55 * $Deviation 
         }
         else {
             $Rmin = $Deviation 
@@ -765,5 +765,4 @@ function Draw-Rectangle
     Start-ThreadJob $DrawRectangle -Name psclickDrawRectangle -StreamingHost $host -ArgumentList @(
         $Location,$Size,$Color,$width
     )|Out-Null
-    
 }

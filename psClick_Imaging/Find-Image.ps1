@@ -80,8 +80,8 @@
         ,
         [UInt16]$Count = 1
         ,
-        [ValidateRange(0.0, 1.0)]
-        [Double]$Deviation = 0.0
+        [ValidateRange(0, 100)]
+        [Int]$Deviation = 0
         ,
         [ValidateRange(0, 100)]
         [Int]$Accuracy = 100
@@ -219,7 +219,7 @@
             $bigBmp, 
             $Count, 
             $Accuracy, 
-            ($Deviation*255), 
+            ($Deviation*2.55), 
             $Attempts, 
             $BgColor
         )
@@ -228,7 +228,7 @@
         $res = [psClick.FindImage]::SearchBitmap(
             $smallBmp, 
             $bigBmp, 
-            $Deviation, 
+            ($Deviation/100.0), 
             $Accuracy, 
             $Count,
             $BgColor

@@ -1,7 +1,7 @@
 ﻿function Get-PointsDistance
 {
     #.COMPONENT
-    #2
+    #2.1
     #.SYNOPSIS
     #Author: Cirus, Fors1k ; Link: https://psClick.ru
     Param(
@@ -13,10 +13,10 @@
         ,
         [Switch]$Round
     )
-    if($point1 -isnot [Drawing.Point] -or $point1 -isnot [Drawing.PointF]){
+    if($point1 -isnot [Drawing.Point] -and $point1 -isnot [Drawing.PointF]){
         try{$point1 = [Drawing.PointF]::new.Invoke($point1)}catch{throw $_}
     }
-    if($point2 -isnot [Drawing.Point] -or $point2 -isnot [Drawing.PointF]){
+    if($point2 -isnot [Drawing.Point] -and $point2 -isnot [Drawing.PointF]){
         try{$point2 = [Drawing.PointF]::new.Invoke($point2)}catch{throw $_}
     }
     $distance = [Math]::Sqrt(

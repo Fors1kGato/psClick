@@ -38,7 +38,7 @@
 function Recognize-Text 
 {
     #.COMPONENT
-    #2
+    #2.1
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     [CmdletBinding()]
@@ -49,7 +49,7 @@ function Recognize-Text
         $Base
         ,
         [Parameter(Position=2)][ValidateRange(0, 100)]
-        $Accuracy = 100
+        $Accuracy = 0
     )
     if($Path -is [Drawing.Image]){
         $result = [psClick.Readtext]::Recognize(
@@ -71,11 +71,17 @@ function Recognize-Text
         )
         $img.Dispose()
     }
-    $tmp = $result.Symbols|Where{$_.Percent -ge $Accuracy/100}
+    for($i=$result.Count-1; $i -ge 0; $i--)
+    {
+        if($result[$i]["Percent"] -lt $Accuracy/100)
+        {
+            $result.RemoveAt($i)
+        }
+    }
     [PSCustomObject]@{
-        Symbols     = $tmp
+        Symbols     = $result
         Text        = [Regex]::Replace(
-            [psClick.Readtext]::SymbolsToString($tmp, $Base.Config.SpaceSize), 
+            [psClick.Readtext]::SymbolsToString($result, $Base.Config.SpaceSize), 
             "^[`r`n]+", '', 
             [Text.RegularExpressions.RegexOptions]::Multiline
         )

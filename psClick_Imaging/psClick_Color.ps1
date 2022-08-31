@@ -1,4 +1,43 @@
-﻿function Get-CursorImage
+﻿function Get-RectangleFromScreen
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Cirus, Fors1k ; Link: https://psClick.ru
+    Param(
+        $Hint = "Выделите область на экране"
+        ,
+        $HintColor = [Drawing.Color]::Black
+        ,
+        $RectColor = [Drawing.Color]::Cyan
+    )
+    if($RectColor -isnot [Drawing.Color]){
+        try{
+            $RectColor = New-Color $RectColor -raw
+        }
+        catch{
+            throw "Неверно указан цевет прямоугольника"
+        }
+    }
+    if($HintColor -isnot [Drawing.Color]){
+        try{
+            $HintColor = New-Color $HintColor -raw
+        }
+        catch{
+            throw "Неверно указан цевет текста"
+        }
+    }
+
+    $form = [psClick.FormRectangle]::new($Hint, $HintColor)
+    $form.StartPosition = [Windows.Forms.FormStartPosition]::CenterScreen
+    $form.BackColor = $RectColor
+    Set-WindowTransparency -Handle $form.Handle -Transparency 150
+    $form.ShowDialog();
+
+    [psClick.FormRectangle]::ResultForm
+}
+
+function Get-CursorImage
 {
     #.COMPONENT
     #1

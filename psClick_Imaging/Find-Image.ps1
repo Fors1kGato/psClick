@@ -231,7 +231,8 @@
             ($Deviation/100.0), 
             $Accuracy, 
             $Count,
-            $BgColor
+            $BgColor,
+            $true
         )
     }
     if($PSCmdlet.ParameterSetName -notmatch "FullSize" -and $res.Count){

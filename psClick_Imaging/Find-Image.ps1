@@ -1,7 +1,7 @@
 ﻿function Find-Image
 {
     #.COMPONENT
-    #6
+    #6.1
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     [Alias('Find-Color')][CmdletBinding(DefaultParameterSetName = 'Screen_FullSize')]
@@ -91,6 +91,8 @@
         ,
         #[Parameter(ParameterSetName = 'Second_Way')]
         $BgColor = -1
+        ,
+        [Switch]$withDuplicates
         ,
         #[Parameter(Mandatory,ParameterSetName = 'Second_Way')]
         [Switch]$V2
@@ -232,6 +234,7 @@
             $Accuracy, 
             $Count,
             $BgColor,
+            $withDuplicates,
             $true
         )
     }

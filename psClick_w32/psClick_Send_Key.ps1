@@ -1,7 +1,7 @@
 ﻿function Send-Key
 {
     #.COMPONENT
-    #3
+    #3.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = '__AllParameterSets')]
@@ -67,7 +67,7 @@
         if(!$Handle){
             if($Hardware){
                 $portName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.
-                            Properties|where{$_.name -like  '*USB*'}).value)[0].replace("COM","")
+                            Properties|Where{$_.name -like  '*USB*'}).value)[0].Replace("COM","")
                 $arduino = [psClick.Arduino]::Open($PortName)
                 $error = "Не удалось открыть порт. Err code: $arduino"
                 if([Int]$arduino -le 0){throw $error}
@@ -152,7 +152,7 @@
             }
             else{
                 if($down){
-                    if($key -match "(alt|Control|Shift|win)"){
+                    if($key -match "(alt|Control|Shift|win|[lr]menu)"){
                         [psClick.User32]::keybd_event([Windows.Forms.Keys]::$key, 0, 0x0000, 0)
                     }
                     else{
@@ -160,13 +160,13 @@
                             while($true){
                                 [psClick.User32]::keybd_event([Windows.Forms.Keys]::[String]$args[1], 0, 0x0000, 0)
                                 [psClick.User32]::keybd_event([Windows.Forms.Keys]::[String]$args[1], 0, 0x0002, 0)
-                                sleep -m $args[0]
+                                Sleep -m $args[0]
                             }
                         } -ArgumentList $delay, $key|Out-Null
                     }
                 }
                 elseif($up){
-                    if($key -match "(alt|Control|Shift|win)"){
+                    if($key -match "(alt|Control|Shift|win|[lr]menu)"){
                         [psClick.User32]::keybd_event([Windows.Forms.Keys]::$key, 0, 0x0002, 0)
                     }
                     else{
@@ -192,7 +192,7 @@
                             [psClick.User32]::SendMessage([IntPtr]$args[2] ,0x0100, [Windows.Forms.Keys]::[string]$args[1], 0)|Out-Null
                             #[psClick.User32]::SendMessage($handle ,0x0101, [Windows.Forms.Keys]::[string]$args[1], 0)|Out-Null
                         }
-                        sleep -m $args[0]
+                        Sleep -m $args[0]
                     }
                 } -ArgumentList $delay, $key, $Handle|Out-Null
             }

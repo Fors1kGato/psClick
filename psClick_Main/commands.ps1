@@ -112,33 +112,16 @@ function Test-AdminRole
 Function Get-LevenshteinDistance 
 {
     #.COMPONENT
-    #1
+    #2
     #.SYNOPSIS
-    #Author: Cirus ; Link: https://psClick.ru
+    #Author: Fors1k, Cirus ; Link: https://psClick.ru
     param(
         [Parameter(Mandatory)]
         [String]$String1,
         [Parameter(Mandatory)]
         [String]$String2
     )
-    Function Get-PSMin { param ( [int[]] $ints ) ($ints | Measure-Object -Minimum).Minimum }
- 
-    $diff = 0
-    $m = New-Object "object[,]" ($string1.Length + 1),($string2.Length + 1)
-    for($i = 0; $i -le $string1.Length; $i++) { $m[$i, 0] = $i }
-    for($j = 0; $j -le $string2.Length; $j++) { $m[0, $j] = $j }
- 
-    for($i = 1; $i -le $string1.Length; $i++) {
-        for($j = 1; $j -le $string2.Length; $j++) {
-            if( $string1[($i-1)] -eq $string2[($j-1)] ) {$diff = 0} else {$diff = 1}
-            $m[$i,$j] = Get-PSMin (Get-PSMin ($m[($i-1),$j]+1), ($m[$i,($j-1)]+1)), ($m[($i-1),($j-1)] + $diff)
-        }
-    }
-    
-    if($string1.Length -ge $string2.Length){
-        return [Math]::Round(1 - ($m[$string1.Length, $string2.Length] / $string1.Length), 6)
-    }
-    return [Math]::Round(1 - ($m[$string1.Length, $string2.Length] / $string2.Length), 6)
+    [psClick.Commands]::CalcLevenshteinDistance($String1, $String2)
 }
 
 function Send-Message

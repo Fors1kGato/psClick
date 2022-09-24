@@ -221,12 +221,14 @@ function Cut-Image
 function Get-Image
 {
     #.COMPONENT
-    #2.2
+    #3
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = 'Screen_FullSize')]
     Param
-    (
+    (   [Parameter(Mandatory,Position=0,ParameterSetName = 'Url')]
+        [String]$Url
+        ,
         [Parameter(Mandatory,Position=0,ParameterSetName = 'Window_EndPoint')]
         [Parameter(Mandatory,Position=0,ParameterSetName = 'Window_Size'    )]
         [Parameter(Mandatory,Position=0,ParameterSetName = 'Window_Rect'    )]
@@ -276,6 +278,10 @@ function Get-Image
         [Switch]$Visible
     )
 
+    if($Url){
+        return [Drawing.Image]::FromStream((IWR $Url -USEB).RawContentStream)
+    }
+    
     Switch -Wildcard ($PSCmdlet.ParameterSetName)
     {
         '*_Size'

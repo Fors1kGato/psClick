@@ -59,7 +59,35 @@ function Recognize-Text
     if($Path -is [Drawing.Image]){
         $result = [psClick.Readtext]::Recognize(
             $Path, 
-            $Base.Config.Settings, 
+            $Base.config.ScrollBarFilter,
+            $Base.Config.ScrollBarR,
+            $Base.Config.ScrollBarG,
+            $Base.Config.ScrollBarB,
+            $Base.Config.CheckSmoothing,
+            $Base.Config.ScrollSmoothingLevel,
+            $Base.Config.ScrollSmoothingGaus,
+            $Base.Config.ScrollSmoothingFilter,
+            $Base.Config.CheckDeleteLineHorizontal,
+            $Base.Config.ScrollDeleteLineHorizontal,
+            $Base.Config.CheckDeleteLineVertical,
+            $Base.Config.ScrollDeleteLineVertical,
+            $Base.Config.CheckRemoveNoise,
+            $Base.Config.ScrollRemoveNoise,
+            $Base.Config.CheckRemoveNoiseLineHorizontal,
+            $Base.Config.ScrollRemoveNoiseHorizontal,
+            $Base.Config.CheckRemoveNoiseVertical,
+            $Base.Config.ScrollRemoveNoiseVertical,
+            $Base.Config.Inversion,
+            $Base.Config.TypeRus,
+            $Base.Config.TypeEn,
+            $Base.Config.TypeNum,
+            $Base.Config.TypeOther,
+            $Base.Config.CheckTextDeviation,
+            $Base.Config.CheckFonDeviation,
+            $Base.Config.ScrollTextDeviation,
+            $Base.Config.ScrollFonDeviation,
+            $Base.Config.CheckIntellect,
+            $Base.Config.ScrollIntellect,
             $Base.Config.txtColors.ForEach({"0x$_"}), 
             $Base.Config.bgColors.ForEach({"0x$_"}), 
             $Base.Base
@@ -69,7 +97,35 @@ function Recognize-Text
         $img = Get-Image -Path $path
         $result = [psClick.Readtext]::Recognize(
             $img, 
-            $Base.Config.Settings, 
+            $Base.Config.ScrollBarFilter,
+            $Base.Config.ScrollBarR,
+            $Base.Config.ScrollBarG,
+            $Base.Config.ScrollBarB,
+            $Base.Config.CheckSmoothing,
+            $Base.Config.ScrollSmoothingLevel,
+            $Base.Config.ScrollSmoothingGaus,
+            $Base.Config.ScrollSmoothingFilter,
+            $Base.Config.CheckDeleteLineHorizontal,
+            $Base.Config.ScrollDeleteLineHorizontal,
+            $Base.Config.CheckDeleteLineVertical,
+            $Base.Config.ScrollDeleteLineVertical,
+            $Base.Config.CheckRemoveNoise,
+            $Base.Config.ScrollRemoveNoise,
+            $Base.Config.CheckRemoveNoiseLineHorizontal,
+            $Base.Config.ScrollRemoveNoiseHorizontal,
+            $Base.Config.CheckRemoveNoiseVertical,
+            $Base.Config.ScrollRemoveNoiseVertical,
+            $Base.Config.Inversion,
+            $Base.Config.TypeRus,
+            $Base.Config.TypeEn,
+            $Base.Config.TypeNum,
+            $Base.Config.TypeOther,
+            $Base.Config.CheckTextDeviation,
+            $Base.Config.CheckFonDeviation,
+            $Base.Config.ScrollTextDeviation,
+            $Base.Config.ScrollFonDeviation,
+            $Base.Config.CheckIntellect,
+            $Base.Config.ScrollIntellect,
             $Base.Config.txtColors.ForEach({"0x$_"}), 
             $Base.Config.bgColors.ForEach({"0x$_"}), 
             $Base.Base
@@ -88,10 +144,22 @@ function Recognize-Text
     }
   
 
+     
+        
+     
+
     if ($UseIntellect -ne -1)
     {     
-        $LastValueIntellect = $Base.Config.Settings[27]
-        $Base.Config.Settings[27] = 1 
+        if($Path -is [Drawing.Image]){
+            $img = Cut-Image -Image $Path -StartPos 0, 0 -Size $Path.Size -New
+        }
+        else{
+            $img = Get-Image -Path $Path 
+        }
+
+
+        $LastValueIntellect = $Base.Config.CheckIntellect
+        $Base.Config.CheckIntellect = 1 
               
         for ($i = 0; $i -lt $result.Symbols.Count; $i++){         
             if ($result.Symbols.Rectangle.Size.Width[$i] -eq 0 -or $result.Symbols.Rectangle.Size.Height[$i] -eq 0){continue}
@@ -101,7 +169,35 @@ function Recognize-Text
                 $img2 = Cut-Image -Image $img -rect $result.Symbols.Rectangle[$i] -New               
                 $tmp = [psClick.Readtext]::Recognize(
                     $img2, 
-                    $Base.Config.Settings, 
+                    $Base.config.ScrollBarFilter,
+                    $Base.Config.ScrollBarR,
+                    $Base.Config.ScrollBarG,
+                    $Base.Config.ScrollBarB,
+                    $Base.Config.CheckSmoothing,
+                    $Base.Config.ScrollSmoothingLevel,
+                    $Base.Config.ScrollSmoothingGaus,
+                    $Base.Config.ScrollSmoothingFilter,
+                    $Base.Config.CheckDeleteLineHorizontal,
+                    $Base.Config.ScrollDeleteLineHorizontal,
+                    $Base.Config.CheckDeleteLineVertical,
+                    $Base.Config.ScrollDeleteLineVertical,
+                    $Base.Config.CheckRemoveNoise,
+                    $Base.Config.ScrollRemoveNoise,
+                    $Base.Config.CheckRemoveNoiseLineHorizontal,
+                    $Base.Config.ScrollRemoveNoiseHorizontal,
+                    $Base.Config.CheckRemoveNoiseVertical,
+                    $Base.Config.ScrollRemoveNoiseVertical,
+                    $Base.Config.Inversion,
+                    $Base.Config.TypeRus,
+                    $Base.Config.TypeEn,
+                    $Base.Config.TypeNum,
+                    $Base.Config.TypeOther,
+                    $Base.Config.CheckTextDeviation,
+                    $Base.Config.CheckFonDeviation,
+                    $Base.Config.ScrollTextDeviation,
+                    $Base.Config.ScrollFonDeviation,
+                    $Base.Config.CheckIntellect,
+                    $Base.Config.ScrollIntellect,
                     $Base.Config.txtColors.ForEach({"0x$_"}), 
                     $Base.Config.bgColors.ForEach({"0x$_"}), 
                     $Base.Base
@@ -131,7 +227,8 @@ function Recognize-Text
                                                         
             }
         }
-        $Base.Config.Settings[27] = $LastValueIntellect
+        $img.Dispose()
+        $Base.Config.CheckIntellect = $LastValueIntellect
     }
     
     if($Accuracy -gt 0){

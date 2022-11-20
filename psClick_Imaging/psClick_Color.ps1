@@ -1,4 +1,70 @@
-﻿function Get-RectangleFromScreen
+﻿function Find-HeapColor
+{
+    #.COMPONENT
+    #1.0
+    #.SYNOPSIS
+    #Author: Cirus, Fors1k ; Link: https://psClick.ru
+ 
+    [CmdletBinding()]   
+    param(
+        [Parameter(Mandatory,Position=0)][Alias("Image")]
+        $Path
+        ,
+        [Parameter(Mandatory,Position=1)]
+        [Object[]]$ListColor
+        ,
+        [Parameter(Mandatory,Position=2)]
+        $SizeObject
+        ,
+        $SizeNoSearch = $SizeObject
+        ,
+        [ValidateRange(0, 100)]
+        [Int]$Deviation = 0
+        ,
+        [Int]$MinColor = 0
+        ,
+        [Int]$MinPixel = 0
+        ,
+        [Int]$MaxPixel = 0
+        ,
+        [Int]$Count = 0
+    )
+    
+    if($SizeObject-isnot[Drawing.Size]){try{$SizeObject=[Drawing.Size]::new.Invoke($SizeObject)}catch{throw $_}}
+    if($SizeNoSearch-isnot[Drawing.Size]){try{$SizeNoSearch=[Drawing.Size]::new.Invoke($SizeNoSearch)}catch{throw $_}}    
+
+    $ListColor2 = [Collections.Generic.List[Drawing.Color]]::new()
+    $ListColorMin2 = [Collections.Generic.List[int]]::new()
+
+    if($ListColor[0].GetType().Name -eq "String"){
+        if($MinColor -eq 0){ $MinColor = 1}
+        $Color = New-Color -Color $ListColor[0]      
+        $ListColor2.Add([Drawing.Color]::FromArgb($Color.RGB[0], $Color.RGB[1], $Color.RGB[2]))
+        $ListColorMin2.Add([int]$ListColor[1])    
+    }
+    else{
+        if($MinColor -eq 0){ $MinColor = $ListColor.Count}
+        foreach($Item in $ListColor){
+            $Color = New-Color -Color $Item[0]       
+            $ListColor2.Add([Drawing.Color]::FromArgb($Color.RGB[0], $Color.RGB[1], $Color.RGB[2]))
+            $ListColorMin2.Add([int]$Item[1])
+        }
+    }
+ 
+
+    if($Path -is [Drawing.Image]){
+        $res = [psClick.Imaging]::FindHeapColor($Path, $ListColor2, $ListColorMin2, $Deviation, $MinColor, $SizeObject, $SizeNoSearch, $MinPixel, $MaxPixel, $Count)                
+    }               
+    else{
+        $img = Get-Image -Path $Path
+        $res = [psClick.Imaging]::FindHeapColor($img, $ListColor2, $ListColorMin2, $Deviation, $MinColor, $SizeObject, $SizeNoSearch, $MinPixel, $MaxPixel, $Count)
+        $img.Dispose()        
+    }
+
+    return $res
+}
+
+function Get-RectangleFromScreen
 {
     #.COMPONENT
     #1
@@ -810,4 +876,116 @@ function Draw-Rectangle
     Start-ThreadJob $DrawRectangle -Name psclickDrawRectangle -StreamingHost $host -ArgumentList @(
         $Location,$Size,$Color,$width
     )|Out-Null
+}
+
+function Show-WindowThumbnail
+{
+    #.COMPONENT
+    #1.0
+    #.SYNOPSIS
+    #Author: Cirus, Fors1k ; Link: https://psClick.ru
+ 
+    [CmdletBinding(DefaultParameterSetName = 'Rect')] 
+    param(
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'Thumbnail')]
+        [Object]$Thumbnail
+        ,
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'EndPoint')]
+        [Parameter(Mandatory,Position=0,ParameterSetName = 'Size'    )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Rect'    )]
+        [IntPtr]$Handle
+        ,
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'EndPoint')]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Size'    )]
+        $StartPos
+        ,
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'EndPoint')]
+        $EndPos
+        ,
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Size'    )]
+        $Size
+        ,
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Rect'    )]
+        [System.Drawing.Rectangle]$Rect
+        ,
+        $Location = [System.Drawing.Point]::Empty
+        ,
+        [uint32]$Percent = 100
+        ,
+        [ValidateRange(0, 1)]
+        [double]$OpacityWindow = 1.0
+    )
+
+
+    Switch ($PSCmdlet.ParameterSetName)
+    {
+        'EndPoint'
+        {
+            if($StartPos -isnot [Drawing.Point]){try{$StartPos = [Drawing.Point]::new.Invoke($StartPos)}catch{throw $_}}
+            if($EndPos -isnot [Drawing.Point]){try{$EndPos = [Drawing.Point]::new.Invoke($EndPos)}catch{throw $_}}
+            $Rect = [Drawing.Rectangle]::new($StartPos.x, $StartPos.y, ($EndPos.X-$StartPos.X), ($EndPos.Y-$StartPos.Y))
+        }
+        'Size'
+        {
+            if($StartPos -isnot [Drawing.Point]){try{$StartPos = [Drawing.Point]::new.Invoke($StartPos)}catch{throw $_}}
+            if($Size-isnot[Drawing.Size]){try{$Size=[Drawing.Size]::new.Invoke($Size)}catch{throw $_}}
+            $Rect = [Drawing.Rectangle]::new($StartPos, $Size)
+        }
+        'Thumbnail'
+        {
+            Set-WindowTransparency -Handle $Thumbnail.Handle -Transparency $Thumbnail.Alpha
+            return
+        }
+    }
+
+
+    if($Location -isnot [Drawing.Point]){try{$Location = [Drawing.Point]::new.Invoke($Location)}catch{throw $_}}
+
+    $Action = {
+        $Form = [psClick.FormWindowThumbnail]::new($args[0], $args[1], $args[2], $args[3], $args[4])
+        $Form.Handle
+        $Form.ShowDialog()|Out-Null
+        $Form.Dispose()
+    }
+
+    $ThumbnailCount = (Get-Job|where{$_.Name -match "JobThumbnail\d+"}).Count
+    $ThumbnailCount++
+
+    $Job = Start-ThreadJob -ScriptBlock $Action -Name ('JobThumbnail' + $ThumbnailCount.ToString()) -ArgumentList $Handle, $Location, $Rect, $Percent, $OpacityWindow
+    while((Receive-Job $Job -Keep) -isnot [System.IntPtr]){ sleep -m 10 }
+    [IntPtr]$FormHandle = Receive-Job $Job
+    [uint32]$Alpha = $OpacityWindow * 255
+
+    [PSCustomObject]@{
+        Job   = $Job
+        Handle = $FormHandle
+        Alpha = $Alpha
+    }   
+}
+
+function Hide-WindowThumbnail
+{
+    #.COMPONENT
+    #1.0
+    #.SYNOPSIS
+    #Author: Cirus, Fors1k ; Link: https://psClick.ru
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [Object]$Thumbnail
+    )
+    Set-WindowTransparency -Handle $Thumbnail.Handle -Transparency 0
+}
+
+function Close-WindowThumbnail
+{
+    #.COMPONENT
+    #1.0
+    #.SYNOPSIS
+    #Author: Cirus, Fors1k ; Link: https://psClick.ru
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [Object]$Thumbnail
+    )
+    Close-Window $Thumbnail.Handle
+    Remove-Job -Job $Thumbnail.Job -Force
 }

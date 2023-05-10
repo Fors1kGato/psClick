@@ -1,34 +1,30 @@
 ﻿function Find-Image
 {
     #.COMPONENT
-    #6.1
+    #7.0
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
-    [Alias('Find-Color')][CmdletBinding(DefaultParameterSetName = 'Screen_FullSize')]
     Param
     (
-        [Parameter(Mandatory,Position=0)][Alias("Color")]
+        [Parameter(Mandatory,Position=0)]
         $Image
         ,
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_EndPoint' )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_Size'     )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_Rect'     )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_FullSize' )]
-        #[Parameter(Mandatory,Position=1,ParameterSetName = 'Second_Way'      )]
         [IntPtr]$Handle
         ,
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_EndPoint' )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_Size'     )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_Rect'     )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_FullSize' )]
-        #[Parameter(Mandatory,Position=1,ParameterSetName = 'Second_Way'      )]
         [Switch]$Screen
         ,
         [Parameter(Mandatory,Position=1,ParameterSetName = 'File_EndPoint'   )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'File_Size'       )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'File_Rect'       )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'File_FullSize'   )]
-        #[Parameter(Mandatory,Position=1,ParameterSetName = 'Second_Way'      )]
         [ValidateScript({Test-Path $_})]
         [String]$Path
         ,
@@ -36,7 +32,6 @@
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_Size'    )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_Rect'    )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_FullSize')]
-        #[Parameter(Mandatory,Position=1,ParameterSetName = 'Second_Way'      )]
         [Drawing.Bitmap]$Picture
         ,
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_EndPoint' )]
@@ -47,35 +42,30 @@
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_Size'     )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'File_Size'       )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Picture_Size'    )]
-        #[Parameter(Mandatory,Position=2,ParameterSetName = 'Second_Way'      )]
         $StartPos
         ,
         [Parameter(Mandatory,Position=3,ParameterSetName = 'Window_EndPoint' )]
         [Parameter(Mandatory,Position=3,ParameterSetName = 'Screen_EndPoint' )]
         [Parameter(Mandatory,Position=3,ParameterSetName = 'File_EndPoint'   )]
         [Parameter(Mandatory,Position=3,ParameterSetName = 'Picture_EndPoint')]
-        #[Parameter(Mandatory,Position=3,ParameterSetName = 'Second_Way'      )]
         $EndPos
         ,
         [Parameter(Mandatory,Position=3,ParameterSetName = 'Window_Size'     )]
         [Parameter(Mandatory,Position=3,ParameterSetName = 'Screen_Size'     )]
         [Parameter(Mandatory,Position=3,ParameterSetName = 'File_Size'       )]
         [Parameter(Mandatory,Position=3,ParameterSetName = 'Picture_Size'    )]
-        #[Parameter(Mandatory,Position=3,ParameterSetName = 'Second_Way'      )]
         $Size
         ,
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_Rect'     )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_Rect'     )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'File_Rect'       )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Picture_Rect'    )]
-        #[Parameter(Mandatory,Position=2,ParameterSetName = 'Second_Way'      )]
         [Drawing.Rectangle]$Rect
         ,
         [Parameter(ParameterSetName = 'Window_EndPoint' )]
         [Parameter(ParameterSetName = 'Window_Size'     )]
         [Parameter(ParameterSetName = 'Window_Rect'     )]
         [Parameter(ParameterSetName = 'Window_FullSize' )]
-        #[Parameter(ParameterSetName = 'Second_Way'      )]
         [Switch]$Visible
         ,
         [UInt16]$Count = 1
@@ -86,16 +76,15 @@
         [ValidateRange(0, 100)]
         [Int]$Accuracy = 100
         ,
-        #[Parameter(ParameterSetName = 'Second_Way')]
         [Int]$Attempts = 0
         ,
-        #[Parameter(ParameterSetName = 'Second_Way')]
         $BgColor = -1
         ,
         [Switch]$withDuplicates
         ,
-        #[Parameter(Mandatory,ParameterSetName = 'Second_Way')]
         [Switch]$V2
+        ,
+        [Switch]$WithoutStartPos
     )
     if(!$V2 -and ($MyInvocation.BoundParameters.Keys.Contains("Attempts"))){
         throw "Для использования параметров -Attempts и -BgColor требуется указывать параметр -v2"
@@ -119,7 +108,8 @@
     else{
         $smallBmp = $Image
     }
-    #
+    
+
     if($V2 -and -1 -ne $BgColor){
         if($BgColor -isnot [Color]){
             try{
@@ -238,12 +228,25 @@
             $true
         )
     }
+    
+
+    <#
     if($PSCmdlet.ParameterSetName -notmatch "FullSize" -and $res.Count){
         0..($res.Count-1)|%{$res[$_].location.X+=$rect.x;$res[$_].location.Y+=$rect.Y}
         if($Image -is [Drawing.Bitmap]){
             0..($res.Count-1)|%{$res[$_].firstPixel.X+=$rect.x;$res[$_].firstPixel.Y+=$rect.Y}
         }
     }
+    #>
+
+    
+    if(!$WithoutStartPos -and $PSCmdlet.ParameterSetName -notmatch "FullSize" -and $res.Count){
+        [psClick.FindImage]::AddStartPos([ref]$res, $rect.Location, 0)
+        if($Image -is [Drawing.Bitmap]){
+            [psClick.FindImage]::AddStartPos([ref]$res, $rect.firstPixel, 1)
+        }
+    }
+
     if($Image -isnot [Drawing.Bitmap]){$smallBmp.Dispose()}
     if(!$Picture){$bigBmp.Dispose()}
     return ,$res

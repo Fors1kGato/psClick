@@ -1,4 +1,181 @@
-﻿function Find-HeapColor
+﻿function Find-Color
+{
+    #.COMPONENT
+    #1.0
+    #.SYNOPSIS
+    #Author: Fors1k, Cirus ; Link: https://psClick.ru
+    Param
+    (
+        [Parameter(Mandatory,Position=0)]
+        $Color
+        ,
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_EndPoint' )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_Size'     )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_Rect'     )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Window_FullSize' )]
+        [IntPtr]$Handle
+        ,
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_EndPoint' )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_Size'     )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_Rect'     )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Screen_FullSize' )]
+        [Switch]$Screen
+        ,
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'File_EndPoint'   )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'File_Size'       )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'File_Rect'       )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'File_FullSize'   )]
+        [ValidateScript({Test-Path $_})]
+        [String]$Path
+        ,
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_EndPoint')]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_Size'    )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_Rect'    )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_FullSize')]
+        [Drawing.Bitmap]$Picture
+        ,
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_EndPoint' )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_EndPoint' )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'File_EndPoint'   )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Picture_EndPoint')]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_Size'     )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_Size'     )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'File_Size'       )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Picture_Size'    )]
+        $StartPos
+        ,
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'Window_EndPoint' )]
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'Screen_EndPoint' )]
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'File_EndPoint'   )]
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'Picture_EndPoint')]
+        $EndPos
+        ,
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'Window_Size'     )]
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'Screen_Size'     )]
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'File_Size'       )]
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'Picture_Size'    )]
+        $Size
+        ,
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_Rect'     )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_Rect'     )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'File_Rect'       )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Picture_Rect'    )]
+        [Drawing.Rectangle]$Rect
+        ,
+        [Parameter(ParameterSetName = 'Window_EndPoint' )]
+        [Parameter(ParameterSetName = 'Window_Size'     )]
+        [Parameter(ParameterSetName = 'Window_Rect'     )]
+        [Parameter(ParameterSetName = 'Window_FullSize' )]
+        [Switch]$Visible
+        ,
+        [UInt16]$Count = 1
+        ,
+        [ValidateRange(0, 100)]
+        [Int]$Deviation = 0     
+        ,
+        [Switch]$WithoutStartPos
+    )
+
+    if($Color -isnot [Drawing.Color]){
+        try{
+            $Color = ([Drawing.Color]::FromArgb.Invoke([Object[]](New-Color $Color).RGB))
+        }
+        catch{
+            throw "Неверно указана цель поиска"
+        }
+    }
+
+
+   
+    Switch -Wildcard ($PSCmdlet.ParameterSetName)
+    {
+        '*_Size'
+        {
+            if($StartPos -isnot [Drawing.Point]){try{$StartPos = [Drawing.Point]::new.Invoke($StartPos)}catch{throw $_}}
+            if($Size-isnot[Drawing.Size]){try{$Size=[Drawing.Size]::new.Invoke($Size)}catch{throw $_}}
+            $rect = [Drawing.Rectangle]::new($StartPos, $Size)
+        }
+        '*EndPoint'
+        {
+            if($StartPos -isnot [Drawing.Point]){try{$StartPos = [Drawing.Point]::new.Invoke($StartPos)}catch{throw $_}}
+            if($EndPos -isnot [Drawing.Point]){try{$EndPos = [Drawing.Point]::new.Invoke($EndPos)}catch{throw $_}}
+            $rect = [Drawing.Rectangle]::new($StartPos.x, $StartPos.y, ($EndPos.X-$StartPos.X), ($EndPos.Y-$StartPos.Y))
+        }
+        'Window*'
+        {
+            if($Visible){
+                $wRect = Get-WindowRectangle $Handle
+                if($rect){
+                    $wRect = [System.Drawing.Rectangle]::new(($wRect.x+$Rect.x), ($wRect.y+$Rect.y), $Rect.Width, $Rect.Height)
+                }
+                $scr = [System.Drawing.Bitmap]::new($wRect.Width, $wRect.Height, [Drawing.Imaging.PixelFormat]::Format32bppArgb)
+                $gfx = [System.Drawing.Graphics]::FromImage($scr)
+                $gfx.CopyFromScreen($wRect.Location,[Drawing.Point]::Empty,$wrect.Size)
+                $gfx.Dispose()
+                $bigBmp = $scr
+            }
+            else{
+                if($rect){
+                    $bigBmp = Cut-Image ([psClick.Imaging]::GetImage($handle)) -Rect $rect
+                }
+                else{
+                    $bigBmp = [psClick.Imaging]::GetImage($handle)
+                }
+            }
+        }
+        'Screen*'
+        {
+            if(!$rect){$rect = [Windows.Forms.Screen]::PrimaryScreen.Bounds}
+            $bigBmp = [System.Drawing.Bitmap]::new($Rect.Width, $Rect.Height)
+            $gfx = [System.Drawing.Graphics]::FromImage($bigBmp)
+            $gfx.CopyFromScreen($rect.Location,[Drawing.Point]::Empty,$rect.Size)
+            $gfx.Dispose()
+        }
+        'File*'
+        {
+            if($rect){
+                $bigBmp = Cut-Image ([System.Drawing.Bitmap]::new($path)) -Rect $rect
+            }
+            else{
+                $bigBmp = [System.Drawing.Bitmap]::new($path)
+            }
+        }
+        'Picture*'
+        {
+            if($rect){
+                $bigBmp = Cut-Image $Picture -Rect $rect -New
+            }
+            else{
+                $bigBmp = $Picture
+            }
+        }
+    }
+
+
+    if($bigBmp.PixelFormat -ne [Drawing.Imaging.PixelFormat]::Format32bppArgb){
+        $bigBmp = $bigBmp.Clone(
+            [Drawing.Rectangle]::new(0, 0, $bigBmp.Width, $bigBmp.Height), 
+            [Drawing.Imaging.PixelFormat]::Format32bppArgb
+        )
+    }
+
+    $res = [psClick.FindImage]::FindColor(
+        $Color,
+        $bigBmp, 
+        $Count,
+        $Deviation*2.55    
+    )
+    
+       
+    if(!$WithoutStartPos -and $PSCmdlet.ParameterSetName -notmatch "FullSize" -and $res.Count){
+        [psClick.FindImage]::AddStartPos([ref]$res, $rect.Location, 0)
+    }
+
+    if(!$Picture){$bigBmp.Dispose()}
+    return ,$res
+}
+
+function Find-HeapColor
 {
     #.COMPONENT
     #1.0
@@ -287,7 +464,7 @@ function Cut-Image
 function Get-Image
 {
     #.COMPONENT
-    #3
+    #3.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = 'Screen_FullSize')]
@@ -342,6 +519,9 @@ function Get-Image
         [Parameter(ParameterSetName = 'Window_Rect'    )]
         [Parameter(ParameterSetName = 'Window_FullSize')]
         [Switch]$Visible
+        ,
+        [ValidateSet([Drawing.Imaging.PixelFormat]::Format24bppRgb, [Drawing.Imaging.PixelFormat]::Format32bppArgb)]
+        $PixelFormat = [Drawing.Imaging.PixelFormat]::Format24bppRgb
     )
 
     if($Url){
@@ -369,7 +549,7 @@ function Get-Image
                 if($rect){
                     $wRect = [System.Drawing.Rectangle]::new(($wRect.x+$Rect.x), ($wRect.y+$Rect.y), $Rect.Width, $Rect.Height)
                 }
-                $scr = [System.Drawing.Bitmap]::new($wRect.Width, $wRect.Height, [Drawing.Imaging.PixelFormat]::Format24bppRgb)
+                $scr = [System.Drawing.Bitmap]::new($wRect.Width, $wRect.Height, $PixelFormat)
                 $gfx = [System.Drawing.Graphics]::FromImage($scr)
                 $gfx.CopyFromScreen($wRect.Location,[Drawing.Point]::Empty,$wrect.Size)
                 $gfx.Dispose()
@@ -387,7 +567,7 @@ function Get-Image
         'Screen*'
         {
             if(!$rect){$rect = [Windows.Forms.Screen]::PrimaryScreen.Bounds}
-            $scr = [System.Drawing.Bitmap]::new($Rect.Width, $Rect.Height, [Drawing.Imaging.PixelFormat]::Format24bppRgb)
+            $scr = [System.Drawing.Bitmap]::new($Rect.Width, $Rect.Height, $PixelFormat)
             $gfx = [System.Drawing.Graphics]::FromImage($scr)
             $gfx.CopyFromScreen($rect.Location,[Drawing.Point]::Empty,$rect.Size)
             $gfx.Dispose()

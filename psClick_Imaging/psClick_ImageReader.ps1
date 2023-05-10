@@ -1,7 +1,7 @@
 ﻿function Get-SymbolsBase 
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     [CmdletBinding()]Param()
@@ -27,6 +27,25 @@
         catch{
             throw $_
         }
+
+        if($cfg.BgColors.Count-gt0){       
+            $TempList = @()
+            for($i=0; $i-le$cfg.BgColors.Count; $i++){
+                if($cfg.BgColorsChecked[$i]-eq1){ $TempList += $cfg.BgColors[$i]}
+
+            }
+            $cfg.BgColors = $TempList
+        }
+                
+        if($cfg.txtColors.Count-gt0){  
+            $TempList = @()
+            for($i=0; $i-le$cfg.txtColors.Count; $i++)
+            {
+                if($cfg.txtColorsChecked[$i]-eq1){ $TempList += $cfg.txtColors[$i]}
+            }
+            $cfg.txtColors = $TempList          
+        }
+
         [PSCustomObject]@{
             Name   = $Base
             Base   = $BaseSymbol
@@ -38,7 +57,7 @@
 function Recognize-Text
 {
     #.COMPONENT
-    #3.1
+    #3.2
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     [CmdletBinding()]
@@ -87,6 +106,7 @@ function Recognize-Text
             $Base.Config.ScrollIntellectAccuracy,
             $Base.Config.CheckIntellectMerge,
             $Base.Config.CheckIntellectSplit,
+            $Base.Config.CheckIntellectVersion,
             $Base.Config.txtColors.ForEach({"0x$_"}), 
             $Base.Config.bgColors.ForEach({"0x$_"}), 
             $Base.Base
@@ -127,6 +147,7 @@ function Recognize-Text
             $Base.Config.ScrollIntellectAccuracy,
             $Base.Config.CheckIntellectMerge,
             $Base.Config.CheckIntellectSplit,
+            $Base.Config.CheckIntellectVersion,
             $Base.Config.txtColors.ForEach({"0x$_"}), 
             $Base.Config.bgColors.ForEach({"0x$_"}), 
             $Base.Base

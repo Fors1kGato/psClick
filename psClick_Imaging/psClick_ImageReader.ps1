@@ -57,7 +57,7 @@
 function Recognize-Text
 {
     #.COMPONENT
-    #3.2
+    #3.6
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     [CmdletBinding()]
@@ -70,10 +70,23 @@ function Recognize-Text
         ,
         [Parameter(Position=2)][ValidateRange(0, 100)]
         $Accuracy = 0
+        ,
+        [Parameter(Position=3)]
+        [Switch]$WithoutSpaces
+        ,
+        [Parameter(Position=4)]
+        $OffSet = [Drawing.Point]::new(0, 0)
     )
     
+    if($Accuracy -gt 0){$checkBoxSkipSymbolsChecked = $true}
+    else{$checkBoxSkipSymbolsChecked = $false}
+
+    if($OffSet -isnot [Drawing.Point]){
+        try{$OffSet = [Drawing.Point]::new.Invoke($OffSet)}catch{throw $_}
+    }
+
     if($Path -is [Drawing.Image]){
-        $result = [psClick.Readtext]::Recognize(
+         $result = [psClick.Readtext]::Recognize(
             $Path, 
             $Base.config.ScrollBarFilter,
             $Base.Config.ScrollBarR,
@@ -94,6 +107,7 @@ function Recognize-Text
             $Base.Config.CheckRemoveNoiseVertical,
             $Base.Config.ScrollRemoveNoiseVertical,
             $Base.Config.Inversion,
+            $Base.Config.CheckBoxMergeLines,
             $Base.Config.TypeRus,
             $Base.Config.TypeEn,
             $Base.Config.TypeNum,
@@ -109,10 +123,12 @@ function Recognize-Text
             $Base.Config.CheckIntellectVersion,
             $Base.Config.txtColors.ForEach({"0x$_"}), 
             $Base.Config.bgColors.ForEach({"0x$_"}), 
-            $Base.Base
+            $Base.Base,
+            $checkBoxSkipSymbolsChecked,
+            $Accuracy
         )
     }
-    else{
+    else{      
         $img = Get-Image -Path $path
         $result = [psClick.Readtext]::Recognize(
             $img, 
@@ -135,6 +151,7 @@ function Recognize-Text
             $Base.Config.CheckRemoveNoiseVertical,
             $Base.Config.ScrollRemoveNoiseVertical,
             $Base.Config.Inversion,
+            $Base.Config.CheckBoxMergeLines,
             $Base.Config.TypeRus,
             $Base.Config.TypeEn,
             $Base.Config.TypeNum,
@@ -150,32 +167,21 @@ function Recognize-Text
             $Base.Config.CheckIntellectVersion,
             $Base.Config.txtColors.ForEach({"0x$_"}), 
             $Base.Config.bgColors.ForEach({"0x$_"}), 
-            $Base.Base
-        )
+            $Base.Base,
+            $checkBoxSkipSymbolsChecked,
+            $Accuracy
+        )       
         $img.Dispose()
     }
-     
+    
+    if(!$OffSet.IsEmpty){
+        [psClick.ReadText]::SymbolsOffSet($result, $OffSet)    
+    }
     $result = [PSCustomObject]@{
         Symbols = $result
-        Text = [Regex]::Replace(
-            [psClick.Readtext]::SymbolsToString($result, $Base.Config.SpaceSize), 
-            "^[`r`n]+", '', 
-            [Text.RegularExpressions.RegexOptions]::Multiline
-        )
+        Text = [psClick.Readtext]::SymbolsToString($result, $Base.Config.SpaceSize, $WithoutSpaces) 
         ImageOutput = [psClick.Readtext]::Output
-    }
-  
-
+    }  
     
-    if($Accuracy -gt 0){
-        for($i=$result.Symbols.Count-1; $i -ge 0; $i--)
-        {
-            if($result.Symbols.Percent[$i] -lt $Accuracy/100)
-            {
-                $result.Symbols.RemoveAt($i)
-                $result.Text = $result.Text.Remove($i, 1)
-            }
-        }
-    }    
     $result
 }

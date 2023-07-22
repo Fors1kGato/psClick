@@ -1,7 +1,7 @@
 ﻿function Get-SymbolsBase 
 {
     #.COMPONENT
-    #1.1
+    #1.2
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     [CmdletBinding()]Param()
@@ -28,24 +28,6 @@
             throw $_
         }
 
-        if($cfg.BgColors.Count-gt0){       
-            $TempList = @()
-            for($i=0; $i-le$cfg.BgColors.Count; $i++){
-                if($cfg.BgColorsChecked[$i]-eq1){ $TempList += $cfg.BgColors[$i]}
-
-            }
-            $cfg.BgColors = $TempList
-        }
-                
-        if($cfg.txtColors.Count-gt0){  
-            $TempList = @()
-            for($i=0; $i-le$cfg.txtColors.Count; $i++)
-            {
-                if($cfg.txtColorsChecked[$i]-eq1){ $TempList += $cfg.txtColors[$i]}
-            }
-            $cfg.txtColors = $TempList          
-        }
-
         [PSCustomObject]@{
             Name   = $Base
             Base   = $BaseSymbol
@@ -57,7 +39,7 @@
 function Recognize-Text
 {
     #.COMPONENT
-    #3.6
+    #4.1
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     [CmdletBinding()]
@@ -76,6 +58,12 @@ function Recognize-Text
         ,
         [Parameter(Position=4)]
         $OffSet = [Drawing.Point]::new(0, 0)
+        ,
+        [Parameter(Position=5)]
+        [Switch]$WithoutNoise
+        ,
+        [Parameter(Position=6)]
+        [Switch]$WithImage
     )
     
     if($Accuracy -gt 0){$checkBoxSkipSymbolsChecked = $true}
@@ -85,8 +73,11 @@ function Recognize-Text
         try{$OffSet = [Drawing.Point]::new.Invoke($OffSet)}catch{throw $_}
     }
 
+    $line = [Collections.Generic.List[[psClick.Line]]]::new()
+    $MinSize = [System.Drawing.Size]::new($Base.config.MinWidth, $Base.config.MinHeight)
     if($Path -is [Drawing.Image]){
-         $result = [psClick.Readtext]::Recognize(
+        $ImageOutput = [System.Drawing.Bitmap]::new($Path.Width, $Path.Height)
+        $result = [psClick.Readtext]::Recognize(
             $Path, 
             $Base.config.ScrollBarFilter,
             $Base.Config.ScrollBarR,
@@ -119,17 +110,26 @@ function Recognize-Text
             $Base.Config.ScrollIntellect,
             $Base.Config.ScrollIntellectAccuracy,
             $Base.Config.CheckIntellectMerge,
+            $Base.Config.CheckIntellectMergeUp,
             $Base.Config.CheckIntellectSplit,
+            $Base.Config.CheckIntellectSplitVertical,
             $Base.Config.CheckIntellectVersion,
             $Base.Config.txtColors.ForEach({"0x$_"}), 
             $Base.Config.bgColors.ForEach({"0x$_"}), 
+            $Base.Config.TxtColorsChecked.ForEach({$_}),
+            $Base.Config.BgColorsChecked.ForEach({$_}),
             $Base.Base,
             $checkBoxSkipSymbolsChecked,
-            $Accuracy
+            $Accuracy,
+            [ref]$line,
+            [ref]$ImageOutput,
+            $WithoutNoise,
+            $MinSize
         )
     }
     else{      
         $img = Get-Image -Path $path
+        $ImageOutput = [System.Drawing.Bitmap]::new($img.Width, $img.Height)
         $result = [psClick.Readtext]::Recognize(
             $img, 
             $Base.Config.ScrollBarFilter,
@@ -163,13 +163,21 @@ function Recognize-Text
             $Base.Config.ScrollIntellect,
             $Base.Config.ScrollIntellectAccuracy,
             $Base.Config.CheckIntellectMerge,
+            $Base.Config.CheckIntellectMergeUp,
             $Base.Config.CheckIntellectSplit,
+            $Base.Config.CheckIntellectSplitVertical,
             $Base.Config.CheckIntellectVersion,
             $Base.Config.txtColors.ForEach({"0x$_"}), 
             $Base.Config.bgColors.ForEach({"0x$_"}), 
+            $Base.Config.TxtColorsChecked.ForEach({$_}),
+            $Base.Config.BgColorsChecked.ForEach({$_}),
             $Base.Base,
             $checkBoxSkipSymbolsChecked,
-            $Accuracy
+            $Accuracy,
+            [ref]$line,
+            [ref]$ImageOutput,
+            $WithoutNoise,
+            $MinSize
         )       
         $img.Dispose()
     }
@@ -177,11 +185,23 @@ function Recognize-Text
     if(!$OffSet.IsEmpty){
         [psClick.ReadText]::SymbolsOffSet($result, $OffSet)    
     }
-    $result = [PSCustomObject]@{
-        Symbols = $result
-        Text = [psClick.Readtext]::SymbolsToString($result, $Base.Config.SpaceSize, $WithoutSpaces) 
-        ImageOutput = [psClick.Readtext]::Output
-    }  
-    
+   
+
+    if($WithImage){
+        $result = [PSCustomObject]@{
+            Symbols = $result
+            Text = [psClick.Readtext]::SymbolsToString($result, $Base.Config.SpaceSize, $line, $WithoutSpaces) 
+            Line = $line
+            ImageOutput = $ImageOutput
+        }  
+    }
+    else{
+        $ImageOutput.Dispose();
+        $result = [PSCustomObject]@{
+            Symbols = $result
+            Text = [psClick.Readtext]::SymbolsToString($result, $Base.Config.SpaceSize, $line, $WithoutSpaces) 
+            Line = $line
+        } 
+    }
     $result
 }

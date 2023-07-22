@@ -92,7 +92,7 @@ function Write-ProcessMemory
 function Read-ProcessMemory
 {
     #.COMPONENT
-    #3
+    #3.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = 'Type')]
@@ -122,9 +122,24 @@ function Read-ProcessMemory
         }
         [IntPtr]$Address= [Int64]$Address + [Int64]$processModule.Address
     }
-
+    
     if($Read -notin ('ANSI', 'Unicode')){
-        if($size){$Data = [Byte[]]::new($size)}
+        if($size){
+            $memInfo = [psClick.Kernel32+MEMORY_BASIC_INFORMATION]::new()
+
+            $queryResult = [psClick.Kernel32]::VirtualQueryEx(
+                $Process.Handle,
+                $Address,
+                [ref]$memInfo,
+                [Runtime.InteropServices.Marshal]::SizeOf($memInfo)
+            )
+            $err = [Runtime.InteropServices.Marshal]::GetLastWin32Error()
+            if(!$queryResult){throw "Virtual Query error: $err"}
+
+            [int]$sizeMax = $memInfo.RegionSize - ([int64]$Address - [int64]$memInfo.BaseAddress)
+            if($sizeMax -lt $size){$size = $sizeMax}
+            $Data = [Byte[]]::new($size)
+        }
         else{$Data = [Byte[]]::new([Runtime.InteropServices.Marshal]::SizeOf([Type]$Read))}
 
         $CallResult = [psClick.Kernel32]::ReadProcessMemory(
@@ -204,4 +219,49 @@ function Get-ProcessModules
                
     [Void][psClick.Kernel32]::CloseHandle($hModuleSnap)
     ,$modules
+}
+
+function Find-AddressProcessMemory
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k, Cirus ; Link: https://psClick.ru
+    Param(
+        [Parameter(Mandatory, Position = 0)]
+        [Diagnostics.Process]$Process
+        ,
+        [Parameter(Mandatory, Position = 1)]
+        $Data
+        ,
+        [Parameter(Mandatory, Position = 2)]
+        [ValidateSet('ANSI','Unicode','Int16','Int32','Int64','UInt16','UInt32','UInt64','Single','Double')]
+        [String]$Type
+        ,
+        [Parameter(Position = 3)]
+        [Uint32]$Alignment = 1
+        ,
+        [Parameter(Position = 4)]
+        [Uint32]$Count = 0
+        ,        
+        [Parameter(Position = 5)]
+        $StartAddress = 0      
+        ,
+        [Parameter(Position = 6)]
+        $EndAddress = 0x7fffffff
+    )
+
+    if($Data -isnot [String] -and $Type -in 'ANSI', 'Unicode'){throw "Переданные данные не являются строкой"}
+
+    if($Data.GetType() -in [Int16],[Int32],[Int64],[UInt16],[UInt32],[UInt64],[Float],[Double]){
+        $Data = [BitConverter]::GetBytes($Data)
+    }
+    elseif ($Data -is [String]){
+        if ($Type -eq 'Unicode'){$Data = [Text.Encoding]::Unicode.GetBytes("$Data")}
+        elseif($Type -eq 'ANSI'){$Data = [Text.Encoding]::GetEncoding(1251).GetBytes("$Data")}
+        else{throw "Укажите кодировку"}
+    }
+    if($Data -isnot [Byte[]]){throw "Incorrect data type"}
+
+    [psClick.Memory]::FindAddress($Process, $Data, $Data.Length, $Alignment, $Count, $StartAddress, $EndAddress)
 }

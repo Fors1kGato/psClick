@@ -243,7 +243,7 @@
     if(!$WithoutStartPos -and $PSCmdlet.ParameterSetName -notmatch "FullSize" -and $res.Count){
         [psClick.FindImage]::AddStartPos([ref]$res, $rect.Location, 0)
         if($Image -is [Drawing.Bitmap]){
-            [psClick.FindImage]::AddStartPos([ref]$res, $rect.firstPixel, 1)
+            [psClick.FindImage]::AddStartPos([ref]$res, $rect.Location, 1)
         }
     }
 

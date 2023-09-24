@@ -1,7 +1,7 @@
 ﻿function Send-TelegramDocument
 {
     #.COMPONENT
-    #1.2
+    #1.3
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [Alias(
@@ -56,15 +56,17 @@
         return $result
     }
     catch{
+        Write-Error $_.Exception.InnerException.InnerException
+    }
+    finally{
         $stream.Close()
-        throw $_
     }
 }
 
 function Send-TelegramMessage
 {
     #.COMPONENT
-    #1.2
+    #1.3
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -82,7 +84,12 @@ function Send-TelegramMessage
     ForEach($k in $MyInvocation.BoundParameters.Keys){
         $body.Add($k.ToLower(), $MyInvocation.BoundParameters.$k)
     }
-    $result = [psClick.Telegram]::SendMessage($body)
-    if($result){$result = $result|ConvertFrom-Json}
-    return $result
+    try{
+        $result = [psClick.Telegram]::SendMessage($body)
+        if($result){$result = $result|ConvertFrom-Json}
+        return $result
+    }
+    catch{
+        Write-Error $_.Exception.InnerException.InnerException
+    }
 }

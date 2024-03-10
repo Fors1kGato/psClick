@@ -32,6 +32,7 @@
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Source_Size'    )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Source_Rect'    )]
         [Parameter(Mandatory,Position=1,ParameterSetName = 'Source_FullSize')]
+        [Alias("Picture")]
         [Drawing.Bitmap]$Source
         ,
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_EndPoint' )]

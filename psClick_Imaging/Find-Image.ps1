@@ -1,7 +1,7 @@
 ﻿function Find-Image
 {
     #.COMPONENT
-    #7.0
+    #8.2
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     Param
@@ -28,38 +28,38 @@
         [ValidateScript({Test-Path $_})]
         [String]$Path
         ,
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_EndPoint')]
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_Size'    )]
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_Rect'    )]
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_FullSize')]
-        [Drawing.Bitmap]$Picture
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Source_EndPoint')]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Source_Size'    )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Source_Rect'    )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Source_FullSize')]
+        [Drawing.Bitmap]$Source
         ,
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_EndPoint' )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_EndPoint' )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'File_EndPoint'   )]
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'Picture_EndPoint')]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Source_EndPoint')]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_Size'     )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_Size'     )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'File_Size'       )]
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'Picture_Size'    )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Source_Size'    )]
         $StartPos
         ,
         [Parameter(Mandatory,Position=3,ParameterSetName = 'Window_EndPoint' )]
         [Parameter(Mandatory,Position=3,ParameterSetName = 'Screen_EndPoint' )]
         [Parameter(Mandatory,Position=3,ParameterSetName = 'File_EndPoint'   )]
-        [Parameter(Mandatory,Position=3,ParameterSetName = 'Picture_EndPoint')]
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'Source_EndPoint')]
         $EndPos
         ,
         [Parameter(Mandatory,Position=3,ParameterSetName = 'Window_Size'     )]
         [Parameter(Mandatory,Position=3,ParameterSetName = 'Screen_Size'     )]
         [Parameter(Mandatory,Position=3,ParameterSetName = 'File_Size'       )]
-        [Parameter(Mandatory,Position=3,ParameterSetName = 'Picture_Size'    )]
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'Source_Size'    )]
         $Size
         ,
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_Rect'     )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_Rect'     )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'File_Rect'       )]
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'Picture_Rect'    )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Source_Rect'    )]
         [Drawing.Rectangle]$Rect
         ,
         [Parameter(ParameterSetName = 'Window_EndPoint' )]
@@ -85,12 +85,15 @@
         [Switch]$V2
         ,
         [Switch]$WithoutStartPos
+        ,
+        [ValidateSet(2, 4, 6, 8, 10)]
+        [Int]$Threads = 0
     )
     if(!$V2 -and ($MyInvocation.BoundParameters.Keys.Contains("Attempts"))){
         throw "Для использования параметров -Attempts и -BgColor требуется указывать параметр -v2"
     }
     if($Image -isnot [Drawing.Bitmap]){
-        if($Image -isnot [Color]){
+        if($Image -isnot [Drawing.Color]){
             try{
                 $color = New-Color $Image
             }
@@ -109,9 +112,8 @@
         $smallBmp = $Image
     }
     
-
-    if($V2 -and -1 -ne $BgColor){
-        if($BgColor -isnot [Color]){
+    if(($V2 -or $Threads -gt 0) -and -1 -ne $BgColor){
+        if($BgColor -isnot [Drawing.Color]){
             try{
                 $BgColor = New-Color $BgColor
             }
@@ -121,7 +123,7 @@
         }
         $BgColor = [Drawing.ColorTranslator]::ToWin32([Drawing.Color]::FromArgb.Invoke([Object[]]$BgColor.RGB))
     }
-    elseif($BgColor -is [Color]){
+    elseif($BgColor -is [Drawing.Color]){
         $BgColor = New-Color $BgColor -raw
     }
     else{
@@ -181,16 +183,25 @@
                 $bigBmp = [System.Drawing.Bitmap]::new($path)
             }
         }
-        'Picture*'
+        'Source*'
         {
             if($rect){
-                $bigBmp = Cut-Image $Picture -Rect $rect -New
+                $bigBmp = Cut-Image $Source -Rect $rect -New
             }
             else{
-                $bigBmp = $Picture
+                $bigBmp = $Source
             }
         }
     }
+
+
+    if($smallBmp-eq$null){
+        throw "Искомое изображение null"
+    }
+    if($bigBmp-eq$null){
+        throw "Изображение, на котором искать null"   
+    }
+
 
     if($V2 -and $smallBmp.PixelFormat -ne [Drawing.Imaging.PixelFormat]::Format32bppArgb){
         $smallBmp = $smallBmp.Clone(
@@ -206,27 +217,61 @@
     }
 
     if($v2){
-        $res = [psClick.FindImage]::FindBitmap(
-            $smallBmp, 
-            $bigBmp, 
-            $Count, 
-            $Accuracy, 
-            ($Deviation*2.55), 
-            $Attempts, 
-            $BgColor
-        )
+        if($Threads -gt 0){
+            $res = [psClick.FindImage]::FindBitmapMultiThreading(
+                $smallBmp, 
+                $bigBmp,
+                $Count, 
+                $Accuracy, 
+                ($Deviation*2.55), 
+                $Attempts, 
+                $BgColor, 
+                $Threads,
+                $false,
+                $false,
+                2
+            )
+        }
+        else{
+            $res = [psClick.FindImage]::FindBitmap(
+                $smallBmp, 
+                $bigBmp, 
+                $Count, 
+                $Accuracy, 
+                ($Deviation*2.55), 
+                $Attempts, 
+                $BgColor
+            )
+        }
     }
     else{
-        $res = [psClick.FindImage]::SearchBitmap(
-            $smallBmp, 
-            $bigBmp, 
-            ($Deviation/100.0), 
-            $Accuracy, 
-            $Count,
-            $BgColor,
-            $withDuplicates,
-            $true
-        )
+        if($Threads -gt 0){
+            $res = [psClick.FindImage]::FindBitmapMultiThreading(
+                $smallBmp, 
+                $bigBmp,
+                $Count, 
+                $Accuracy, 
+                ($Deviation/100.0), 
+                0, 
+                $BgColor, 
+                $Threads,
+                $withDuplicates,
+                $true,
+                1
+            )
+        }
+        else{
+            $res = [psClick.FindImage]::SearchBitmap(
+                $smallBmp, 
+                $bigBmp, 
+                ($Deviation/100.0), 
+                $Accuracy, 
+                $Count,
+                $BgColor,
+                $withDuplicates,
+                $true
+            )
+        }
     }
     
 
@@ -239,7 +284,6 @@
     }
     #>
 
-    
     if(!$WithoutStartPos -and $PSCmdlet.ParameterSetName -notmatch "FullSize" -and $res.Count){
         [psClick.FindImage]::AddStartPos([ref]$res, $rect.Location, 0)
         if($Image -is [Drawing.Bitmap]){
@@ -248,6 +292,6 @@
     }
 
     if($Image -isnot [Drawing.Bitmap]){$smallBmp.Dispose()}
-    if(!$Picture){$bigBmp.Dispose()}
+    if(!$Source){$bigBmp.Dispose()}
     return ,$res
 }

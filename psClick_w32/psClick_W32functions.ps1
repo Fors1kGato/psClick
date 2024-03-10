@@ -224,7 +224,7 @@ function Get-ProcessModules
 function Find-AddressProcessMemory
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     Param(
@@ -235,7 +235,7 @@ function Find-AddressProcessMemory
         $Data
         ,
         [Parameter(Mandatory, Position = 2)]
-        [ValidateSet('ANSI','Unicode','Int16','Int32','Int64','UInt16','UInt32','UInt64','Single','Double')]
+        [ValidateSet('ANSI','Unicode','Int16','Int32','Int64','UInt16','UInt32','UInt64','Single','Double','Mask','Byte[]')]
         [String]$Type
         ,
         [Parameter(Position = 3)]
@@ -251,17 +251,153 @@ function Find-AddressProcessMemory
         $EndAddress = 0x7fffffff
     )
 
-    if($Data -isnot [String] -and $Type -in 'ANSI', 'Unicode'){throw "Переданные данные не являются строкой"}
+    if($Type -ne 'Mask')
+    {
+        if($Data -isnot [String] -and $Type -in 'ANSI', 'Unicode'){throw "Переданные данные не являются строкой"}
 
-    if($Data.GetType() -in [Int16],[Int32],[Int64],[UInt16],[UInt32],[UInt64],[Float],[Double]){
+        if($Data.GetType() -in [Int16],[Int32],[Int64],[UInt16],[UInt32],[UInt64],[Float],[Double]){
         $Data = [BitConverter]::GetBytes($Data)
-    }
-    elseif ($Data -is [String]){
-        if ($Type -eq 'Unicode'){$Data = [Text.Encoding]::Unicode.GetBytes("$Data")}
-        elseif($Type -eq 'ANSI'){$Data = [Text.Encoding]::GetEncoding(1251).GetBytes("$Data")}
-        else{throw "Укажите кодировку"}
-    }
-    if($Data -isnot [Byte[]]){throw "Incorrect data type"}
+        }
+        elseif ($Data -is [String]){
+            if ($Type -eq 'Unicode'){$Data = [Text.Encoding]::Unicode.GetBytes("$Data")}
+            elseif($Type -eq 'ANSI'){$Data = [Text.Encoding]::GetEncoding(1251).GetBytes("$Data")}
+            else{throw "Укажите кодировку"}
+        }
+        if($Data -isnot [Byte[]]){throw "Incorrect data type"}
 
-    [psClick.Memory]::FindAddress($Process, $Data, $Data.Length, $Alignment, $Count, $StartAddress, $EndAddress)
+        ,[psClick.Memory]::FindAddress($Process, $Data, $null, $Alignment, $Count, $StartAddress, $EndAddress) 
+    }
+    else{
+       if($Data -isnot [Object[]]){throw "Недопустимый объект, используйте Get-MaskBytes"}       
+       ,[psClick.Memory]::FindAddress($Process, [Byte[]]$Data[0], [Bool[]]$Data[1], $Alignment, $Count, $StartAddress, $EndAddress) 
+     }       
+}
+
+function Exclude-AddressProcessMemory
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k, Cirus ; Link: https://psClick.ru
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory, Position = 0)]
+        [Diagnostics.Process]$Process
+        ,      
+        [Parameter(Mandatory, Position = 1)]
+        $Address
+        ,             
+        [Parameter(Mandatory, Position = 2, ParameterSetName="String")]
+        [String]$String
+        ,
+        [Parameter(Mandatory, Position = 2, ParameterSetName="Number")]
+        [Object[]]$Number
+        ,
+        [Parameter(Mandatory, Position = 3, ParameterSetName="String")]
+        [ValidateSet('ANSI','Unicode')]
+        [String]$Encoding
+        ,
+        [Parameter(Mandatory, Position = 3, ParameterSetName="Number")]
+        [ValidateSet('Int16', 'Int32','Int64', 'UInt16', 'UInt32', 'UInt64', 'Single', 'Double')]
+        [String]$NumberType
+        ,
+        [Parameter(Mandatory, Position = 4, ParameterSetName="String")]
+        [ValidateSet('НовоеЗначение', 'Изменилось', 'НеИзменилось')]     
+        [String]$StringChanged
+        ,
+        [Parameter(Mandatory, Position = 4, ParameterSetName="Number")]
+        [ValidateSet(
+            'НовоеЗначение','БольшеЧем','МеньшеЧем','ЗначениеМежду','Увеличилось',
+            'УвеличилосьНа','Уменьшилось','УменьшилосьНа','Изменилось','НеИзменилось')]     
+        [String]$NumberChanged        
+    )
+    DynamicParam
+    {
+        if ($NumberChanged -in 'УвеличилосьНа','УменьшилосьНа')
+        {
+            $attribute = [Management.Automation.ParameterAttribute]@{
+                Mandatory = $true
+                Position = 5
+                ParameterSetName = "Number"
+            }
+            $collection = [Collections.ObjectModel.Collection[Attribute]]::new()
+            $collection.Add([ValidateNotNullOrEmpty]::new())
+            $collection.Add($attribute)
+ 
+            $param = [Management.Automation.RuntimeDefinedParameter]::new(
+                'TargetValue', ([Type]$NumberType), $collection
+            )
+            $Global:a= $param
+            $dictionary = [Management.Automation.RuntimeDefinedParameterDictionary]::new()
+            $dictionary.Add('TargetValue', $param)
+ 
+            return $dictionary
+        }
+    }
+ 
+    End{
+        Switch ($PSCmdlet.ParameterSetName)
+        {           
+            'String'
+            {
+                if($Encoding -eq 'Unicode'){$Data = [Text.Encoding]::Unicode.GetBytes($String)}
+                else{$Data = [Text.Encoding]::GetEncoding(1251).GetBytes($String)}
+                [psClick.Memory]::ExcludeAddress($Process, $Data, $Encoding, $StringChanged, 0, [ref]$Address)  
+            }
+            'Number'
+            {   
+                if($NumberChanged -eq 'ЗначениеМежду' -and $Number.Count -lt 2){
+                	throw "Number должно содержать 2 числа"	    
+                }
+            
+                $Data = [BitConverter]::GetBytes($Number[0])
+                if($Number.Count -gt 1){ $Data += [BitConverter]::GetBytes($Number[1]) }
+
+                if($PSBoundParameters.TargetValue -eq $null){ $TargetValue = 0 }
+                else {$TargetValue = $PSBoundParameters.TargetValue}
+
+                [psClick.Memory]::ExcludeAddress($Process, $Data, $NumberType, $NumberChanged, $TargetValue, [ref]$Address)  
+            }     
+        }
+    }
+}
+
+function Get-MaskBytes
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k, Cirus ; Link: https://psClick.ru
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory, Position = 0)]         
+        [Object[]]$Data       
+    )
+
+    $buffer = [Byte[]]::new(0)
+    $mask = [Bool[]]::new(0)
+
+    $Data|%{
+        if($_.GetType() -in [Int32],[Int16],[Int64],[Double],[Float]){        
+            $buffer += [BitConverter]::GetBytes($_)
+            $size = [System.Runtime.InteropServices.Marshal]::SizeOf([Type]$_.GetType())
+            for($i=0; $i-lt$size; $i++){$mask += $true}
+        }
+        elseif($_ -is [Byte[]]){       
+            $buffer += $_
+            $size = $_.Count
+            $BytesNull = $true
+            for($i=0; $i-lt$size; $i++){$_|%{if($_ -ne [byte]0){ $BytesNull = $false; break }}}
+            if($BytesNull){ for($i=0; $i-lt$size; $i++){$mask += $false} } # пустой массив
+            else{ for($i=0; $i-lt$size; $i++){$mask += $true} }           # массив байт                         
+        }
+        elseif($_ -is [String]){
+            $text = Get-Bytes -Text $_ -Encoding Unicode
+            $buffer += $text
+            for($i=0; $i-lt$text.Count; $i++){$mask += $true}
+        }
+        else{ throw 'Тип данных не определён' }
+    }
+
+    $buffer, $mask
 }

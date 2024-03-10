@@ -245,7 +245,7 @@ function Find-HeapColor
 function Get-RectangleFromScreen
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Cirus, Fors1k ; Link: https://psClick.ru
     Param(
@@ -276,7 +276,7 @@ function Get-RectangleFromScreen
     $form.StartPosition = [Windows.Forms.FormStartPosition]::CenterScreen
     $form.BackColor = $RectColor
     Set-WindowTransparency -Handle $form.Handle -Transparency 150
-    $form.ShowDialog();
+    $form.ShowDialog()|Out-null
 
     [psClick.FormRectangle]::ResultForm
 }

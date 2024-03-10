@@ -89,7 +89,7 @@ function Get-CursorHandle
 function Move-Cursor
 {
     #.COMPONENT
-    #4.1
+    #4.2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = 'ScreenCursor')]
@@ -115,6 +115,30 @@ function Move-Cursor
         [Parameter(ParameterSetName = 'WindowCursor')]
         [UInt16]$Wait = 5000
     )
+
+    $StepMouse = @(
+        0.03125,
+        0.0625,
+        0.125,
+        0.25,
+        0.375,
+        0.5,
+        0.625,
+        0.75,
+        0.875, 
+        1.0,
+        1.25,
+        1.5,
+        1.75,
+        2.0,
+        2.25,
+        2.5,
+        2.75,
+        3.0,
+        3.25,
+        3.5
+    )
+    
     if($Position -isnot [Drawing.Point]){
         try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
     }
@@ -137,6 +161,8 @@ function Move-Cursor
             if([Int]$arduino -le 0){throw $error}
 
             $offset = $Position - [System.Windows.Forms.Cursor]::Position
+            $offset.X /= $StepMouse[(Get-MouseSpeed)-1]
+            $offset.Y /= $StepMouse[(Get-MouseSpeed)-1]
 
             $param  = "5{0}{1}{2}" -f (
                 $(if($offset.x -ge 0){"+"}else{"-"}), 

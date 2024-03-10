@@ -1,7 +1,7 @@
 ﻿function Find-Color
 {
     #.COMPONENT
-    #1.0
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     Param
@@ -28,38 +28,38 @@
         [ValidateScript({Test-Path $_})]
         [String]$Path
         ,
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_EndPoint')]
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_Size'    )]
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_Rect'    )]
-        [Parameter(Mandatory,Position=1,ParameterSetName = 'Picture_FullSize')]
-        [Drawing.Bitmap]$Picture
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Source_EndPoint')]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Source_Size'    )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Source_Rect'    )]
+        [Parameter(Mandatory,Position=1,ParameterSetName = 'Source_FullSize')]
+        [Drawing.Bitmap]$Source
         ,
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_EndPoint' )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_EndPoint' )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'File_EndPoint'   )]
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'Picture_EndPoint')]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Source_EndPoint')]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_Size'     )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_Size'     )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'File_Size'       )]
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'Picture_Size'    )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Source_Size'    )]
         $StartPos
         ,
         [Parameter(Mandatory,Position=3,ParameterSetName = 'Window_EndPoint' )]
         [Parameter(Mandatory,Position=3,ParameterSetName = 'Screen_EndPoint' )]
         [Parameter(Mandatory,Position=3,ParameterSetName = 'File_EndPoint'   )]
-        [Parameter(Mandatory,Position=3,ParameterSetName = 'Picture_EndPoint')]
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'Source_EndPoint')]
         $EndPos
         ,
         [Parameter(Mandatory,Position=3,ParameterSetName = 'Window_Size'     )]
         [Parameter(Mandatory,Position=3,ParameterSetName = 'Screen_Size'     )]
         [Parameter(Mandatory,Position=3,ParameterSetName = 'File_Size'       )]
-        [Parameter(Mandatory,Position=3,ParameterSetName = 'Picture_Size'    )]
+        [Parameter(Mandatory,Position=3,ParameterSetName = 'Source_Size'    )]
         $Size
         ,
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Window_Rect'     )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'Screen_Rect'     )]
         [Parameter(Mandatory,Position=2,ParameterSetName = 'File_Rect'       )]
-        [Parameter(Mandatory,Position=2,ParameterSetName = 'Picture_Rect'    )]
+        [Parameter(Mandatory,Position=2,ParameterSetName = 'Source_Rect'    )]
         [Drawing.Rectangle]$Rect
         ,
         [Parameter(ParameterSetName = 'Window_EndPoint' )]
@@ -140,13 +140,13 @@
                 $bigBmp = [System.Drawing.Bitmap]::new($path)
             }
         }
-        'Picture*'
+        'Source*'
         {
             if($rect){
-                $bigBmp = Cut-Image $Picture -Rect $rect -New
+                $bigBmp = Cut-Image $Source -Rect $rect -New
             }
             else{
-                $bigBmp = $Picture
+                $bigBmp = $Source
             }
         }
     }
@@ -171,7 +171,7 @@
         [psClick.FindImage]::AddStartPos([ref]$res, $rect.Location, 0)
     }
 
-    if(!$Picture){$bigBmp.Dispose()}
+    if(!$Source){$bigBmp.Dispose()}
     return ,$res
 }
 
@@ -464,7 +464,7 @@ function Cut-Image
 function Get-Image
 {
     #.COMPONENT
-    #3.1
+    #3.2
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = 'Screen_FullSize')]
@@ -557,10 +557,10 @@ function Get-Image
             }
             else{
                 if( $rect ){
-                    return Cut-Image ([psClick.Imaging]::GetImage($handle)) -Rect $rect
+                    return Cut-Image ([psClick.Imaging]::GetImage($handle, $PixelFormat)) -Rect $rect
                 }
                 else{
-                    return [psClick.Imaging]::GetImage($handle)
+                    return [psClick.Imaging]::GetImage($handle, $PixelFormat)
                 }
             }
         }
@@ -576,10 +576,26 @@ function Get-Image
         'File*'
         {
             if($rect){
-                return ($path|ForEach{Cut-Image ([Drawing.Bitmap]::new($_)) -Rect $rect})
+                $res = $path|ForEach{                   
+                    $img = Cut-Image ([Drawing.Bitmap]::new($_)) -Rect $rect
+                    if($img.PixelFormat -ne $PixelFormat){
+                        $img.Clone([System.Drawing.Rectangle]::new(0, 0, $img.Width, $img.Height), $PixelFormat)
+                        $img.Dispose()         
+                    }
+                    else{ $img }
+                }
+                return $res
             }
             else{
-                return ($path|ForEach{[Drawing.Bitmap]::new($_)})
+                $res = $path|ForEach{
+                    $img = [Drawing.Bitmap]::new($_)
+                    if($img.PixelFormat -ne $PixelFormat){
+                        $img.Clone([System.Drawing.Rectangle]::new(0, 0, $img.Width, $img.Height), $PixelFormat)
+                        $img.Dispose()         
+                    }
+                    else{ $img }
+                }
+                return $res
             }
         }
     }
@@ -1168,4 +1184,57 @@ function Close-WindowThumbnail
     )
     Close-Window $Thumbnail.Handle
     Remove-Job -Job $Thumbnail.Job -Force
+}
+
+function Merge-Images
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Cirus, Fors1k ; Link: https://psClick.ru
+    Param(
+        [Parameter(Mandatory)]
+        [Object[]]$Images
+    )
+
+    $WidthImage = $Images[0].Width
+    $HeightImage = $Images[0].Height
+    $ImagesCount = $Images.Count
+
+    for ($i = 1; $i -lt $ImagesCount; $i++)
+    { 
+        if ($Images[$i].Width -ne $WidthImage -or $Images[$i].Height -ne $HeightImage){
+            throw "Изображения разных размеров"
+        }
+    }
+
+    $ResultImage = [System.Drawing.Bitmap]::new($WidthImage, $HeightImage)
+
+    for ($x = 0; $x -lt $WidthImage; $x++)
+    { 
+        for ($y = 0; $y -lt $HeightImage; $y++)
+        { 
+            [int]$R = 0
+            [int]$G = 0
+            [int]$B = 0
+            
+            for ($i = 0; $i -lt $ImagesCount; $i++)
+            {
+                $Color = $Images[$i].GetPixel($x, $y)
+                $R += $Color.R
+                $G += $Color.G
+                $B += $Color.B
+            }
+            
+            $ResultImage.SetPixel(
+                    $x, $y,
+                    [Drawing.Color]::FromArgb(
+                    ($R / $ImagesCount),
+                    ($G / $ImagesCount),
+                    ($B / $ImagesCount)
+                )
+            )
+        }
+    }
+    $ResultImage
 }

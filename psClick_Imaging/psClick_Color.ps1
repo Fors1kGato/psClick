@@ -1194,48 +1194,13 @@ function Merge-Images
     #.SYNOPSIS
     #Author: Cirus, Fors1k ; Link: https://psClick.ru
     Param(
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory,Position=0)]
         [Object[]]$Images
+        ,
+        [Parameter(Position=1)]
+        [ValidateSet([Drawing.Imaging.PixelFormat]::Format24bppRgb, [Drawing.Imaging.PixelFormat]::Format32bppArgb)]
+        $PixelFormat = [Drawing.Imaging.PixelFormat]::Format24bppRgb
     )
 
-    $WidthImage = $Images[0].Width
-    $HeightImage = $Images[0].Height
-    $ImagesCount = $Images.Count
-
-    for ($i = 1; $i -lt $ImagesCount; $i++)
-    { 
-        if ($Images[$i].Width -ne $WidthImage -or $Images[$i].Height -ne $HeightImage){
-            throw "Изображения разных размеров"
-        }
-    }
-
-    $ResultImage = [System.Drawing.Bitmap]::new($WidthImage, $HeightImage)
-
-    for ($x = 0; $x -lt $WidthImage; $x++)
-    { 
-        for ($y = 0; $y -lt $HeightImage; $y++)
-        { 
-            [int]$R = 0
-            [int]$G = 0
-            [int]$B = 0
-            
-            for ($i = 0; $i -lt $ImagesCount; $i++)
-            {
-                $Color = $Images[$i].GetPixel($x, $y)
-                $R += $Color.R
-                $G += $Color.G
-                $B += $Color.B
-            }
-            
-            $ResultImage.SetPixel(
-                    $x, $y,
-                    [Drawing.Color]::FromArgb(
-                    ($R / $ImagesCount),
-                    ($G / $ImagesCount),
-                    ($B / $ImagesCount)
-                )
-            )
-        }
-    }
-    $ResultImage
+    [psClick.Imaging]::MergeImages($Images, $PixelFormat)
 }

@@ -14,6 +14,7 @@ NestedModules=@(
     "psClick_Send_Key.ps1"
     "psClick_W32functions.ps1"
     "psClick_Arduino.ps1"
+    "psClick_ThreeInRow.ps1"
 )
 AliasesToExport = @(
     'Clear-KeyState'
@@ -67,11 +68,19 @@ FunctionsToExport = @(
     # W32functions
     #
     'Find-AddressProcessMemory'
+    'Exclude-AddressProcessMemory'
+    'Get-MaskBytes'
     'Write-ProcessMemory'
     'Read-ProcessMemory'
     'Get-ProcessModules'
     'Get-PointsDistance'
     'Get-TrayInfo'
+    #
+    # ThreeInRow
+    #
+    'Get-MoveThreeInRow'
+    'Get-BestMove'
+    'Show-FieldConsole'
 )
 VariablesToExport = '*'
 }

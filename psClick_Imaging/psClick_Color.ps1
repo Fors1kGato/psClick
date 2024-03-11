@@ -242,6 +242,63 @@ function Find-HeapColor
     return $res
 }
 
+function Find-DynamicAreas
+{
+    #.COMPONENT
+    #1.0
+    #.SYNOPSIS
+    #Author: Cirus, Fors1k ; Link: https://psClick.ru
+ 
+    [CmdletBinding()]   
+    param(
+        [Parameter(Mandatory,Position=0)][Alias("Path")]
+        $Image
+        ,
+        [Parameter(Mandatory,Position=1)][Alias("Path2")]
+        $Image2
+        ,
+        [Parameter(Mandatory,Position=2)]
+        $Size
+        ,
+        [Parameter(Position=3)]
+        [Int]$Count = 1
+        ,
+        [Parameter(Position=4)]
+        [ValidateRange(0, 100)]
+        [Int]$Accuracy = 100
+        ,
+        [Parameter(Position=5)]
+        [ValidateRange(0, 100)]
+        [Int]$Deviation = 0        
+    )
+
+    if($Size-isnot[Drawing.Size]){try{$Size=[Drawing.Size]::new.Invoke($Size)}catch{throw $_}}
+
+    if($Image -is [Drawing.Image] -and $Image2 -is [Drawing.Image]){
+        $res = [psClick.Imaging]::FindDynamicAreas($Image, $Image2, $Size, $Count, $Accuracy, ($Deviation * 2.55))             
+    }               
+    else{
+        if($Image -isnot [Drawing.Image] -and $Image2 -isnot [Drawing.Image]){
+            $img = Get-Image -Path $Image
+            $img2 = Get-Image -Path $Image2
+            $res = [psClick.Imaging]::FindDynamicAreas($img, $img2, $Size, $Count, $Accuracy, ($Deviation * 2.55))   
+            $img.Dispose()
+            $img2.Dispose()
+        }
+        elseif($Image -isnot [Drawing.Image]){
+            $img = Get-Image -Path $Image
+            $res = [psClick.Imaging]::FindDynamicAreas($img, $Image2, $Size, $Count, $Accuracy, ($Deviation * 2.55))  
+            $img.Dispose()
+        }
+        else{
+            $img2 = Get-Image -Path $Image2
+            $res = [psClick.Imaging]::FindDynamicAreas($Image, $img2, $Size, $Count, $Accuracy, ($Deviation * 2.55))  
+            $img2.Dispose()
+        }      
+    }
+    return $res
+}
+
 function Get-RectangleFromScreen
 {
     #.COMPONENT

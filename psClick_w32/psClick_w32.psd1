@@ -78,7 +78,7 @@ FunctionsToExport = @(
     #
     # ThreeInRow
     #
-    'Get-MoveThreeInRow'
+    'Find-MovesThreeInRow'
     'Get-BestMove'
     'Show-FieldConsole'
 )

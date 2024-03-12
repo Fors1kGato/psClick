@@ -1,4 +1,4 @@
-function Get-MoveThreeInRow
+function Find-MovesThreeInRow
 {
     #.COMPONENT
     #1
@@ -31,7 +31,7 @@ function Get-BestMove
     )
 
     if($Criteria-eq "TotalItem" -and !$Item){
-        throw "РќРµРѕР±С…РѕРґРёРјРѕ СѓРєР°Р·Р°С‚СЊ Р·Р°РґР°С‚СЊ РїР°СЂР°РјРµС‚СЂ Item"
+        throw "Необходимо указать задать параметр Item"
     }
 
     if($Criteria -eq "TotalItems"){

@@ -1,4 +1,4 @@
-function Find-MovesThreeInRow
+п»їfunction Find-MovesThreeInRow
 {
     #.COMPONENT
     #1
@@ -31,17 +31,17 @@ function Get-BestMove
     )
 
     if($Criteria-eq "TotalItem" -and !$Item){
-        throw "Необходимо указать задать параметр Item"
+        throw "РќРµРѕР±С…РѕРґРёРјРѕ СѓРєР°Р·Р°С‚СЊ Р·Р°РґР°С‚СЊ РїР°СЂР°РјРµС‚СЂ Item"
     }
 
     if($Criteria -eq "TotalItems"){
-        [psClick.ThreeInRow]::FindBestMove($ListMove, 0, $null)
+        [psClick.ThreeInRow]::FindBestMove($ListMoves, 0, $null)
     }
     elseif($Criteria -eq "MAxLengthInRow"){
-        [psClick.ThreeInRow]::FindBestMove($ListMove, 1, $null)
+        [psClick.ThreeInRow]::FindBestMove($ListMoves, 1, $null)
     }
     else{
-        [psClick.ThreeInRow]::FindBestMove($ListMove, 2, $Item)
+        [psClick.ThreeInRow]::FindBestMove($ListMoves, 2, $Item)
     }
 }
 

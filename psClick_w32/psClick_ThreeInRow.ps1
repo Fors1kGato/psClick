@@ -21,7 +21,7 @@ function Get-BestMove
     #Author: Cirus, Fors1k ; Link: https://psClick.ru
     Param(
         [Parameter(Mandatory, Position = 0)]
-        $ListMove
+        $ListMoves
         ,
         [Parameter(Mandatory, Position = 1)]
         [ValidateSet("TotalItems", "MAxLengthInRow", "TotalItem")]

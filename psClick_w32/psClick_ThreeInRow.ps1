@@ -9,7 +9,7 @@ function Find-MovesThreeInRow
         [char[,]]$Field
     )
 
-    [ThreeInRow.FindThreeInRow]::FieldMove($Field)
+    [psClick.ThreeInRow]::FieldMove($Field)
 }
 
 
@@ -35,13 +35,13 @@ function Get-BestMove
     }
 
     if($Criteria -eq "TotalItems"){
-        [ThreeInRow.FindThreeInRow]::FindBestMove($ListMove, 0, $null)
+        [psClick.ThreeInRow]::FindBestMove($ListMove, 0, $null)
     }
     elseif($Criteria -eq "MAxLengthInRow"){
-        [ThreeInRow.FindThreeInRow]::FindBestMove($ListMove, 1, $null)
+        [psClick.ThreeInRow]::FindBestMove($ListMove, 1, $null)
     }
     else{
-        [ThreeInRow.FindThreeInRow]::FindBestMove($ListMove, 2, $Item)
+        [psClick.ThreeInRow]::FindBestMove($ListMove, 2, $Item)
     }
 }
 
@@ -57,5 +57,5 @@ function Show-FieldConsole
         [char[,]]$Field
     )
 
-    [ThreeInRow.FindThreeInRow]::FieldShowConsole($Field)
+    [psClick.ThreeInRow]::FieldShowConsole($Field)
 }

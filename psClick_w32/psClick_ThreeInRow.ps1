@@ -7,9 +7,15 @@
     Param(
         [Parameter(Mandatory, Position=0)]
         [char[,]]$Field
+        ,
+        [Switch]$WithoutRecursion
     )
-
-    [psClick.ThreeInRow]::FieldMove($Field)
+    if($WithoutRecursion){
+        [psClick.ThreeInRow]::FieldMove($Field, $false)
+    }
+    else{
+        [psClick.ThreeInRow]::FieldMove($Field, $true)
+    }
 }
 
 

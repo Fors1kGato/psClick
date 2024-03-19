@@ -33,15 +33,15 @@ if(!$env:psClick){
     "\psClick"
 }
 $vc = Test-Path "$env:windir\System32\vcruntime140d.dll"
-if(!$vc -and ![Environment]::GetEnvironmentVariable("Path", "User").Contains("$env:psClick\psClick_Main\x32")){
+if(!$vc -and ![Environment]::GetEnvironmentVariable("Path", "User").Contains("$env:psClick\psClick_Main\Libs\x32")){
     [Environment]::SetEnvironmentVariable("Path",
     [Environment]::GetEnvironmentVariable("Path","User")+
-    [IO.Path]::PathSeparator+"$env:psClick\psClick_Main\x32","User")
+    [IO.Path]::PathSeparator+"$env:psClick\psClick_Main\Libs\x32","User")
 }
-if(!$vc -and ![Environment]::GetEnvironmentVariable("Path", "User").Contains("$env:psClick\psClick_Main\x64")){
+if(!$vc -and ![Environment]::GetEnvironmentVariable("Path", "User").Contains("$env:psClick\psClick_Main\Libs\x64")){
     [Environment]::SetEnvironmentVariable("Path",
     [Environment]::GetEnvironmentVariable("Path","User")+
-    [IO.Path]::PathSeparator+"$env:psClick\psClick_Main\x64","User")
+    [IO.Path]::PathSeparator+"$env:psClick\psClick_Main\Libs\x64","User")
 }
 $url   = "api.github.com/repos/Fors1kGato/psClick/git/trees/main?recursive=1"
 $tree  = (Irm $url -useb).tree

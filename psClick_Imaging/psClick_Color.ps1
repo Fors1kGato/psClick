@@ -1,4 +1,33 @@
-﻿function Find-Color
+﻿function Read-QRcode
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Cirus, Fors1k ; Link: https://psClick.ru
+    Param(
+        [Parameter(Mandatory, Position=0)]
+        [Alias("Image")]
+        $Path
+    )
+
+    if($Path -is [Drawing.Image]){
+        $Result = [ZXing.BarcodeReader]::new().Decode($img)
+    }
+    else{
+        try{
+            $img = Get-Image -Path $Path
+        }
+        catch{
+            Write-Error "Неверно задан путь"
+            return $null
+        }
+        $Result = [ZXing.BarcodeReader]::new().Decode($img)
+        $img.Dispose()
+    }
+    $Result
+}
+
+function Find-Color
 {
     #.COMPONENT
     #1.1

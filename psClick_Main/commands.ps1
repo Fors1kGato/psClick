@@ -411,3 +411,41 @@ function Invoke-Ternary{
     )if($Bool){$val=$TrueV}else{$val=$FalseV}
     if($val-is[ScriptBlock]){&$val}else{$val}
 }
+
+function Add-DllToExe
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Cirus, Fors1k ; Link: https://psClick.ru
+    Param(
+        [Parameter(Mandatory, Position=0)]
+        [ValidateScript({Test-Path $_})]
+        [String]$PathToExe
+        ,
+        [Parameter(Mandatory, Position=1)]
+        [Object[]]$PathToDll
+        ,
+        [Parameter(Mandatory, Position=2)]
+        [String]$PathOut
+    )
+
+    $PathMerge = $env:psClick + "\psClick_Main\Libs\ILMerge\ILMerge.exe"
+    $Path = [System.IO.Path]::GetDirectoryName($PathToExe)
+    $Exe = [System.IO.Path]::GetFileName($PathToExe)
+    $Dll = ""
+    foreach ($item in $PathToDll){ $Dll += "$item " }
+
+    ipconfig|out-null
+    $encodingInput = [System.Console]::InputEncoding 
+    $encodingOutput = [System.Console]::OutputEncoding 
+    $encodingCMD = [System.Text.Encoding]::GetEncoding("cp866")
+    [System.Console]::OutputEncoding = $encodingCMD
+    [System.Console]::InputEncoding = $encodingCMD 
+
+    $Path2 = [System.IO.Path]::GetDirectoryName($PathOut)
+    if($Path2.length-eq0){ $PathOut = $Path +"\$PathOut" }
+    cmd.exe /c "cd /d $Path & $PathMerge $Exe $Dll /out:$PathOut" 
+    [System.Console]::InputEncoding = $encodingInput
+    [System.Console]::OutputEncoding = $encodingOutput    
+}

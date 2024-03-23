@@ -424,7 +424,7 @@ function Add-DllToExe
         [String]$PathToExe
         ,
         [Parameter(Mandatory, Position=1)]
-        [Object[]]$PathToDll
+        [String[]]$PathToDll
         ,
         [Parameter(Mandatory, Position=2)]
         [String]$PathOut

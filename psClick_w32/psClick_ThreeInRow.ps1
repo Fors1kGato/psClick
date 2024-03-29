@@ -30,7 +30,7 @@ function Get-BestMove
         $ListMoves
         ,
         [Parameter(Mandatory, Position = 1)]
-        [ValidateSet("TotalItems", "MAxLengthInRow", "TotalItem", "Intersection")]
+        [ValidateSet("TotalItems", "MAxLengthInRow", "TotalItem", "Intersection", "Bottom")]
         [string]$Criteria
         ,
         [char]$Item = $null
@@ -49,8 +49,11 @@ function Get-BestMove
     elseif($Criteria -eq "TotalItem"){
         [psClick.ThreeInRow]::FindBestMove($ListMoves, 2, $Item)
     }
-    else{
+    elseif($Criteria -eq "Intersection"){
         [psClick.ThreeInRow]::FindBestMove($ListMoves, 3, $null)
+    }
+    else{
+        [psClick.ThreeInRow]::FindBestMove($ListMoves, 4, $null)
     }
 }
 

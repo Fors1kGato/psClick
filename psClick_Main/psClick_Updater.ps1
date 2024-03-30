@@ -65,7 +65,7 @@ $tr = (gci -file -Recurse $env:psClick).FullName|ForEach{
 ForEach($f in $files){
     $check = $tr.sha.Contains($f.sha)
     if($f.path -eq 'psClick_Main/psClick_Updater.ps1'){continue}
-    if($vc -and $f.path -like "psClick_Main/x*/*d.dll"){continue}
+    if($vc -and $f.path -like "psClick_Main/Libs/x*/*d.dll"){continue}
     if(!$check){
         $Path = (Join-path $env:psClick $f.path)
         try{$p = Ni -ea Stop $Path -Force}

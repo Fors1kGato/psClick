@@ -7,7 +7,7 @@
     Param(
         [IntPtr]$Handle
     )
-    [psClick.Windows]::SetWindowTopMostNoActivate($Handle)
+    [psClick.Window]::SetWindowTopMostNoActivate($Handle)
 }
 
 function Get-ScreenRectangle
@@ -62,7 +62,7 @@ function Get-WindowRectangle
         ,
         [Switch]$Withborder
     )
-    $wInfo = [psClick.Windows]::GetWindowInformation($Handle)
+    $wInfo = [psClick.Window]::GetWindowInformation($Handle)
     if(!$Withborder){
         [Drawing.Rectangle]::new(
             $wInfo.rcClient.Left,
@@ -172,7 +172,7 @@ function Get-ChildWindows
         [parameter(Mandatory=$true)]
         [IntPtr]$Handle
     )
-    [psClick.Windows]::GetChildWindows($Handle)
+    [psClick.Window]::GetChildWindows($Handle)
 }
 
 function Set-WindowText

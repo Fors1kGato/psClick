@@ -1,0 +1,30 @@
+<Configuration>
+<ViewDefinitions>
+    <View>
+      <Name>psClick.Window</Name>
+      <ViewSelectedBy>
+        <TypeName>psClick.Window</TypeName>
+      </ViewSelectedBy>
+      <TableControl>
+        
+        <TableRowEntries>
+          
+          <TableRowEntry>
+            <TableColumnItems>
+              
+              <TableColumnItem>
+                <PropertyName>Handle</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>Text</PropertyName>
+              </TableColumnItem>
+              
+            </TableColumnItems>
+          </TableRowEntry>
+          
+        </TableRowEntries>
+        
+      </TableControl>
+    </View>
+  </ViewDefinitions>
+</Configuration>

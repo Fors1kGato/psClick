@@ -127,10 +127,17 @@ function Type-Text
         ,
         [Switch]$Hardware
         ,
+        [Switch]$Driver
+        ,
         [Switch]$ShiftEOL
         ,
         [UInt16]$Wait = 5000
     )
+
+    if($Hardware -and $Driver){
+        Write-Error "-Hardware, -Driver: Допускается только один параметр";return
+    }
+
     $Layout = Get-KeyboardLayout
     $text = $text-replace"(`r`n|`r)","`n"
     $chars = $Text.ToCharArray()
@@ -147,44 +154,50 @@ function Type-Text
         if([Int]$arduino -le 0){throw $error}
     }
 
-    ForEach($char in $chars){
-        $byte = [Text.Encoding]::Default.GetBytes($char)[0]
-        if($byte -in $ruCh){
-            [Void][psClick.User32]::PostMessage($window, 0x0050, 0x0001, $rus)
-            $vk = [psClick.User32]::VkKeyScanEx($char, $rus)
-            $cr = $vk
-            if(!($vk -band 256)){$cr+=32}
-            if($char-ceq"ё"){$cr=96}elseif($char-ceq"Ё"){$cr=126}
-        }
-        else{
-            [Void][psClick.User32]::PostMessage($window, 0x0050, 0x0001, $eng)
-            $vk = [psClick.User32]::VkKeyScanEx($char, $eng)
-            if($Hardware){$cr = $byte}
-        }
+    if($Driver){
+        [psClick.KeyBoard]::SendText($Text, $Delay)
 
-        if($Hardware){
-            if($ShiftEOL -and $vk -eq 525){
-                Send-ArduinoCommand $arduino "3129" $Wait
-                Send-ArduinoCommand $arduino "1176" $Wait
-                Send-ArduinoCommand $arduino "4129" $Wait
+    }
+    else{
+        ForEach($char in $chars){
+            $byte = [Text.Encoding]::Default.GetBytes($char)[0]
+            if($byte -in $ruCh){
+                [Void][psClick.User32]::PostMessage($window, 0x0050, 0x0001, $rus)
+                $vk = [psClick.User32]::VkKeyScanEx($char, $rus)
+                $cr = $vk
+                if(!($vk -band 256)){$cr+=32}
+                if($char-ceq"ё"){$cr=96}elseif($char-ceq"Ё"){$cr=126}
             }
             else{
-                Send-ArduinoCommand $arduino "1$cr" $Wait
+                [Void][psClick.User32]::PostMessage($window, 0x0050, 0x0001, $eng)
+                $vk = [psClick.User32]::VkKeyScanEx($char, $eng)
+                if($Hardware){$cr = $byte}
             }
-        }
-        else{
-            if($vk -band 256 -or ($ShiftEOL -and $vk -eq 525)){
-                [psClick.User32]::keybd_event(0xA0, 0, 0x0000, 0)
-                [psClick.User32]::keybd_event($vk , 0, 0x0000, 0)
-                [psClick.User32]::keybd_event($vk , 0, 0x0002, 0)
-                [psClick.User32]::keybd_event(0xA0, 0, 0x0002, 0)
+
+            if($Hardware){
+                if($ShiftEOL -and $vk -eq 525){
+                    Send-ArduinoCommand $arduino "3129" $Wait
+                    Send-ArduinoCommand $arduino "1176" $Wait
+                    Send-ArduinoCommand $arduino "4129" $Wait
+                }
+                else{
+                    Send-ArduinoCommand $arduino "1$cr" $Wait
+                }
             }
             else{
-                [psClick.User32]::keybd_event($vk , 0, 0x0000, 0)
-                [psClick.User32]::keybd_event($vk , 0, 0x0002, 0)
+                if($vk -band 256 -or ($ShiftEOL -and $vk -eq 525)){
+                    [psClick.User32]::keybd_event(0xA0, 0, 0x0000, 0)
+                    [psClick.User32]::keybd_event($vk , 0, 0x0000, 0)
+                    [psClick.User32]::keybd_event($vk , 0, 0x0002, 0)
+                    [psClick.User32]::keybd_event(0xA0, 0, 0x0002, 0)
+                }
+                else{
+                    [psClick.User32]::keybd_event($vk , 0, 0x0000, 0)
+                    [psClick.User32]::keybd_event($vk , 0, 0x0002, 0)
+                }
             }
+            Sleep -m $Delay
         }
-        Sleep -m $Delay
     }
     if($Hardware){[Void][psClick.Arduino]::Close($arduino)}
     Set-KeyboardLayout $Layout

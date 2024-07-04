@@ -1,7 +1,7 @@
 ﻿function Click-Mouse
 {
     #.COMPONENT
-    #1.6
+    #1.7
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -26,6 +26,8 @@
         ,
         [Switch]$Hardware
         ,
+        [Switch]$Driver
+        ,
         [ValidateSet('Shift','Control')]
         [String[]]$With = [String[]]::new(0)
         ,
@@ -39,6 +41,9 @@
     }
     if($Down -and $Up){
         Write-Error "-Down , -Up: Допускается только один параметр";return
+    }
+    if($Hardware -and $Driver){
+        Write-Error "-Hardware, -Driver: Допускается только один параметр";return
     }
     if($Double -and $Tripple){
         Write-Error "-Double , -Tripple: Допускается только один параметр";return
@@ -84,6 +89,22 @@
             $with|%{Send-ArduinoCommand $arduino "4$($w.$_)" $Wait}
 
             if($Hardware){[void][psClick.Arduino]::Close($arduino)}
+        }
+        elseif($Driver){
+            $button = 1
+            if($Right ){$button = 2}
+            if($Middle){$button = 4}
+            
+            $w = @{'Shift' = 42;'Control' = 29}
+            $with|%{[psClick.KeyBoard]::SendKey($w.$_, [psClick.Hardware.KeyState]::Down)}
+            
+            if($Down){[psClick.Mouse]::MouseDown($Position, $button)}
+            elseif($Up){
+                Sleep -m $DelayUP 
+                [psClick.Mouse]::MouseUp($Position, $button)
+            }
+            else{1..$count|%{[psClick.Mouse]::MouseClick($Position, $button, $DelayUP)}}
+            $with|%{[psClick.KeyBoard]::SendKey($w.$_, [psClick.Hardware.KeyState]::Up)}
         }
         else{
             $button = "left"

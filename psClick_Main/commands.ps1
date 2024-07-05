@@ -449,3 +449,21 @@ function Add-DllToExe
     [System.Console]::InputEncoding = $encodingInput
     [System.Console]::OutputEncoding = $encodingOutput    
 }
+
+function Install-Interception
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Cirus, Fors1k ; Link: https://psClick.ru
+    Start Powershell -Verb RunAs -Arg '-noexit', '-c $res = &"$env:psClick\psClick_Interception\HardwareInstall.exe" /install;$res[4];Write-Host "`r`nНажать любую клавишу чтобы закрыть окно.";[System.Console]::ReadKey();exit'
+}
+
+function Remove-Interception
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Cirus, Fors1k ; Link: https://psClick.ru
+    Start Powershell -Verb RunAs -Arg '-noexit', '-c $res = &"$env:psClick\psClick_Interception\HardwareInstall.exe" /uninstall;$res[4];Write-Host "`r`nНажать любую клавишу чтобы закрыть окно.";[System.Console]::ReadKey();exit'
+}

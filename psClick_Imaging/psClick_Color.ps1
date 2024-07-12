@@ -30,7 +30,7 @@
 function Find-Color
 {
     #.COMPONENT
-    #1.1
+    #1.2
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     Param
@@ -102,7 +102,16 @@ function Find-Color
         ,
         [ValidateRange(0, 100)]
         [Int]$Deviation = 0     
+        ,          
+        [ValidateRange(0, 100)]
+        [Int]$DeviationR = 0
         ,
+        [ValidateRange(0, 100)]
+        [Int]$DeviationG = 0     
+        ,
+        [ValidateRange(0, 100)]
+        [Int]$DeviationB = 0     
+        , 
         [Switch]$WithoutStartPos
     )
 
@@ -114,8 +123,6 @@ function Find-Color
             throw "Неверно указана цель поиска"
         }
     }
-
-
    
     Switch -Wildcard ($PSCmdlet.ParameterSetName)
     {
@@ -181,6 +188,9 @@ function Find-Color
         }
     }
 
+    if(!$DeviationR){$DeviationR = $Deviation}
+    if(!$DeviationG){$DeviationG = $Deviation}
+    if(!$DeviationB){$DeviationB = $Deviation}
 
     if($bigBmp.PixelFormat -ne [Drawing.Imaging.PixelFormat]::Format32bppArgb){
         $bigBmp = $bigBmp.Clone(
@@ -193,10 +203,11 @@ function Find-Color
         $Color,
         $bigBmp, 
         $Count,
-        $Deviation*2.55    
+        $DeviationR*2.55,
+        $DeviationG*2.55,
+        $DeviationB*2.55 
     )
-    
-       
+           
     if(!$WithoutStartPos -and $PSCmdlet.ParameterSetName -notmatch "FullSize" -and $res.Count){
         [psClick.FindImage]::AddStartPos([ref]$res, $rect.Location, 0)
     }

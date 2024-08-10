@@ -39,7 +39,7 @@
 function Recognize-Text
 {
     #.COMPONENT
-    #4.1
+    #5.0
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     [CmdletBinding()]
@@ -124,7 +124,15 @@ function Recognize-Text
             [ref]$line,
             [ref]$ImageOutput,
             $WithoutNoise,
-            $MinSize
+            $MinSize,
+            $Base.config.Sharpness,
+            $Base.config.SharpnessScrollBarR,
+            $Base.config.SharpnessScrollBarG,
+            $Base.config.SharpnessScrollBarB,
+            $Base.config.SharpnessRadioButtonNoChange,
+            $Base.config.SharpnessRadioButtonBlack,
+            $Base.config.SharpnessRadioButtonWhite,
+            $Base.config.SharpnessTextBoxCore.ForEach({$_})
         )
     }
     else{      
@@ -177,7 +185,15 @@ function Recognize-Text
             [ref]$line,
             [ref]$ImageOutput,
             $WithoutNoise,
-            $MinSize
+            $MinSize,
+            $Base.config.Sharpness,
+            $Base.config.SharpnessScrollBarR,
+            $Base.config.SharpnessScrollBarG,
+            $Base.config.SharpnessScrollBarB,
+            $Base.config.SharpnessRadioButtonNoChange,
+            $Base.config.SharpnessRadioButtonBlack,
+            $Base.config.SharpnessRadioButtonWhite,
+            $Base.config.SharpnessTextBoxCore.ForEach({$_})
         )       
         $img.Dispose()
     }

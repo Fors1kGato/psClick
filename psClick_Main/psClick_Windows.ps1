@@ -125,7 +125,7 @@ function Set-WindowTransparency
 function Move-Window
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -144,7 +144,7 @@ function Move-Window
 function Resize-Window
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(

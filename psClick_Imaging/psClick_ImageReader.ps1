@@ -39,7 +39,7 @@
 function Recognize-Text
 {
     #.COMPONENT
-    #5.0
+    #5.1
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     [CmdletBinding()]
@@ -112,7 +112,7 @@ function Recognize-Text
             $Base.Config.CheckIntellectMerge,
             $Base.Config.CheckIntellectMergeUp,
             $Base.Config.CheckIntellectSplit,
-            $Base.Config.CheckIntellectSplitVertical,
+            $Base.Config.CheckIntellectSplitContour,
             $Base.Config.CheckIntellectVersion,
             $Base.Config.txtColors.ForEach({"0x$_"}), 
             $Base.Config.bgColors.ForEach({"0x$_"}), 
@@ -174,7 +174,7 @@ function Recognize-Text
             $Base.Config.CheckIntellectMerge,
             $Base.Config.CheckIntellectMergeUp,
             $Base.Config.CheckIntellectSplit,
-            $Base.Config.CheckIntellectSplitVertical,
+            $Base.Config.CheckIntellectSplitContour,
             $Base.Config.CheckIntellectVersion,
             $Base.Config.txtColors.ForEach({"0x$_"}), 
             $Base.Config.bgColors.ForEach({"0x$_"}), 

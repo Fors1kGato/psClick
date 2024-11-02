@@ -1,7 +1,7 @@
 ﻿function Get-SymbolsBase 
 {
     #.COMPONENT
-    #1.2
+    #1.3
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     [CmdletBinding()]Param()
@@ -22,7 +22,7 @@
         try{
             $Base = $PSBoundParameters.Name
             $BaseSymbol = [psClick.Readtext]::LoadSymbolBase(([Environment]::GetFolderPath('MyDocuments')+"\psClick\psClick_UserData\ImageReader_Data\$Base.pssb"))
-            $cfg = Get-Content ([Environment]::GetFolderPath('MyDocuments')+"\psClick\psClick_UserData\ImageReader_Data\$Base.cfg")|ConvertFrom-Json
+            $cfg = Get-Content ([Environment]::GetFolderPath('MyDocuments')+"\psClick\psClick_UserData\ImageReader_Data\$Base.cfg") -Encoding utf8|ConvertFrom-Json
         }
         catch{
             throw $_
@@ -39,7 +39,7 @@
 function Recognize-Text
 {
     #.COMPONENT
-    #5.2
+    #5.3
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     [CmdletBinding()]
@@ -134,7 +134,8 @@ function Recognize-Text
             $Base.config.SharpnessRadioButtonNoChange,
             $Base.config.SharpnessRadioButtonBlack,
             $Base.config.SharpnessRadioButtonWhite,
-            $Base.config.SharpnessTextBoxCore.ForEach({$_})
+            $Base.config.SharpnessTextBoxCore.ForEach({$_}),
+            $Base.Config.ListDoubleSymbols.ForEach({$_})
         )
     }
     else{      
@@ -197,7 +198,8 @@ function Recognize-Text
             $Base.config.SharpnessRadioButtonNoChange,
             $Base.config.SharpnessRadioButtonBlack,
             $Base.config.SharpnessRadioButtonWhite,
-            $Base.config.SharpnessTextBoxCore.ForEach({$_})
+            $Base.config.SharpnessTextBoxCore.ForEach({$_}),
+            $Base.Config.ListDoubleSymbols.ForEach({$_})
         )       
         $img.Dispose()
     }

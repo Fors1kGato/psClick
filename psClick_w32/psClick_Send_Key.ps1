@@ -55,7 +55,7 @@
         $collection.Add($attribute)
 
         if($Hardware){
-            $validationSet = [String[]]('D0','D1','D2','D3','D4','D5','D6','D7','D8','D9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','Alt','Capital','CapsLock','Delete','Down','End','Enter','Escape','F1','F10','F11','F12','F13','F14','F15','F16','F17','F18','F19','F2','F20','F21','F22','F23','F24','F3','F4','F5','F6','F7','F8','F9','Home','Insert','LControlKey','Left','LShiftKey','LWin','PageDown','PageUp','RControlKey','Return','Right','RShiftKey','RWin','Tab','Up','NumPad0','NumPad1','NumPad2','NumPad3','NumPad4','NumPad5','NumPad6','NumPad7','NumPad8','NumPad9','Multiply','Subtract','Decimal','Add','Divide')
+            $validationSet = [String[]]('D0','D1','D2','D3','D4','D5','D6','D7','D8','D9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','Alt','Capital','CapsLock','Delete','Down','End','Enter','Escape','Space','F1','F10','F11','F12','F13','F14','F15','F16','F17','F18','F19','F2','F20','F21','F22','F23','F24','F3','F4','F5','F6','F7','F8','F9','Home','Insert','LControlKey','Left','LShiftKey','LWin','PageDown','PageUp','RControlKey','Return','Right','RShiftKey','RWin','Tab','Up','NumPad0','NumPad1','NumPad2','NumPad3','NumPad4','NumPad5','NumPad6','NumPad7','NumPad8','NumPad9','Multiply','Subtract','Decimal','Add','Divide')
         }
         elseif($Driver){
             $validationSet = [String[]]('Escape','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Zero','DashUnderscore','PlusEquals','Backspace','Tab','Q','W','E','R','T','Y','U','I','O','P','OpenBracketBrace','CloseBracketBrace','Enter','Control','A','S','D','F','G','H','J','K','L','SemicolonColon','SingleDoubleQuote','Tilde','LeftShift','BackslashPipe','Z','X','C','V','B','N','M','CommaLeftArrow','PeriodRightArrow','ForwardSlashQuestionMark','RightShift','RightAlt','Space','CapsLock','F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12','Up','Down','Right','Left','Home','End','Delete','PageUp','PageDown','Insert','PrintScreen','NumLock','ScrollLock','Menu','WindowsKey','NumpadDivide','NumpadAsterisk','Numpad7','Numpad8','Numpad9','Numpad4','Numpad5','Numpad6','Numpad1','Numpad2','Numpad3','Numpad0','NumpadDelete','NumpadEnter','NumpadPlus','NumpadMinus')
@@ -117,6 +117,7 @@
                         End            = 0xD5
                         CapsLock       = 0xC1
                         Capital        = 0xC1
+                        Space          = 0x20
                         F1             = 0xC2
                         F2             = 0xC3
                         F3             = 0xC4

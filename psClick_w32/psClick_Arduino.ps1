@@ -90,7 +90,7 @@ function Start-Wait()
         [Parameter(Mandatory, Position=0)]
         [Int]$Wait 
         ,
-        [Parameter(Position=1, ParameterSetName = "SerialPort")]
+        [Parameter(Position=1)]
         [System.IO.Ports.SerialPort]$Port               
     )
       

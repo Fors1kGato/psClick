@@ -32,6 +32,7 @@ FunctionsToExport = @(
     'Scroll-Mouse'
     'Get-CursorHandle'
     'Set-ArduinoSetting'
+    'Start-Wait'
     #
     # Keyboard
     #

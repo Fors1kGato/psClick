@@ -78,3 +78,35 @@ function Send-ArduinoCommand
         throw $error 
     }
 }
+
+function Start-Wait()
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        [ValidateRange(1, 999999)]
+        [Parameter(Mandatory, Position=0)]
+        [Int]$Wait 
+        ,
+        [Parameter(Position=1, ParameterSetName = "SerialPort")]
+        [System.IO.Ports.SerialPort]$Port               
+    )
+      
+    if($Port){         
+        $Port.Write("06" + ($Wait - 1))
+        while($Port.BytesToRead-lt5){}  
+        [byte[]]$result = 0,0,0,0,0
+        $Port.Read($result, 0, 5)|Out-Null
+    }
+    else{    
+        $portName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.
+                    Properties|where{$_.name -like  '*USB*'}).value)[0].replace("COM","")
+        $arduino = [psClick.Arduino]::Open($PortName)
+        $error = "Не удалось открыть порт. Err code: $arduino"
+        if([Int]$arduino -le 0){throw $error}    
+        Send-ArduinoCommand $arduino ("06" + ($Wait - 1)) -Wait ($Wait + 5000)
+        [Void][psClick.Arduino]::Close($arduino)
+    }
+}

@@ -1,59 +1,157 @@
 ﻿function Set-ArduinoSetting
 {
     #.COMPONENT
-    #1.2
+    #1.3
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [parameter(ParameterSetName = "cus")]
-        [UInt16]$MouseDelay
+        [Parameter(Position=0)]
+        [System.IO.Ports.SerialPort]$Port
         ,
         [parameter(ParameterSetName = "cus")]
-        [UInt16]$MouseMoveDelay
+        [Int16]$MouseDelay = -1
+        ,
+        [parameter(ParameterSetName = "cus")]
+        [Int16]$MouseMoveDelay = -1
         ,
         [ValidateRange(1, 127)]
         [parameter(ParameterSetName = "cus")]
-        [UInt16]$MouseMoveOffset
+        [Int16]$MouseMoveOffset = -1
         ,
         [parameter(ParameterSetName = "cus")]
-        [UInt16]$KeyRandomDelay
+        [Int16]$KeyRandomDelay = -1
         ,
         [parameter(ParameterSetName = "cus")]
-        [UInt16]$MouseRandomDelay
+        [Int16]$MouseRandomDelay = -1
         ,
         [parameter(Mandatory,ParameterSetName = "def")]
         [Switch]$Default
     )
-    $portName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.
-                Properties|where{$_.name -like  '*USB*'}).value)[0].replace("COM","")
-    $arduino = [psClick.Arduino]::Open($PortName)
-    $error = "Не удалось открыть порт. Err code: $arduino"
-    if([Int]$arduino -le 0){throw $error}
 
-    if($Default){
-        Send-ArduinoCommand $arduino "0120"
-        Send-ArduinoCommand $arduino "020"
-        Send-ArduinoCommand $arduino "035"
-        Send-ArduinoCommand $arduino "040"
-        Send-ArduinoCommand $arduino "050"
+    if($Port){    
+        [byte[]]$result = 0,0,0,0,0    
+        
+        if($Default){
+            $Port.Write("0120")
+            while($port.BytesToRead-lt5){}       
+            $port.Read($result, 0, 5)|Out-Null
+
+            $Port.Write("020")
+            while($port.BytesToRead-lt5){}       
+            $port.Read($result, 0, 5)|Out-Null
+
+            $Port.Write("035")
+            while($port.BytesToRead-lt5){}       
+            $port.Read($result, 0, 5)|Out-Null
+
+            $Port.Write("040")
+            while($port.BytesToRead-lt5){}       
+            $port.Read($result, 0, 5)|Out-Null
+
+            $Port.Write("050")
+            while($port.BytesToRead-lt5){}       
+            $port.Read($result, 0, 5)|Out-Null
+        }
+        if($MouseDelay -gt -1){          
+            $Port.Write("01$MouseDelay")
+            while($port.BytesToRead-lt5){}       
+            $port.Read($result, 0, 5)|Out-Null
+        }
+        if($MousemoveDelay -gt -1){
+            $Port.Write("02$mousemoveDelay")
+            while($port.BytesToRead-lt5){}       
+            $port.Read($result, 0, 5)|Out-Null
+        }
+        if($MousemoveOffset -gt -1){
+            $Port.Write("03$mousemoveOffset")
+            while($port.BytesToRead-lt5){}       
+            $port.Read($result, 0, 5)|Out-Null
+        }
+        if($KeyRandomDelay -gt -1){
+            $Port.Write("04$keyRandomDelay")
+            while($port.BytesToRead-lt5){}       
+            $port.Read($result, 0, 5)|Out-Null
+        }
+        if($MouseRandomDelay -gt -1){
+            $Port.Write("05$MouseRandomDelay")
+            while($port.BytesToRead-lt5){}       
+            $port.Read($result, 0, 5)|Out-Null
+        }                                   
     }
-    if($MouseDelay){
-        Send-ArduinoCommand $arduino "01$mouseDelay"
+    else{
+        $portName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.
+                    Properties|where{$_.name -like  '*USB*'}).value)[0].replace("COM","")
+        $arduino = [psClick.Arduino]::Open($PortName)
+        $error = "Не удалось открыть порт. Err code: $arduino"
+        if([Int]$arduino -le 0){throw $error}
+
+        if($Default){
+            Send-ArduinoCommand $arduino "0120"
+            Send-ArduinoCommand $arduino "020"
+            Send-ArduinoCommand $arduino "035"
+            Send-ArduinoCommand $arduino "040"
+            Send-ArduinoCommand $arduino "050"
+        }
+        if($MouseDelay -gt -1){
+            Send-ArduinoCommand $arduino "01$mouseDelay"
+        }
+        if($MousemoveDelay -gt -1){
+            Send-ArduinoCommand $arduino "02$mousemoveDelay"
+        }
+        if($MousemoveOffset -gt -1){
+            Send-ArduinoCommand $arduino "03$mousemoveOffset"
+        }
+        if($KeyRandomDelay -gt -1){
+            Send-ArduinoCommand $arduino "04$keyRandomDelay"
+        }
+        if($MouseRandomDelay -gt -1){
+            Send-ArduinoCommand $arduino "05$MouseRandomDelay"
+        }
+
+        [Void][psClick.Arduino]::Close($arduino)
     }
-    if($MousemoveDelay){
-        Send-ArduinoCommand $arduino "02$mousemoveDelay"
+}
+
+function Get-ArduinoSetting
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        [Parameter(Position=0)]
+        [System.IO.Ports.SerialPort]$Port               
+    )
+          
+    if($Port){         
+        $Port.Write("07")
+        while($port.BytesToRead-lt1){} 
+        $res = $port.ReadLine()
     }
-    if($MousemoveOffset){
-        Send-ArduinoCommand $arduino "03$mousemoveOffset"
-    }
-    if($KeyRandomDelay){
-        Send-ArduinoCommand $arduino "04$keyRandomDelay"
-    }
-    if($MouseRandomDelay){
-        Send-ArduinoCommand $arduino "05$MouseRandomDelay"
+    else{    
+        $portName = @(((Get-ItemProperty "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM").psobject.
+                    Properties|where{$_.name -like  '*USB*'}).value)[0].replace("COM","")
+        $port = [System.IO.Ports.SerialPort]::new("COM$portName", 9600)
+        $port.RtsEnable = $true
+        $port.ReadTimeout = 3000
+        $port.Open()
+        $port.Write("07") 
+
+        while($port.BytesToRead-lt1){} 
+        $res =  $port.ReadLine()
+
+        $port.Close();$port.Dispose()
     }
 
-    [Void][psClick.Arduino]::Close($arduino)
+    $values = [regex]::Matches($res, "\d+")
+    $Result = [ordered]@{
+        MouseDelay = $values[0].Value
+        MouseMoveDelay = $values[1].Value
+        MouseMoveOffset = $values[2].Value
+        KeyRandomDelay = $values[3].Value
+        MouseRandomDelay = $values[4].Value
+    }
+    $Result
 }
 
 function Send-ArduinoCommand
@@ -79,7 +177,7 @@ function Send-ArduinoCommand
     }
 }
 
-function Start-Wait()
+function Start-Wait
 {
     #.COMPONENT
     #1

@@ -33,7 +33,7 @@ FunctionsToExport = @(
     'Get-CursorHandle'
     'Get-ArduinoSetting'
     'Set-ArduinoSetting'
-    'Start-Wait'
+    'Start-WaitArduino'
     #
     # Keyboard
     #
@@ -77,6 +77,7 @@ FunctionsToExport = @(
     'Get-ProcessModules'
     'Get-PointsDistance'
     'Get-TrayInfo'
+    'Start-Wait'
     #
     # ThreeInRow
     #

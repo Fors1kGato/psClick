@@ -401,3 +401,21 @@ function Get-MaskBytes
 
     $buffer, $mask
 }
+
+function Start-Wait
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        [ValidateRange(0, 999999)]
+        [Parameter(Mandatory)]
+        [double]$Milliseconds              
+    )
+
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    $dt = $sw.ElapsedTicks + [Int64]($Milliseconds*[Diagnostics.Stopwatch]::Frequency*0.001)
+    while($sw.ElapsedTicks -le $dt){}
+    $sw.Stop()
+}

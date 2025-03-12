@@ -177,7 +177,7 @@ function Send-ArduinoCommand
     }
 }
 
-function Start-Wait
+function Start-WaitArduino
 {
     #.COMPONENT
     #1
@@ -186,14 +186,14 @@ function Start-Wait
     Param(
         [ValidateRange(1, 999999)]
         [Parameter(Mandatory, Position=0)]
-        [Int]$Wait 
+        [Int]$Milliseconds 
         ,
         [Parameter(Position=1)]
         [System.IO.Ports.SerialPort]$Port               
     )
       
     if($Port){         
-        $Port.Write("06" + ($Wait - 1))
+        $Port.Write("06" + ($Milliseconds - 1))
         while($Port.BytesToRead-lt5){}  
         [byte[]]$result = 0,0,0,0,0
         $Port.Read($result, 0, 5)|Out-Null
@@ -204,7 +204,7 @@ function Start-Wait
         $arduino = [psClick.Arduino]::Open($PortName)
         $error = "Не удалось открыть порт. Err code: $arduino"
         if([Int]$arduino -le 0){throw $error}    
-        Send-ArduinoCommand $arduino ("06" + ($Wait - 1)) -Wait ($Wait + 5000)
+        Send-ArduinoCommand $arduino ("06" + ($Milliseconds - 1)) -Wait ($Milliseconds + 5000)
         [Void][psClick.Arduino]::Close($arduino)
     }
 }

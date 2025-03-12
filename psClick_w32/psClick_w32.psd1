@@ -31,6 +31,7 @@ FunctionsToExport = @(
     'Drag-WithMouse'
     'Scroll-Mouse'
     'Get-CursorHandle'
+    'Send-ArduinoCommand'
     'Get-ArduinoSetting'
     'Set-ArduinoSetting'
     'Start-WaitArduino'

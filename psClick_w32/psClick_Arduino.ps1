@@ -157,23 +157,36 @@ function Get-ArduinoSetting
 function Send-ArduinoCommand
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
-        [Parameter(Mandatory, Position=0)]
+        [Parameter(Mandatory, Position=0, ParameterSetName = "Arduino")]
         [System.IntPtr]$Arduino
+        ,
+        [Parameter(Mandatory, Position=0, ParameterSetName = "Port")]
+        [System.IO.Ports.SerialPort]$Port
         ,
         [Parameter(Mandatory, Position=1)]
         [String]$Command 
         ,
-        [Parameter(Position=2)]
+        [Parameter(Position=2, ParameterSetName = "Arduino")]
         [UInt16]$Wait = 5000
     )
-    if(![psClick.Arduino]::SendCommand($Arduino, $Command, $Wait)){
-        [void][psClick.Arduino]::Close($Arduino)
-        $error = "Arduino write/read error"
-        throw $error 
+
+    if($Port){
+        $Port.Write($Command)
+        while($port.BytesToRead-lt5){
+        }  
+        [byte[]]$result = 0,0,0,0,0
+        $port.Read($result, 0, 5)|Out-Null
+    }
+    else{
+        if(![psClick.Arduino]::SendCommand($Arduino, $Command, $Wait)){
+            [void][psClick.Arduino]::Close($Arduino)
+            $error = "Arduino write/read error"
+            throw $error 
+        }
     }
 }
 

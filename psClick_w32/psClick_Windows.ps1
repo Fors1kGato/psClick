@@ -125,7 +125,7 @@ function Set-WindowTransparency
 function Move-Window
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -138,13 +138,13 @@ function Move-Window
     if($Position -isnot [Drawing.Point]){
         try{$Position = [Drawing.Point]::new.Invoke($Position)}catch{throw $_}
     }
-    [Void][psClick.User32]::SetWindowPos($Handle, [IntPtr]::Zero, $Position.X, $Position.Y, 0, 0, (0x0001 -bor 0x0004))
+    [Void][psClick.User32]::SetWindowPos($Handle, [IntPtr]::Zero, $Position.X, $Position.Y, 0, 0, ([psClick.User32+SWP]::NOSIZE -bor [psClick.User32+SWP]::NOZORDER))
 }
 
 function Resize-Window
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -154,12 +154,10 @@ function Resize-Window
         [parameter(Mandatory,Position=1)]
         [IntPtr]$Handle
     )
-    $SWP_NOZORDER = 0x0004
-    $SWP_NOMOVE   = 0x0002
     if($Size -isnot [Drawing.Size]){
         try{$Size = [Drawing.Size]::new.Invoke($Size)}catch{throw $_}
     }
-    [Void][psClick.User32]::SetWindowPos($Handle, [IntPtr]::Zero, 0, 0, $Size.Width, $Size.Height, ($SWP_NOZORDER -bor $SWP_NOMOVE))
+    [Void][psClick.User32]::SetWindowPos($Handle, [IntPtr]::Zero, 0, 0, $Size.Width, $Size.Height, ([psClick.User32+SWP]::NOZORDER -bor [psClick.User32+SWP]::NOMOVE))
 }
 
 function Get-ChildWindows

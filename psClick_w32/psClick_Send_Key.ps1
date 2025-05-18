@@ -1,7 +1,7 @@
 ﻿function Send-Key
 {
     #.COMPONENT
-    #3.2
+    #3.3
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     [CmdletBinding(DefaultParameterSetName = '__AllParameterSets')]
@@ -20,7 +20,7 @@
         [parameter(Mandatory,ParameterSetName = "Sys_Up")]
         [parameter(Mandatory,ParameterSetName = "Hardware_Up")]
         [parameter(Mandatory,ParameterSetName = "Driver_Up")]
-        [parameter(Mandatory,ParameterSetName = "Event_Down")]
+        [parameter(Mandatory,ParameterSetName = "Event_Up")]
         [Switch]$Up
         ,
         [parameter(Mandatory,ParameterSetName = "Hardware_Click")]

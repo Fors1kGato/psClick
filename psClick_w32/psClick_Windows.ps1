@@ -259,7 +259,7 @@ function Set-ForegroundWindow
 function Show-Window
 {
     #.COMPONENT
-    #1
+    #1.1
     #.SYNOPSIS
     #Author: Fors1k ; Link: https://psClick.ru
     Param(
@@ -272,19 +272,19 @@ function Show-Window
     ) 
        
     $ShowWindow = @{
-        HIDE            = 0
-        SHOWNORMAL      = 1
-        SHOWMINIMIZED   = 2
-        MAXIMIZE        = 3
-        SHOWMAXIMIZED   = 3
-        SHOWNOACTIVATE  = 4
-        SHOW            = 5
-        MINIMIZE        = 6
-        SHOWMINNOACTIVE = 7
-        SHOWNA          = 8
-        RESTORE         = 9
-        SHOWDEFAULT     = 10
-        FORCEMINIMIZE   = 11
+        HIDE            = [psClick.User32+SW]::HIDE
+        SHOWNORMAL      = [psClick.User32+SW]::SHOWNORMAL
+        SHOWMINIMIZED   = [psClick.User32+SW]::SHOWMINIMIZED
+        MAXIMIZE        = [psClick.User32+SW]::MAXIMIZE
+        SHOWMAXIMIZED   = [psClick.User32+SW]::SHOWMAXIMIZED
+        SHOWNOACTIVATE  = [psClick.User32+SW]::SHOWNOACTIVATE
+        SHOW            = [psClick.User32+SW]::SHOW
+        MINIMIZE        = [psClick.User32+SW]::MINIMIZE
+        SHOWMINNOACTIVE = [psClick.User32+SW]::SHOWMINNOACTIVE
+        SHOWNA          = [psClick.User32+SW]::SHOWNA
+        RESTORE         = [psClick.User32+SW]::RESTORE
+        SHOWDEFAULT     = [psClick.User32+SW]::SHOWDEFAULT
+        FORCEMINIMIZE   = [psClick.User32+SW]::FORCEMINIMIZE
     }
     $SetWindowPos = @{
         BOTTOM          =  1
@@ -296,7 +296,7 @@ function Show-Window
     if($State -in $ShowWindow.Keys)
     {[Void][psClick.User32]::ShowWindow($Handle, $ShowWindow.$State)}
     else
-    {[Void][psClick.User32]::SetWindowPos($Handle, $SetWindowPos.$State, 0,0,0,0, (0x0001 -bor 0x0002 -bor 0x0010))}
+    {[Void][psClick.User32]::SetWindowPos($Handle, $SetWindowPos.$State, 0,0,0,0, ([psClick.User32+SWP]::NOMOVE -bor [psClick.User32+SWP]::NOSIZE))}
 }
 
 function Find-Window

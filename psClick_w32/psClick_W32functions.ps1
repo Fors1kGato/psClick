@@ -419,3 +419,17 @@ function Start-Wait
     while($sw.ElapsedTicks -le $dt){}
     $sw.Stop()
 }
+
+function Find-LockedApp
+{
+    #.COMPONENT
+    #1
+    #.SYNOPSIS
+    #Author: Fors1k ; Link: https://psClick.ru
+    Param(
+        [ValidateScript({Test-Path $_})]
+        [parameter(Mandatory=$true)]
+        [String]$Path
+    )
+    ,[psClick.FindLockedApp]::GetLockProcesses($Path)
+}

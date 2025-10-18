@@ -79,6 +79,7 @@ FunctionsToExport = @(
     'Get-PointsDistance'
     'Get-TrayInfo'
     'Start-Wait'
+    'Find-LockedApp'
     #
     # ThreeInRow
     #

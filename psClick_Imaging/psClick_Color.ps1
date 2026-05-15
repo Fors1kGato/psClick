@@ -342,7 +342,7 @@ function Find-DynamicAreas
 function Get-RectangleFromScreen
 {
     #.COMPONENT
-    #1.1
+    #1.2
     #.SYNOPSIS
     #Author: Cirus, Fors1k ; Link: https://psClick.ru
     Param(
@@ -351,6 +351,13 @@ function Get-RectangleFromScreen
         $HintColor = [Drawing.Color]::Black
         ,
         $RectColor = [Drawing.Color]::Cyan
+        ,
+        $Size = [Drawing.Size]::new(300, 300)
+        ,
+        $Location
+        ,
+        [ValidateRange(0, 1)]
+        [double]$Transparency = 0.6
     )
     if($RectColor -isnot [Drawing.Color]){
         try{
@@ -369,12 +376,24 @@ function Get-RectangleFromScreen
         }
     }
 
-    $form = [psClick.FormRectangle]::new($Hint, $HintColor)
+    $form = [psClick.FormRectangle]::new($Hint, $HintColor, $Transparency)
     $form.StartPosition = [Windows.Forms.FormStartPosition]::CenterScreen
     $form.BackColor = $RectColor
-    Set-WindowTransparency -Handle $form.Handle -Transparency 150
-    $form.ShowDialog()|Out-null
 
+    if($Size -isnot [Drawing.Size]){
+        try{$Size = [Drawing.Size]::new.Invoke($Size)}catch{throw $_}
+    }
+    $form.Size = $Size
+
+    if($Location){       
+        if($Location -isnot [Drawing.Point]){
+            try{$Location = [Drawing.Point]::new.Invoke($Location)}catch{throw $_}
+        }  
+        $form.StartPosition = [Windows.Forms.FormStartPosition]::Manual 
+        $form.Location = $Location
+    }
+    
+    $form.ShowDialog()|Out-null
     [psClick.FormRectangle]::ResultForm
 }
 

@@ -1,7 +1,7 @@
 ﻿function Get-SymbolsBase 
 {
     #.COMPONENT
-    #1.3
+    #1.4
     #.SYNOPSIS
     #Author: Fors1k, Cirus ; Link: https://psClick.ru
     [CmdletBinding()]Param()
@@ -135,7 +135,14 @@ function Recognize-Text
             $Base.config.SharpnessRadioButtonBlack,
             $Base.config.SharpnessRadioButtonWhite,
             $Base.config.SharpnessTextBoxCore.ForEach({$_}),
-            $Base.Config.ListDoubleSymbols.ForEach({$_})
+            $Base.Config.ListDoubleSymbols.ForEach({$_}),
+            $Base.Config.TextBoxMinW,
+            $Base.Config.TextBoxMinH, 
+            $Base.Config.TextBoxMaxW,
+            $Base.Config.TextBoxMaxH,
+            $Base.Config.RadioButtonMinAnd,
+            $Base.Config.RadioButtonMaxAnd,
+            $Base.Config.СheckBoxSizeSymbol
         )
     }
     else{      
@@ -199,7 +206,14 @@ function Recognize-Text
             $Base.config.SharpnessRadioButtonBlack,
             $Base.config.SharpnessRadioButtonWhite,
             $Base.config.SharpnessTextBoxCore.ForEach({$_}),
-            $Base.Config.ListDoubleSymbols.ForEach({$_})
+            $Base.Config.ListDoubleSymbols.ForEach({$_}),
+            $Base.Config.TextBoxMinW,
+            $Base.Config.TextBoxMinH, 
+            $Base.Config.TextBoxMaxW,
+            $Base.Config.TextBoxMaxH,
+            $Base.Config.RadioButtonMinAnd,
+            $Base.Config.RadioButtonMaxAnd,
+            $Base.Config.СheckBoxSizeSymbol
         )       
         $img.Dispose()
     }
